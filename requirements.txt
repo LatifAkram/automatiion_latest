@@ -11,14 +11,13 @@ pandas>=2.0.0
 # Web Automation
 playwright>=1.40.0
 selenium>=4.15.0
-cypress>=13.0.0
 
 # Vector Database
 chromadb>=0.4.0
 faiss-cpu>=1.7.4
 
 # Database
-sqlite3
+# sqlite3 is built into Python
 
 # Data Processing
 aiofiles>=23.0.0
@@ -35,8 +34,7 @@ github3.py>=4.0.0
 stackapi>=0.2.0
 
 # Async & Concurrency
-asyncio
-concurrent.futures
+# asyncio and concurrent.futures are built into Python
 
 # Security & Compliance
 cryptography>=41.0.0

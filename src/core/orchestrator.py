@@ -29,6 +29,9 @@ from ..models.workflow import Workflow, WorkflowStep, WorkflowStatus
 from ..models.task import Task, TaskStatus, TaskType
 from ..models.execution import ExecutionResult, ExecutionLog
 
+from ..utils.media_capture import MediaCapture
+from ..utils.selector_drift import SelectorDriftDetector
+
 
 class MultiAgentOrchestrator:
     """
@@ -42,7 +45,7 @@ class MultiAgentOrchestrator:
         # Core components
         self.db_manager = DatabaseManager(config.database)
         self.vector_store = VectorStore(config.database)
-        self.audit_logger = AuditLogger(config.security)
+        self.audit_logger = AuditLogger(config)
         
         # AI Agents
         self.planner_agent: Optional[PlannerAgent] = None
@@ -90,9 +93,14 @@ class MultiAgentOrchestrator:
         
         # Initialize Execution Agents (AI-2: Automation)
         for i in range(self.config.automation.max_parallel_agents):
+            # Create media capture and selector drift detector instances
+            media_capture = MediaCapture(self.config.database.media_path)
+            selector_drift_detector = SelectorDriftDetector(self.config.automation)
+            
             execution_agent = ExecutionAgent(
-                agent_id=f"executor_{i}",
                 config=self.config.automation,
+                media_capture=media_capture,
+                selector_drift_detector=selector_drift_detector,
                 audit_logger=self.audit_logger
             )
             await execution_agent.initialize()

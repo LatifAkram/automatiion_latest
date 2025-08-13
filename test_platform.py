@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from src.core.config import Config
-from src.core.database import Database
+from src.core.database import DatabaseManager
 from src.core.vector_store import VectorStore
 from src.core.audit import AuditLogger
 from src.core.ai_provider import AIProvider
@@ -28,11 +28,11 @@ async def test_core_components():
         # Test configuration
         print("  📋 Testing Configuration...")
         config = Config()
-        print(f"    ✅ Configuration loaded: {config.api.api_host}:{config.api.api_port}")
+        print(f"    ✅ Configuration loaded: {config.api.host}:{config.api.port}")
         
         # Test database
         print("  🗄️  Testing Database...")
-        database = Database(config.database.database_path)
+        database = DatabaseManager(config.database)
         await database.initialize()
         print("    ✅ Database initialized")
         

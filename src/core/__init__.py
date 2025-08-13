@@ -11,7 +11,7 @@ This package contains the fundamental building blocks:
 """
 
 from .config import Config
-from .database import Database
+from .database import DatabaseManager
 from .vector_store import VectorStore
 from .ai_provider import AIProvider
 from .audit import AuditLogger
@@ -19,7 +19,7 @@ from .orchestrator import MultiAgentOrchestrator
 
 __all__ = [
     "Config",
-    "Database", 
+    "DatabaseManager", 
     "VectorStore",
     "AIProvider",
     "AuditLogger",
