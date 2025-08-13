@@ -205,6 +205,10 @@ class MultiAgentOrchestrator:
                 
                 self.logger.info(f"Started workflow execution: {workflow_id}")
                 return workflow_id
+                
+            except Exception as e:
+                self.logger.error(f"Failed to start workflow: {e}", exc_info=True)
+                raise
     
     async def generate_automation_report(
         self, 
@@ -242,10 +246,6 @@ class MultiAgentOrchestrator:
     def get_available_report_formats(self) -> List[str]:
         """Get list of available report formats."""
         return self.report_generator.get_available_formats()
-                
-            except Exception as e:
-                self.logger.error(f"Failed to start workflow: {e}", exc_info=True)
-                raise
                 
     async def _execute_workflow_async(self, workflow_id: str, workflow_request: Dict[str, Any]):
         """Execute workflow asynchronously."""
