@@ -146,7 +146,7 @@ export default function AIThinkingDisplay({
         {/* Thoughts Stream */}
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-3">
-            {thoughts.map((thought, index) => (
+            {thoughts.filter(thought => thought && thought.id).map((thought, index) => (
               <motion.div
                 key={thought.id}
                 initial={{ opacity: 0, y: 20 }}
