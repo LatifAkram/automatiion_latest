@@ -424,6 +424,147 @@ class PlannerAgent:
             }
         ]
         
+    async def analyze_task_complexity(self, user_request: str) -> Dict[str, Any]:
+        """Analyze the complexity of a task using AI."""
+        try:
+            prompt = f"""
+            Analyze the complexity of this automation task: "{user_request}"
+            
+            Consider:
+            1. Number of steps required
+            2. Data sources needed
+            3. User interactions required
+            4. Potential challenges
+            5. Success probability
+            
+            Return a JSON response with:
+            - complexity_level: "simple", "medium", "complex", "ultra_complex"
+            - estimated_steps: number
+            - data_sources: array
+            - user_interactions: array
+            - challenges: array
+            - success_probability: float (0-1)
+            """
+            
+            response = await self.ai_provider.generate_response(prompt)
+            
+            try:
+                analysis = json.loads(response)
+                return analysis
+            except json.JSONDecodeError:
+                return self._fallback_complexity_analysis(user_request)
+                
+        except Exception as e:
+            self.logger.error(f"Task complexity analysis failed: {e}")
+            return self._fallback_complexity_analysis(user_request)
+            
+    def _fallback_complexity_analysis(self, user_request: str) -> Dict[str, Any]:
+        """Fallback complexity analysis when AI fails."""
+        return {
+            "complexity_level": "medium",
+            "estimated_steps": 5,
+            "data_sources": [],
+            "user_interactions": [],
+            "challenges": ["Unknown complexity"],
+            "success_probability": 0.8
+        }
+        
+    async def generate_execution_plan(self, user_request: str, complexity_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate detailed execution plan based on complexity analysis."""
+        try:
+            prompt = f"""
+            Generate an execution plan for this task: "{user_request}"
+            
+            Complexity Analysis: {json.dumps(complexity_analysis, indent=2)}
+            
+            Create a detailed plan with:
+            1. Step-by-step execution sequence
+            2. Required data gathering
+            3. User interaction points
+            4. Success criteria
+            5. Error handling strategies
+            
+            Return as JSON with execution_steps array.
+            """
+            
+            response = await self.ai_provider.generate_response(prompt)
+            
+            try:
+                plan = json.loads(response)
+                return plan
+            except json.JSONDecodeError:
+                return self._fallback_execution_plan(user_request)
+                
+        except Exception as e:
+            self.logger.error(f"Execution plan generation failed: {e}")
+            return self._fallback_execution_plan(user_request)
+            
+    def _fallback_execution_plan(self, user_request: str) -> Dict[str, Any]:
+        """Fallback execution plan when AI fails."""
+        return {
+            "execution_steps": [
+                {
+                    "step": 1,
+                    "action": "analyze_requirements",
+                    "description": "Analyze user requirements",
+                    "duration": 30
+                },
+                {
+                    "step": 2,
+                    "action": "execute_automation",
+                    "description": "Execute automation task",
+                    "duration": 120
+                },
+                {
+                    "step": 3,
+                    "action": "validate_results",
+                    "description": "Validate execution results",
+                    "duration": 30
+                }
+            ],
+            "estimated_duration": 180,
+            "success_criteria": ["task_completed"]
+        }
+        
+    async def identify_required_agents(self, execution_plan: Dict[str, Any]) -> Dict[str, bool]:
+        """Identify which agents are required for the execution plan."""
+        try:
+            # Analyze execution plan to determine required agents
+            required_agents = {
+                "web_search": False,
+                "dom_analysis": False,
+                "data_extraction": False,
+                "api_calls": False,
+                "file_processing": False
+            }
+            
+            # Check execution steps for agent requirements
+            for step in execution_plan.get("execution_steps", []):
+                action = step.get("action", "").lower()
+                
+                if any(word in action for word in ["search", "find", "lookup"]):
+                    required_agents["web_search"] = True
+                if any(word in action for word in ["dom", "element", "click", "type"]):
+                    required_agents["dom_analysis"] = True
+                if any(word in action for word in ["extract", "scrape", "data"]):
+                    required_agents["data_extraction"] = True
+                if any(word in action for word in ["api", "call", "request"]):
+                    required_agents["api_calls"] = True
+                if any(word in action for word in ["file", "process", "upload", "download"]):
+                    required_agents["file_processing"] = True
+                    
+            return required_agents
+            
+        except Exception as e:
+            self.logger.error(f"Agent identification failed: {e}")
+            return {
+                "web_search": True,
+                "dom_analysis": True,
+                "data_extraction": False,
+                "api_calls": False,
+                "file_processing": False
+            }
+            
     async def shutdown(self):
         """Shutdown the planner agent."""
         await self.ai_provider.shutdown()

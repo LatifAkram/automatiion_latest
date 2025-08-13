@@ -73,6 +73,12 @@ class AIProvider:
         # Cache for responses
         self.response_cache = {}
         
+        # Initialize client attributes
+        self.openai_client = None
+        self.anthropic_client = None
+        self.google_client = None
+        self.local_llm_client = None
+        
     async def initialize(self):
         """Initialize AI providers."""
         self.logger.info("Initializing AI providers...")
