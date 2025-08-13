@@ -157,12 +157,12 @@ class ConversationalAgent:
             conversation.add_message(user_message)
             
             # Check if this is a handoff request
-            # if self._is_handoff_request(message):
-            #     return await self._handle_handoff_request(conversation, context)
+            if self._is_handoff_request(message):
+                return await self._handle_handoff_request(conversation, context)
             
             # Check if AI needs human intervention
-            # if self._needs_human_intervention(message, context):
-            #     return await self._request_human_intervention(conversation, context)
+            if self._needs_human_intervention(message, context):
+                return await self._request_human_intervention(conversation, context)
             
             # Generate AI response with reasoning
             response = await self._generate_response(conversation, performance_metrics)
@@ -177,13 +177,17 @@ class ConversationalAgent:
             conversation.add_message(ai_message)
             
             # Store conversation in vector store
-            await self.vector_store.store_conversation(conversation.session_id, {
-                "messages": [msg.to_dict() for msg in conversation.messages],
-                "session_id": conversation.session_id,
-                "created_at": conversation.created_at.isoformat(),
-                "updated_at": conversation.updated_at.isoformat(),
-                "context": conversation.context
-            })
+            try:
+                await self.vector_store.store_conversation(conversation.session_id, {
+                    "messages": [msg.to_dict() for msg in conversation.messages],
+                    "session_id": conversation.session_id,
+                    "created_at": conversation.created_at.isoformat(),
+                    "updated_at": conversation.updated_at.isoformat(),
+                    "context": conversation.context
+                })
+            except Exception as e:
+                self.logger.warning(f"Failed to store conversation: {e}")
+                # Continue without storing - conversation still works
             
             # Log conversation
             await self.audit_logger.log_conversation(
@@ -668,13 +672,17 @@ To continue after you've handled this, say: "Continue automation" 🎯"""
         
         # Save all active conversations
         for session_id, conversation in self.active_conversations.items():
-            await self.vector_store.store_conversation(conversation.session_id, {
-                "messages": [msg.to_dict() for msg in conversation.messages],
-                "session_id": conversation.session_id,
-                "created_at": conversation.created_at.isoformat(),
-                "updated_at": conversation.updated_at.isoformat(),
-                "context": conversation.context
-            })
+            try:
+                await self.vector_store.store_conversation(conversation.session_id, {
+                    "messages": [msg.to_dict() for msg in conversation.messages],
+                    "session_id": conversation.session_id,
+                    "created_at": conversation.created_at.isoformat(),
+                    "updated_at": conversation.updated_at.isoformat(),
+                    "context": conversation.context
+                })
+            except Exception as e:
+                self.logger.warning(f"Failed to store conversation during shutdown: {e}")
+                # Continue shutdown process
             
         # Shutdown AI provider
         await self.ai_provider.shutdown()

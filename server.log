@@ -295,3 +295,11 @@ INFO:     127.0.0.1:50622 - "POST /search HTTP/1.1" 200 OK
 WARNING:root:Agent execution failed, using fallback: 'ExecutionAgent' object has no attribute 'execute_automation'
 INFO:     127.0.0.1:40972 - "POST /automation/execute HTTP/1.1" 200 OK
 INFO:     127.0.0.1:47168 - "POST /export HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response if isinstance(response, str) else response.get("content", str(response)),
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:46472 - "POST /chat HTTP/1.1" 200 OK
