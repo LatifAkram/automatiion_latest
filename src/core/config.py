@@ -49,7 +49,7 @@ class AIConfig(BaseSettings):
     
     # Local LLM
     local_llm_url: str = Field(default="http://127.0.0.1:1234", env="LOCAL_LLM_URL")
-    local_llm_model: str = Field(default="deepseek-coder", env="LOCAL_LLM_MODEL")
+    local_llm_model: str = Field(default="deepseek-coder-v2-lite-instruct", env="LOCAL_LLM_MODEL")
     local_llm_max_tokens: int = Field(default=2000, env="LOCAL_LLM_MAX_TOKENS")
     local_llm_temperature: float = Field(default=0.7, env="LOCAL_LLM_TEMPERATURE")
     

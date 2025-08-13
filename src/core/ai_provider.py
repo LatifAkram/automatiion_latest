@@ -186,6 +186,22 @@ class AIProvider:
     async def _test_local_llm(self):
         """Test local LLM connection."""
         try:
+            # First, try to get available models
+            async with aiohttp.ClientSession() as session:
+                try:
+                    async with session.get(
+                        f"{self.config.local_llm_url}/v1/models",
+                        timeout=aiohttp.ClientTimeout(total=5)
+                    ) as response:
+                        if response.status == 200:
+                            models_data = await response.json()
+                            self.logger.info(f"Available models: {models_data}")
+                        else:
+                            self.logger.warning(f"Could not fetch models list: {response.status}")
+                except Exception as e:
+                    self.logger.warning(f"Could not fetch models list: {e}")
+            
+            # Test with the configured model
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     f"{self.config.local_llm_url}/v1/chat/completions",
@@ -202,11 +218,22 @@ class AIProvider:
                     timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     if response.status != 200:
-                        raise Exception(f"Local LLM returned status {response.status}")
+                        error_text = await response.text()
+                        self.logger.error(f"Local LLM test failed: {error_text}")
+                        raise Exception(f"Local LLM returned status {response.status}: {error_text}")
+                    
+                    data = await response.json()
+                    if "error" in data:
+                        error_msg = data.get("error", {})
+                        if isinstance(error_msg, dict):
+                            error_msg = error_msg.get("message", str(error_msg))
+                        raise Exception(f"Local LLM test error: {error_msg}")
                     
                     # Test successful, mark as available
                     self.local_llm_client = True
+                    self.logger.info("Local LLM connection test successful")
         except Exception as e:
+            self.logger.error(f"Local LLM connection failed: {e}")
             raise Exception(f"Local LLM connection failed: {e}")
             
     async def generate_response(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7, timeout: int = 30) -> str:
@@ -223,6 +250,11 @@ class AIProvider:
                 providers_to_try.append(("Google Gemini", self._call_google))
             if self.local_llm_client:
                 providers_to_try.append(("Local LLM", self._call_local_llm))
+            
+            # If no providers available, use fallback
+            if not providers_to_try:
+                self.logger.warning("No AI providers available, using fallback response")
+                return self._generate_fallback_response(prompt)
             
             # Try each provider in order with timeout
             for provider_name, provider_func in providers_to_try:
@@ -346,9 +378,9 @@ class AIProvider:
                 async with session.post(
                     f"{self.config.local_llm_url}/v1/chat/completions",
                     json={
-                        "model": "deepseek-coder-v2-lite-instruct",
+                        "model": self.config.local_llm_model,
                         "messages": [
-                            {"role": "system", "content": "You are an expert automation assistant. Provide clear, helpful responses for automation tasks."},
+                            {"role": "system", "content": "You are an expert automation assistant. Provide clear, helpful responses for automation tasks. Always respond with valid JSON when requested."},
                             {"role": "user", "content": prompt}
                         ],
                         "temperature": temperature,
@@ -358,12 +390,34 @@ class AIProvider:
                     timeout=aiohttp.ClientTimeout(total=30)
                 ) as response:
                     if response.status != 200:
-                        raise Exception(f"Local LLM returned status {response.status}")
+                        error_text = await response.text()
+                        self.logger.error(f"Local LLM error response: {error_text}")
+                        raise Exception(f"Local LLM returned status {response.status}: {error_text}")
                         
                     data = await response.json()
-                    return data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    
+                    # Check for prediction error
+                    if "error" in data:
+                        error_msg = data.get("error", {})
+                        if isinstance(error_msg, dict):
+                            error_msg = error_msg.get("message", str(error_msg))
+                        raise Exception(f"Local LLM prediction error: {error_msg}")
+                    
+                    # Extract content from response
+                    choices = data.get("choices", [])
+                    if not choices:
+                        raise Exception("Local LLM returned no choices")
+                    
+                    message = choices[0].get("message", {})
+                    content = message.get("content", "")
+                    
+                    if not content:
+                        raise Exception("Local LLM returned empty content")
+                    
+                    return content
                     
         except Exception as e:
+            self.logger.error(f"Local LLM API error: {e}")
             raise Exception(f"Local LLM API error: {e}")
             
     def _track_performance(self, provider: str, duration: float, success: bool):
