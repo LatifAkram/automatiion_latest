@@ -301,7 +301,7 @@ export default function RealBrowserAutomation({
                   <div className="space-y-3">
                     {steps.map((step, index) => (
                       <motion.div
-                        key={`real_step_${index}_${Date.now()}_${Math.random()}`}
+                        key={`real_step_${step.id || index}_${step.action?.replace(/\s+/g, '_') || 'step'}`}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
@@ -358,7 +358,7 @@ export default function RealBrowserAutomation({
                   <div className="grid grid-cols-3 gap-4">
                     {steps.filter(step => step.screenshot).map((step, index) => (
                       <motion.div
-                        key={`real_screenshot_${index}_${Date.now()}_${Math.random()}`}
+                        key={`real_screenshot_${step.id || index}_${step.action?.replace(/\s+/g, '_') || 'screenshot'}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
