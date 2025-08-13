@@ -11,6 +11,7 @@ import logging
 from typing import Dict, List, Optional, Any
 import json
 import aiohttp
+import hashlib
 
 # AI Provider imports
 try:
@@ -68,6 +69,9 @@ class AIProvider:
         # Performance tracking
         self.provider_performance = {}
         self.fallback_count = 0
+        
+        # Cache for responses
+        self.response_cache = {}
         
     async def initialize(self):
         """Initialize AI providers."""
@@ -147,6 +151,12 @@ class AIProvider:
         if max_tokens is None:
             max_tokens = self.config.openai_max_tokens
             
+        # Check cache first
+        cache_key = self._generate_cache_key(prompt, max_tokens, temperature)
+        if cache_key in self.response_cache:
+            self.logger.info("Using cached response")
+            return self.response_cache[cache_key]
+            
         # Use specified provider or determine best available
         if provider and self.providers[provider]["available"]:
             providers_to_try = [provider]
@@ -178,6 +188,9 @@ class AIProvider:
                 duration = asyncio.get_event_loop().time() - start_time
                 self._track_performance(provider_name, duration, True)
                 
+                # Cache the response
+                self.response_cache[cache_key] = response
+                
                 self.logger.info(f"Generated response using {provider_name}")
                 return response
                 
@@ -190,6 +203,11 @@ class AIProvider:
         # All providers failed
         self.fallback_count += 1
         raise Exception(f"All AI providers failed. Last error: {last_error}")
+        
+    def _generate_cache_key(self, prompt: str, max_tokens: int, temperature: float) -> str:
+        """Generate cache key for response caching."""
+        content = f"{prompt}:{max_tokens}:{temperature}"
+        return hashlib.md5(content.encode()).hexdigest()
         
     async def _call_openai(self, prompt: str, max_tokens: int, temperature: float) -> str:
         """Call OpenAI API."""
@@ -429,7 +447,8 @@ class AIProvider:
             "providers": self.provider_performance,
             "fallback_count": self.fallback_count,
             "best_provider": self.get_best_provider(),
-            "available_providers": [p for p, config in self.providers.items() if config["available"]]
+            "available_providers": [p for p, config in self.providers.items() if config["available"]],
+            "cache_size": len(self.response_cache)
         }
         
     async def shutdown(self):
