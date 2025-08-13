@@ -7,7 +7,6 @@ import {
   Bot, 
   User, 
   Search, 
-  FileText, 
   Image, 
   Code, 
   Download,
@@ -28,7 +27,7 @@ import {
   Hand,
   MessageSquare,
   FileSpreadsheet,
-  FilePdf,
+  FileText,
   FileWord,
   ChevronDown,
   ChevronUp,
@@ -448,7 +447,7 @@ export default function EnhancedChatInterface({
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   {file.type === 'excel' && <FileSpreadsheet className="w-5 h-5 text-green-600" />}
-                  {file.type === 'pdf' && <FilePdf className="w-5 h-5 text-red-600" />}
+                  {file.type === 'pdf' && <FileText className="w-5 h-5 text-red-600" />}
                   {file.type === 'word' && <FileWord className="w-5 h-5 text-blue-600" />}
                   {file.type === 'image' && <Image className="w-5 h-5 text-purple-600" />}
                   {file.type === 'code' && <Code className="w-5 h-5 text-orange-600" />}

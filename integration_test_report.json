@@ -1,0 +1,74 @@
+{
+  "test_summary": {
+    "total_tests": 11,
+    "passed_tests": 5,
+    "failed_tests": 6,
+    "success_rate": 45.45,
+    "timestamp": "2025-08-13T07:02:13.591484"
+  },
+  "detailed_results": {
+    "Backend Health": {
+      "status": "PASSED",
+      "duration": 0.01,
+      "timestamp": "2025-08-13T07:02:00.434429"
+    },
+    "System Information": {
+      "status": "FAILED",
+      "duration": 0.02,
+      "timestamp": "2025-08-13T07:02:01.451321"
+    },
+    "Workflow Creation": {
+      "status": "FAILED",
+      "duration": 2.01,
+      "timestamp": "2025-08-13T07:02:04.464492"
+    },
+    "Chat Interaction": {
+      "status": "PASSED",
+      "duration": 0.0,
+      "timestamp": "2025-08-13T07:02:05.469492"
+    },
+    "Search Functionality": {
+      "status": "PASSED",
+      "duration": 0.0,
+      "timestamp": "2025-08-13T07:02:06.473082"
+    },
+    "Automation Execution": {
+      "status": "FAILED",
+      "duration": 0.0,
+      "timestamp": "2025-08-13T07:02:07.476181"
+    },
+    "Data Export": {
+      "status": "PASSED",
+      "duration": 0.0,
+      "timestamp": "2025-08-13T07:02:08.479264"
+    },
+    "Frontend Connectivity": {
+      "status": "FAILED",
+      "duration": 0.1,
+      "timestamp": "2025-08-13T07:02:09.581736"
+    },
+    "WebSocket Connection": {
+      "status": "PASSED",
+      "duration": 0.0,
+      "timestamp": "2025-08-13T07:02:10.583256"
+    },
+    "Database Operations": {
+      "status": "FAILED",
+      "duration": 0.0,
+      "timestamp": "2025-08-13T07:02:11.587013"
+    },
+    "AI Provider Integration": {
+      "status": "FAILED",
+      "duration": 0.0,
+      "timestamp": "2025-08-13T07:02:12.590307"
+    }
+  },
+  "recommendations": [
+    "\u274c Significant issues detected.",
+    "\ud83d\udea8 System needs major fixes before deployment.",
+    "\ud83d\udd27 Focus on core functionality first.",
+    "\ud83d\udd27 Frontend server is not running. Start the frontend first.",
+    "\ud83d\udd27 Database connection issues. Check database configuration.",
+    "\ud83d\udd27 AI providers not configured. Set up API keys."
+  ]
+}

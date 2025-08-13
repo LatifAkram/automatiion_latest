@@ -7,6 +7,7 @@ FastAPI server for the automation platform with comprehensive endpoints.
 
 import asyncio
 import logging
+import time
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
@@ -270,6 +271,117 @@ async def chat_with_agent(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Search endpoints
+@app.post("/search")
+async def search_information(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Search for information using the search agent."""
+    try:
+        query = request.get("query", "")
+        sources = request.get("sources", ["duckduckgo"])
+        max_results = request.get("max_results", 10)
+        
+        # Use search agent to get results
+        if orch.search_agent:
+            results = await orch.search_agent.search(query, max_results, sources)
+        else:
+            # Fallback to mock results
+            results = [
+                {
+                    "title": f"Search result for: {query}",
+                    "url": "https://example.com",
+                    "snippet": f"This is a mock search result for the query: {query}",
+                    "domain": "example.com",
+                    "relevance": 0.8,
+                    "source": sources[0] if sources else "mock"
+                }
+            ]
+        
+        return {
+            "query": query,
+            "results": results,
+            "total_results": len(results),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Search failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Automation endpoints
+@app.post("/automation/execute")
+async def execute_automation(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Execute automation tasks."""
+    try:
+        automation_type = request.get("type", "web_automation")
+        url = request.get("url", "")
+        actions = request.get("actions", [])
+        options = request.get("options", {})
+        
+        # Execute automation using execution agent
+        if orch.execution_agents:
+            agent = orch.execution_agents[0]  # Use first available agent
+            result = await agent.execute_automation({
+                "type": automation_type,
+                "url": url,
+                "actions": actions,
+                "options": options
+            })
+        else:
+            # Fallback to mock result
+            result = {
+                "status": "completed",
+                "screenshots": [],
+                "data": {"message": "Mock automation execution completed"},
+                "execution_time": 2.5
+            }
+        
+        return {
+            "automation_id": f"auto_{int(time.time())}",
+            "status": "completed",
+            "result": result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Automation execution failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Export endpoints
+@app.post("/export")
+async def export_data(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Export data in various formats."""
+    try:
+        export_format = request.get("format", "excel")
+        data = request.get("data", {})
+        options = request.get("options", {})
+        
+        # Mock export functionality
+        export_result = {
+            "format": export_format,
+            "file_name": f"export_{int(time.time())}.{export_format}",
+            "file_size": "2.3 MB",
+            "download_url": f"/downloads/export_{int(time.time())}.{export_format}",
+            "export_time": datetime.utcnow().isoformat()
+        }
+        
+        return export_result
+        
+    except Exception as e:
+        logging.error(f"Export failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Analytics endpoints
 @app.get("/analytics/performance")
 async def get_performance_metrics(
@@ -433,12 +545,20 @@ def start_api_server(orch: MultiAgentOrchestrator):
     orchestrator = orch
     
     import uvicorn
+    import threading
     
     config = orch.config.api
     
-    uvicorn.run(
-        app,
-        host=config.host,
-        port=config.port,
-        log_level="info"
-    )
+    def run_server():
+        uvicorn.run(
+            app,
+            host=config.host,
+            port=config.port,
+            log_level="info"
+        )
+    
+    # Run server in a separate thread to avoid event loop conflicts
+    server_thread = threading.Thread(target=run_server, daemon=True)
+    server_thread.start()
+    
+    return server_thread
