@@ -312,7 +312,7 @@ class IntelligentAutomationAgent:
                 }
             ])
             
-                    return plan
+            return plan
             
     async def _generate_automation_plan_with_ai(self, instructions: str, url: str, ai_dom_analysis: Dict[str, Any]) -> Dict[str, Any]:
         """Generate automation plan using AI-powered DOM analysis."""

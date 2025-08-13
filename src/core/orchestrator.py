@@ -28,6 +28,7 @@ from ..agents.intelligent_automation import IntelligentAutomationAgent
 from ..agents.parallel_executor import ParallelExecutor
 from ..agents.sector_specialists import SectorManager
 from ..agents.conversational_ai import ConversationalAI
+from ..agents.executor import ExecutionAgent
 from ..utils.media_capture import MediaCapture
 from ..utils.selector_drift import SelectorDriftDetector
 from ..utils.code_generator import CodeGenerator

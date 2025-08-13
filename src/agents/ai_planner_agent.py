@@ -18,8 +18,8 @@ from datetime import datetime
 from enum import Enum
 
 from ..core.ai_provider import AIProvider
-from ..utils.vector_store import VectorStore
-from ..utils.audit import AuditLogger
+from ..core.vector_store import VectorStore
+from ..core.audit import AuditLogger
 
 
 class TaskComplexity(Enum):
