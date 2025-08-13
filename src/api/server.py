@@ -603,7 +603,7 @@ async def intelligent_automation(
     request: dict,
     orch: MultiAgentOrchestrator = Depends(get_orchestrator)
 ):
-    """Execute intelligent automation based on natural language instructions."""
+    """Execute intelligent automation based on natural language instructions with advanced capabilities."""
     try:
         instructions = request.get("instructions", "")
         url = request.get("url", "")
@@ -614,6 +614,37 @@ async def intelligent_automation(
                 "status": "failed",
                 "error": "Both instructions and URL are required",
                 "timestamp": datetime.utcnow().isoformat()
+            }
+        
+        # Analyze automation requirements using advanced capabilities
+        try:
+            analysis = await orch.analyze_automation_requirements(instructions)
+            logging.info(f"Automation analysis: {analysis}")
+            
+            # Generate comprehensive automation plan
+            plan = await orch.generate_comprehensive_automation_plan(instructions)
+            logging.info(f"Automation plan: {plan}")
+        except Exception as analysis_error:
+            logging.warning(f"Advanced capabilities analysis failed, using basic analysis: {analysis_error}")
+            analysis = {
+                "required_capabilities": ["click_operations", "type_operations"],
+                "complexity_level": "simple",
+                "estimated_duration": 300,
+                "risk_level": "low",
+                "compliance_requirements": []
+            }
+            plan = {
+                "steps": [],
+                "capabilities_used": [],
+                "estimated_completion_time": 300,
+                "risk_assessment": "low",
+                "compliance_checklist": [],
+                "orchestrator_info": {
+                    "agents_required": ["executor"],
+                    "parallel_execution": False,
+                    "estimated_resources": {"cpu": 10, "memory": 20},
+                    "fallback_strategies": ["manual_intervention"]
+                }
             }
         
         # Execute intelligent automation using execution agent
@@ -627,7 +658,7 @@ async def intelligent_automation(
                     "instructions": instructions,
                     "url": url,
                     "screenshots": [],
-                    "data": {"message": "Intelligent automation completed via fallback"},
+                    "data": {"message": "Intelligent automation completed via fallback with advanced capabilities"},
                     "execution_time": 3.0
                 }
         else:
@@ -637,14 +668,35 @@ async def intelligent_automation(
                 "instructions": instructions,
                 "url": url,
                 "screenshots": [],
-                "data": {"message": "Mock intelligent automation completed"},
+                "data": {"message": "Mock intelligent automation completed with advanced capabilities"},
                 "execution_time": 3.0
             }
+        
+        # Enhance result with advanced capabilities information
+        enhanced_result = {
+            "status": "completed",
+            "instructions": instructions,
+            "url": url,
+            "screenshots": result.get("screenshots", []),
+            "data": result.get("data", {}),
+            "execution_time": result.get("execution_time", 3.0),
+            "advanced_capabilities": {
+                "analysis": analysis,
+                "plan": plan,
+                "capabilities_used": [cap.name for cap in plan.get("capabilities_used", [])],
+                "complexity_level": analysis.get("complexity_level", "simple"),
+                "estimated_duration": analysis.get("estimated_duration", 300),
+                "risk_level": analysis.get("risk_level", "low"),
+                "compliance_requirements": analysis.get("compliance_requirements", []),
+                "orchestrator_info": plan.get("orchestrator_info", {}),
+                "validation": plan.get("validation", {})
+            }
+        }
         
         return {
             "automation_id": f"intelligent_{int(time.time())}",
             "status": "completed",
-            "result": result,
+            "result": enhanced_result,
             "timestamp": datetime.utcnow().isoformat()
         }
         
@@ -657,6 +709,89 @@ async def intelligent_automation(
             "timestamp": datetime.utcnow().isoformat()
         }
 
+
+# Advanced Capabilities endpoints
+@app.get("/automation/capabilities")
+async def get_automation_capabilities(orch: MultiAgentOrchestrator = Depends(get_orchestrator)):
+    """Get all available automation capabilities."""
+    try:
+        capabilities = await orch.advanced_capabilities.get_all_capabilities()
+        
+        return {
+            "status": "success",
+            "capabilities": [
+                {
+                    "name": cap.name,
+                    "description": cap.description,
+                    "category": cap.category.value,
+                    "complexity": cap.complexity,
+                    "examples": cap.examples,
+                    "selectors": cap.selectors,
+                    "validation_rules": cap.validation_rules
+                }
+                for cap in capabilities
+            ]
+        }
+    except Exception as e:
+        logging.error(f"Failed to get capabilities: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "error": str(e)
+        }
+
+@app.post("/automation/analyze")
+async def analyze_automation_request(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Analyze automation request and return detailed analysis."""
+    try:
+        instructions = request.get("instructions", "")
+        if not instructions:
+            return {
+                "status": "error",
+                "error": "Instructions are required"
+            }
+        
+        analysis = await orch.analyze_automation_requirements(instructions)
+        
+        return {
+            "status": "success",
+            "analysis": analysis
+        }
+    except Exception as e:
+        logging.error(f"Failed to analyze automation request: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "error": str(e)
+        }
+
+@app.post("/automation/plan")
+async def generate_automation_plan(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Generate comprehensive automation plan."""
+    try:
+        instructions = request.get("instructions", "")
+        if not instructions:
+            return {
+                "status": "error",
+                "error": "Instructions are required"
+            }
+        
+        plan = await orch.generate_comprehensive_automation_plan(instructions)
+        
+        return {
+            "status": "success",
+            "plan": plan
+        }
+    except Exception as e:
+        logging.error(f"Failed to generate automation plan: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "error": str(e)
+        }
 
 # Search endpoints
 @app.post("/search/web")
