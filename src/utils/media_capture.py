@@ -106,6 +106,9 @@ class MediaCapture:
             filename = f"{task_id}_{name}_{timestamp}.png"
             filepath = self.screenshots_path / filename
             
+            # Ensure directory exists
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+            
             screenshot_bytes = await page.screenshot(full_page=True)
             
             with open(filepath, "wb") as f:
