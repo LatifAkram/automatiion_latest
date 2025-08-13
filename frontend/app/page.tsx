@@ -3,8 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import SimpleChatInterface from '../src/components/simple-chat-interface';
-import AutomationDashboard from '../src/components/automation-dashboard';
-import LiveAutomationDisplay from '../src/components/live-automation-display';
 import RealBrowserAutomation from '../src/components/real-browser-automation';
 import AIThinkingDisplay from '../src/components/ai-thinking-display';
 
@@ -1121,13 +1119,38 @@ export default function Home() {
 
         {/* Automation Dashboard */}
         {showDashboard && (
-          <div className="w-80 bg-white border-l border-gray-200 shadow-sm">
-            <AutomationDashboard
-              metrics={automationMetrics}
-              agents={agents}
-              onAgentControl={handleAgentControl}
-              onViewDetails={handleViewDetails}
-            />
+          <div className="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Automation Dashboard</h3>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  <div className="text-sm text-blue-600 dark:text-blue-400">Active Automations</div>
+                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{automationMetrics.activeAutomations}</div>
+                </div>
+                <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                  <div className="text-sm text-green-600 dark:text-green-400">Success Rate</div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300">{automationMetrics.successRate}%</div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {agents.map(agent => (
+                  <div key={agent.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">{agent.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{agent.currentTask}</div>
+                    </div>
+                    <div className={`w-3 h-3 rounded-full ${
+                      agent.status === 'active' ? 'bg-green-500' :
+                      agent.status === 'idle' ? 'bg-yellow-500' :
+                      agent.status === 'error' ? 'bg-red-500' :
+                      'bg-gray-500'
+                    }`}></div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -1229,49 +1252,49 @@ export default function Home() {
         </div>
       </div>
 
-                          {/* Real Browser Automation Display */}
-                    <RealBrowserAutomation
-                      isVisible={showLiveAutomation}
-                      onClose={() => setShowLiveAutomation(false)}
-                      automationId={automationId}
-                      currentStep={currentAutomationStep}
-                      steps={automationSteps}
-                      browserUrl={browserUrl}
-                      isRunning={isAutomationRunning}
-                      onControl={(action) => {
-                        if (action === 'stop') {
-                          setIsAutomationRunning(false);
-                          setShowLiveAutomation(false);
-                        } else if (action === 'pause') {
-                          setIsAutomationRunning(false);
-                        } else if (action === 'play') {
-                          setIsAutomationRunning(true);
-                        }
-                      }}
-                      onTakeScreenshot={() => {
-                        // Trigger screenshot capture
-                        console.log('Taking screenshot...');
-                      }}
-                      onViewCode={() => {
-                        // Show generated code
-                        console.log('Viewing generated code...');
-                      }}
-                      onDownloadReport={() => {
-                        // Download automation report
-                        console.log('Downloading report...');
-                      }}
-                    />
+      {/* Real Browser Automation Display */}
+      <RealBrowserAutomation
+        isVisible={showLiveAutomation}
+        onClose={() => setShowLiveAutomation(false)}
+        automationId={automationId}
+        currentStep={currentAutomationStep}
+        steps={automationSteps}
+        browserUrl={browserUrl}
+        isRunning={isAutomationRunning}
+        onControl={(action) => {
+          if (action === 'stop') {
+            setIsAutomationRunning(false);
+            setShowLiveAutomation(false);
+          } else if (action === 'pause') {
+            setIsAutomationRunning(false);
+          } else if (action === 'play') {
+            setIsAutomationRunning(true);
+          }
+        }}
+        onTakeScreenshot={() => {
+          // Trigger screenshot capture
+          console.log('Taking screenshot...');
+        }}
+        onViewCode={() => {
+          // Show generated code
+          console.log('Viewing generated code...');
+        }}
+        onDownloadReport={() => {
+          // Download automation report
+          console.log('Downloading report...');
+        }}
+      />
 
-                    {/* AI Thinking Display */}
-                    <AIThinkingDisplay
-                      isVisible={showAIThinking}
-                      onClose={() => setShowAIThinking(false)}
-                      thoughts={aiThoughts}
-                      currentOperation={currentOperation}
-                      isPaused={isAIThinkingPaused}
-                      onPause={() => setIsAIThinkingPaused(true)}
-                      onResume={() => setIsAIThinkingPaused(false)}
-                    />
+      {/* AI Thinking Display */}
+      <AIThinkingDisplay
+        isVisible={showAIThinking}
+        onClose={() => setShowAIThinking(false)}
+        thoughts={aiThoughts}
+        currentOperation={currentOperation}
+        isPaused={isAIThinkingPaused}
+        onPause={() => setIsAIThinkingPaused(true)}
+        onResume={() => setIsAIThinkingPaused(false)}
+      />
     </div>
   );
 }
