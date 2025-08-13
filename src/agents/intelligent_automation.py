@@ -277,6 +277,11 @@ class IntelligentAutomationAgent:
             - Successful Selectors: {len(learned_patterns.get('successful_selectors', []))}
             - Domain-Specific Patterns: {len(learned_patterns.get('domain_specific', []))}
             
+            Based on the instructions, create specific automation steps. For example:
+            - If instructions mention "login to Flipkart", create steps for navigation, clicking login, entering credentials
+            - If instructions mention "search on Google", create steps for navigation, typing search terms, clicking search
+            - If instructions mention "fill form", create steps for finding and filling each form field
+            
             Create an intelligent automation plan that:
             1. Uses the best available selectors from AI analysis
             2. Incorporates learned patterns for better success
@@ -284,7 +289,11 @@ class IntelligentAutomationAgent:
             4. Provides comprehensive error handling
             5. Uses advanced learning and auto-heal capabilities
             
-            IMPORTANT: Return ONLY valid JSON without any additional text, markdown, or explanations.
+            IMPORTANT: 
+            1. ALWAYS include at least 3-5 steps in the automation plan
+            2. Make steps specific to the instructions provided
+            3. Return ONLY valid JSON without any additional text, markdown, or explanations
+            4. Ensure the JSON is properly formatted and complete
             
             {{
                 "steps": [
@@ -298,12 +307,39 @@ class IntelligentAutomationAgent:
                     }},
                     {{
                         "step": 2,
+                        "action": "wait",
+                        "description": "Wait for page to load completely",
+                        "duration": 3,
+                        "expected_result": "Page fully loaded",
+                        "ai_confidence": 0.90
+                    }},
+                    {{
+                        "step": 3,
                         "action": "click",
                         "description": "Click login button using AI-identified selector",
-                        "primary_selector": "best_selector_from_ai",
-                        "fallback_selectors": ["alternative1", "alternative2"],
+                        "primary_selector": "button[type='submit'], .login-btn, #login, a[href*='login']",
+                        "fallback_selectors": ["//button[contains(text(), 'Login')]", "//a[contains(@class, 'login')]"],
                         "ai_confidence": 0.88,
                         "learned_pattern": "successful_pattern_from_vector_store"
+                    }},
+                    {{
+                        "step": 4,
+                        "action": "type",
+                        "description": "Enter mobile number",
+                        "primary_selector": "input[type='tel'], input[name='mobile'], #mobile",
+                        "fallback_selectors": ["//input[contains(@placeholder, 'mobile')]", "//input[contains(@name, 'mobile')]"],
+                        "text": "9080306208",
+                        "expected_result": "Mobile number entered",
+                        "ai_confidence": 0.85
+                    }},
+                    {{
+                        "step": 5,
+                        "action": "click",
+                        "description": "Click request OTP button",
+                        "primary_selector": "button[type='submit'], .otp-btn, #request-otp",
+                        "fallback_selectors": ["//button[contains(text(), 'OTP')]", "//button[contains(text(), 'Send')]"],
+                        "expected_result": "OTP sent message appears",
+                        "ai_confidence": 0.82
                     }}
                 ],
                 "ai_analysis": {{

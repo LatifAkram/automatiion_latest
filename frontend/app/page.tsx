@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import SimpleChatInterface from '../src/components/simple-chat-interface';
 import RealBrowserAutomation from '../src/components/real-browser-automation';
 import AIThinkingDisplay from '../src/components/ai-thinking-display';
+import { RealTimeBrowser } from '../src/components/real-time-browser';
 
 // Backend configuration
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
@@ -134,6 +135,15 @@ export default function Home() {
   const [aiThoughts, setAiThoughts] = useState<any[]>([]);
   const [currentOperation, setCurrentOperation] = useState<string>('');
   const [isAIThinkingPaused, setIsAIThinkingPaused] = useState(false);
+  
+  // Real-time browser state
+  const [showRealTimeBrowser, setShowRealTimeBrowser] = useState(false);
+  const [realTimeBrowserUrl, setRealTimeBrowserUrl] = useState<string>('');
+  const [realTimeIsAutomationRunning, setRealTimeIsAutomationRunning] = useState(false);
+  const [realTimeCurrentStep, setRealTimeCurrentStep] = useState(1);
+  const [realTimeTotalSteps, setRealTimeTotalSteps] = useState(0);
+  const [realTimeAutomationSteps, setRealTimeAutomationSteps] = useState<any[]>([]);
+  const [realTimeAutomationScreenshots, setRealTimeAutomationScreenshots] = useState<string[]>([]);
 
   // Initialize default chat session
   useEffect(() => {
@@ -488,6 +498,15 @@ export default function Home() {
           }
           
           setAutomationSteps(steps);
+          
+          // Set up real-time browser
+          setShowRealTimeBrowser(true);
+          setRealTimeBrowserUrl(data.result?.url || 'https://www.google.com');
+          setRealTimeIsAutomationRunning(true);
+          setRealTimeCurrentStep(1);
+          setRealTimeTotalSteps(steps.length);
+          setRealTimeAutomationSteps(steps);
+          setRealTimeAutomationScreenshots([]);
           
           // Simulate step progression
           steps.forEach((step: any, index: number) => {
@@ -1284,6 +1303,31 @@ export default function Home() {
           console.log('Downloading report...');
         }}
       />
+
+      {/* Real-Time Browser */}
+      {showRealTimeBrowser && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-7xl h-full max-h-[90vh]">
+            <RealTimeBrowser
+              url={realTimeBrowserUrl}
+              isAutomationRunning={realTimeIsAutomationRunning}
+              currentStep={realTimeCurrentStep}
+              totalSteps={realTimeTotalSteps}
+              automationSteps={realTimeAutomationSteps}
+              screenshots={realTimeAutomationScreenshots}
+              onStepComplete={(stepIndex) => {
+                setRealTimeCurrentStep(stepIndex + 2);
+                // Add screenshot for completed step
+                setRealTimeAutomationScreenshots(prev => [...prev, `/api/screenshots/step_${stepIndex + 1}.png`]);
+              }}
+              onAutomationComplete={() => {
+                setRealTimeIsAutomationRunning(false);
+                setShowRealTimeBrowser(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* AI Thinking Display */}
       <AIThinkingDisplay
