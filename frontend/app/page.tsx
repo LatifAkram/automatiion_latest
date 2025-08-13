@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SimpleChatInterface from '../src/components/simple-chat-interface';
 import AutomationDashboard from '../src/components/automation-dashboard';
+import LiveAutomationDisplay from '../src/components/live-automation-display';
 
 // Backend configuration
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
@@ -118,6 +119,14 @@ export default function Home() {
   const [showFloatingAgents, setShowFloatingAgents] = useState(false);
   const [agentThoughts, setAgentThoughts] = useState<string[]>([]);
   const [showThoughtBubble, setShowThoughtBubble] = useState(false);
+  
+  // Live Automation Display State
+  const [showLiveAutomation, setShowLiveAutomation] = useState(false);
+  const [automationSteps, setAutomationSteps] = useState<any[]>([]);
+  const [currentAutomationStep, setCurrentAutomationStep] = useState<any>(null);
+  const [automationId, setAutomationId] = useState<string>('');
+  const [browserUrl, setBrowserUrl] = useState<string>('');
+  const [isAutomationRunning, setIsAutomationRunning] = useState(false);
 
   // Initialize default chat session
   useEffect(() => {
@@ -367,8 +376,44 @@ export default function Home() {
         
         // Handle automation response differently
         const content = isAutomationRequest 
-          ? `🚀 **Live Automation Started!**\n\n${data.result?.summary || data.message || 'Automation is now running in the background. Check the automation panel for real-time updates and screenshots.'}`
+          ? `🚀 **Live Automation Started!**\n\n${data.result?.summary || data.message || 'Automation is now running in the background. Check the live automation panel for real-time updates and screenshots.'}`
           : data.response || 'I understand your request. Let me help you with that.';
+        
+        // Show live automation display for automation requests
+        if (isAutomationRequest && data.automation_id) {
+          setShowLiveAutomation(true);
+          setAutomationId(data.automation_id);
+          setBrowserUrl(data.result?.url || '');
+          setIsAutomationRunning(true);
+          
+          // Convert automation plan to steps
+          const steps = data.result?.automation_plan?.map((step: any, index: number) => ({
+            id: `step_${index}`,
+            action: step.action || step.description || `Step ${index + 1}`,
+            description: step.description || step.action || `Executing step ${index + 1}`,
+            status: 'pending' as const,
+            timestamp: new Date().toISOString(),
+            screenshot: step.screenshot
+          })) || [];
+          
+          setAutomationSteps(steps);
+          
+          // Simulate step progression
+          steps.forEach((step, index) => {
+            setTimeout(() => {
+              setCurrentAutomationStep(step);
+              setAutomationSteps(prev => prev.map((s, i) => 
+                i === index ? { ...s, status: 'running' } : s
+              ));
+              
+              setTimeout(() => {
+                setAutomationSteps(prev => prev.map((s, i) => 
+                  i === index ? { ...s, status: 'completed' } : s
+                ));
+              }, 2000);
+            }, index * 3000);
+          });
+        }
         
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -1069,6 +1114,39 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Live Automation Display */}
+      <LiveAutomationDisplay
+        isVisible={showLiveAutomation}
+        onClose={() => setShowLiveAutomation(false)}
+        automationId={automationId}
+        currentStep={currentAutomationStep}
+        steps={automationSteps}
+        browserUrl={browserUrl}
+        isRunning={isAutomationRunning}
+        onControl={(action) => {
+          if (action === 'stop') {
+            setIsAutomationRunning(false);
+            setShowLiveAutomation(false);
+          } else if (action === 'pause') {
+            setIsAutomationRunning(false);
+          } else if (action === 'play') {
+            setIsAutomationRunning(true);
+          }
+        }}
+        onTakeScreenshot={() => {
+          // Trigger screenshot capture
+          console.log('Taking screenshot...');
+        }}
+        onViewCode={() => {
+          // Show generated code
+          console.log('Viewing generated code...');
+        }}
+        onDownloadReport={() => {
+          // Download automation report
+          console.log('Downloading report...');
+        }}
+      />
     </div>
   );
 }
