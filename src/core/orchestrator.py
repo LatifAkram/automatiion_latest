@@ -59,22 +59,26 @@ class MultiAgentOrchestrator:
         # Initialize advanced automation capabilities
         self.advanced_capabilities = AdvancedAutomationCapabilities()
         
-        # Initialize agents
-        self.planner_agent = PlannerAgent(config.ai, self.vector_store, self.audit_logger)
-        self.execution_agent = ExecutionAgent(config.automation, self.media_capture, SelectorDriftDetector(config.automation), self.audit_logger)
-        self.conversational_ai = ConversationalAI(config, self.ai_provider)
-        self.parallel_executor = ParallelExecutor(config, self.ai_provider)
-        self.sector_manager = SectorManager(config, self.ai_provider)
-        self.code_generator = CodeGenerator(config, self.ai_provider)
-        self.intelligent_automation_agent = IntelligentAutomationAgent(config, self.ai_provider)
-        self.search_agent = SearchAgent(config, self.ai_provider)
-        
-        # Initialize media capture
+        # Initialize media capture first
         if hasattr(config, 'database') and hasattr(config.database, 'media_path'):
             media_path = config.database.media_path
         else:
             media_path = 'data/media'
         self.media_capture = MediaCapture(media_path)
+        
+        # Initialize agents (will be fully initialized in _initialize_agents)
+        self.planner_agent = None
+        self.execution_agents = []
+        self.conversational_agent = None
+        self.search_agent = None
+        self.dom_extractor_agent = None
+        
+        # Initialize other components
+        self.conversational_ai = ConversationalAI(config, self.ai_provider)
+        self.parallel_executor = ParallelExecutor(config, self.ai_provider)
+        self.sector_manager = SectorManager(config, self.ai_provider)
+        self.code_generator = CodeGenerator(config, self.ai_provider)
+        self.intelligent_automation_agent = IntelligentAutomationAgent(config, self.ai_provider)
         
         # Workflow management
         self.active_workflows: Dict[str, Workflow] = {}
@@ -133,32 +137,19 @@ class MultiAgentOrchestrator:
             self.execution_agents.append(execution_agent)
         
         # Initialize Conversational Agent (AI-3: Reasoning & Context)
-        self.conversational_agent = ConversationalAgent(
-            config=self.config.ai,
-            vector_store=self.vector_store,
-            audit_logger=self.audit_logger
+        self.conversational_agent = ConversationalAI(
+            config=self.config,
+            ai_provider=self.ai_provider
         )
-        await self.conversational_agent.initialize()
         
         # Initialize Search Agent
         self.search_agent = SearchAgent(
             config=self.config,
-            audit_logger=self.audit_logger
+            ai_provider=self.ai_provider
         )
-        await self.search_agent.initialize()
         
-        # Initialize DOM Extraction Agent
-        self.dom_extractor_agent = DOMExtractionAgent(
-            config=self.config.automation,
-            audit_logger=self.audit_logger
-        )
-        await self.dom_extractor_agent.initialize()
+
         
-    @property
-    def dom_extractor(self):
-        """Get the DOM extractor agent."""
-        return self.dom_extractor_agent
-    
     @property
     def execution_agent(self):
         """Get the first available execution agent."""
