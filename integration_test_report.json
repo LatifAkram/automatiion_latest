@@ -4,63 +4,63 @@
     "passed_tests": 11,
     "failed_tests": 0,
     "success_rate": 100.0,
-    "timestamp": "2025-08-13T07:16:24.597818"
+    "timestamp": "2025-08-13T07:32:56.987500"
   },
   "detailed_results": {
     "Backend Health": {
       "status": "PASSED",
-      "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:11.450392"
+      "duration": 0.02,
+      "timestamp": "2025-08-13T07:32:43.762772"
     },
     "System Information": {
       "status": "PASSED",
       "duration": 0.01,
-      "timestamp": "2025-08-13T07:16:12.465038"
+      "timestamp": "2025-08-13T07:32:44.774035"
     },
     "Workflow Creation": {
       "status": "PASSED",
       "duration": 2.01,
-      "timestamp": "2025-08-13T07:16:15.476324"
+      "timestamp": "2025-08-13T07:32:47.789898"
     },
     "Chat Interaction": {
       "status": "PASSED",
       "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:16.481537"
+      "timestamp": "2025-08-13T07:32:48.794715"
     },
     "Search Functionality": {
       "status": "PASSED",
       "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:17.484663"
+      "timestamp": "2025-08-13T07:32:49.797694"
     },
     "Automation Execution": {
       "status": "PASSED",
       "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:18.487395"
+      "timestamp": "2025-08-13T07:32:50.801635"
     },
     "Data Export": {
       "status": "PASSED",
       "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:19.489775"
+      "timestamp": "2025-08-13T07:32:51.804741"
     },
     "Frontend Connectivity": {
       "status": "PASSED",
-      "duration": 0.1,
-      "timestamp": "2025-08-13T07:16:20.587251"
+      "duration": 0.17,
+      "timestamp": "2025-08-13T07:32:52.976194"
     },
     "WebSocket Connection": {
       "status": "PASSED",
       "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:21.588639"
+      "timestamp": "2025-08-13T07:32:53.977705"
     },
     "Database Operations": {
       "status": "PASSED",
       "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:22.592773"
+      "timestamp": "2025-08-13T07:32:54.981513"
     },
     "AI Provider Integration": {
       "status": "PASSED",
       "duration": 0.0,
-      "timestamp": "2025-08-13T07:16:23.596563"
+      "timestamp": "2025-08-13T07:32:55.986292"
     }
   },
   "recommendations": [
