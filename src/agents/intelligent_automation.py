@@ -1367,50 +1367,101 @@ class IntelligentAutomationAgent:
             }
 
     async def _execute_action(self, action: str, selector: str, step: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a specific action with a selector."""
+        """Execute a specific action with REAL browser automation."""
         try:
+            self.logger.info(f"Executing REAL action: {action} with selector: {selector}")
+            
             if action == "click":
-                element = await self.page.wait_for_selector(selector, timeout=5000)
+                # REAL click action with proper waiting
+                element = await self.page.wait_for_selector(selector, timeout=10000, state="visible")
                 if element:
                     await element.click()
+                    await asyncio.sleep(0.5)  # Wait for click to register
                     return {"success": True, "action": "click"}
                 else:
                     return {"success": False, "error": "Element not found"}
                     
             elif action == "type":
-                element = await self.page.wait_for_selector(selector, timeout=5000)
+                # REAL type action with proper input handling
+                element = await self.page.wait_for_selector(selector, timeout=10000, state="visible")
                 if element:
                     text = step.get("text", "test_input")
                     await element.fill(text)
+                    await asyncio.sleep(0.3)  # Wait for input to register
                     return {"success": True, "action": "type", "text": text}
                 else:
                     return {"success": False, "error": "Element not found"}
                     
             elif action == "input":
-                element = await self.page.wait_for_selector(selector, timeout=5000)
+                # REAL input action
+                element = await self.page.wait_for_selector(selector, timeout=10000, state="visible")
                 if element:
                     text = step.get("text", "test_input")
                     await element.fill(text)
+                    await asyncio.sleep(0.3)
                     return {"success": True, "action": "input", "text": text}
                 else:
                     return {"success": False, "error": "Element not found"}
                     
             elif action == "wait":
-                await asyncio.sleep(step.get("timeout", 2))
-                return {"success": True, "action": "wait"}
+                # REAL wait action
+                duration = step.get("timeout", step.get("duration", 2))
+                await asyncio.sleep(duration)
+                return {"success": True, "action": "wait", "duration": duration}
                 
             elif action == "navigate":
+                # REAL navigation action
                 url = step.get("url", "")
                 if url:
                     await self.page.goto(url, wait_until="networkidle")
+                    await asyncio.sleep(2)  # Wait for page to load
                     return {"success": True, "action": "navigate", "url": url}
                 else:
                     return {"success": False, "error": "No URL provided"}
                     
+            elif action == "scroll":
+                # REAL scroll action
+                direction = step.get("direction", "down")
+                if direction == "down":
+                    await self.page.evaluate("window.scrollBy(0, 500)")
+                elif direction == "up":
+                    await self.page.evaluate("window.scrollBy(0, -500)")
+                await asyncio.sleep(0.5)
+                return {"success": True, "action": "scroll", "direction": direction}
+                
+            elif action == "select":
+                # REAL select action
+                element = await self.page.wait_for_selector(selector, timeout=10000, state="visible")
+                if element:
+                    value = step.get("value", "")
+                    await element.select_option(value)
+                    await asyncio.sleep(0.5)
+                    return {"success": True, "action": "select", "value": value}
+                else:
+                    return {"success": False, "error": "Element not found"}
+                    
+            elif action == "hover":
+                # REAL hover action
+                element = await self.page.wait_for_selector(selector, timeout=10000, state="visible")
+                if element:
+                    await element.hover()
+                    await asyncio.sleep(0.5)
+                    return {"success": True, "action": "hover"}
+                else:
+                    return {"success": False, "error": "Element not found"}
+                    
+            elif action == "screenshot":
+                # REAL screenshot action
+                screenshot_path = await self.media_capture.capture_screenshot(
+                    self.page, "automation", f"step_{step.get('step_number', 'unknown')}"
+                )
+                return {"success": True, "action": "screenshot", "path": screenshot_path}
+                
             else:
                 return {"success": False, "error": f"Unknown action: {action}"}
                 
         except Exception as e:
+            self.logger.error(f"REAL action execution failed: {e}")
             return {"success": False, "error": str(e)}
 
     def _extract_json_from_response(self, response: str) -> str:

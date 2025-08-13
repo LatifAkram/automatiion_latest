@@ -1,640 +1,692 @@
 """
-Advanced Automation Capabilities Module
-Covers all aspects of automation beyond basic interactions
+Advanced Automation Capabilities
+================================
+
+Enterprise-level automation capabilities covering all aspects of RPA and automation.
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-from dataclasses import dataclass
+import json
+import re
+from typing import Dict, List, Any, Optional, Union
+from datetime import datetime, timedelta
 from enum import Enum
+import pandas as pd
+from playwright.async_api import Page, ElementHandle
+import aiohttp
+from dataclasses import dataclass
 
-class AutomationType(Enum):
-    """Types of automation operations"""
-    BASIC_INTERACTION = "basic_interaction"
+from ..core.ai_provider import AIProvider
+from ..utils.media_capture import MediaCapture
+
+
+class AutomationCategory(Enum):
+    """Categories of automation capabilities."""
+    WEB_AUTOMATION = "web_automation"
     DATA_EXTRACTION = "data_extraction"
-    FILE_OPERATIONS = "file_operations"
     FORM_HANDLING = "form_handling"
-    VISUAL_TESTING = "visual_testing"
     API_INTEGRATION = "api_integration"
-    DATABASE_OPERATIONS = "database_operations"
+    FILE_PROCESSING = "file_processing"
     EMAIL_AUTOMATION = "email_automation"
-    SOCIAL_MEDIA = "social_media"
-    ECOMMERCE = "ecommerce"
-    BANKING = "banking"
-    HEALTHCARE = "healthcare"
-    EDUCATION = "education"
-    GOVERNMENT = "government"
-    CUSTOM_WORKFLOW = "custom_workflow"
+    DOCUMENT_PROCESSING = "document_processing"
+    WORKFLOW_ORCHESTRATION = "workflow_orchestration"
+    ERROR_HANDLING = "error_handling"
+    COMPLIANCE = "compliance"
+
+
+class ComplexityLevel(Enum):
+    """Complexity levels for automation tasks."""
+    SIMPLE = "simple"
+    MEDIUM = "medium"
+    COMPLEX = "complex"
+    ENTERPRISE = "enterprise"
+
 
 @dataclass
 class AutomationCapability:
-    """Represents an automation capability"""
+    """Represents an automation capability."""
     name: str
     description: str
-    category: AutomationType
-    complexity: str  # simple, medium, complex
+    category: AutomationCategory
+    complexity: ComplexityLevel
     examples: List[str]
     selectors: List[str]
     validation_rules: Dict[str, Any]
+    dependencies: List[str]
+    estimated_duration: int
+    risk_level: str
+    compliance_requirements: List[str]
+
 
 class AdvancedAutomationCapabilities:
-    """Comprehensive automation capabilities covering all aspects"""
+    """Advanced automation capabilities for enterprise-level automation."""
     
-    def __init__(self):
+    def __init__(self, config, ai_provider: AIProvider):
+        self.config = config
+        self.ai_provider = ai_provider
+        self.media_capture = MediaCapture(config.database.media_path)
         self.logger = logging.getLogger(__name__)
+        
+        # Initialize capabilities
         self.capabilities = self._initialize_capabilities()
-    
+        
+        # Performance tracking
+        self.execution_history = []
+        self.error_patterns = {}
+        self.success_patterns = {}
+        
     def _initialize_capabilities(self) -> Dict[str, AutomationCapability]:
-        """Initialize all automation capabilities"""
-        return {
-            # Basic Interactions
-            "click_operations": AutomationCapability(
-                name="Click Operations",
-                description="Advanced clicking with intelligent element detection",
-                category=AutomationType.BASIC_INTERACTION,
-                complexity="simple",
-                examples=[
-                    "Click login button with retry logic",
-                    "Click dynamic elements with wait conditions",
-                    "Click elements by text content",
-                    "Click elements by partial text match"
-                ],
-                selectors=[
-                    "button[type='submit']",
-                    "a[href*='login']",
-                    "div[class*='button']",
-                    "//button[contains(text(), 'Login')]"
-                ],
-                validation_rules={
-                    "element_visible": True,
-                    "element_clickable": True,
-                    "retry_attempts": 3,
-                    "timeout": 10
-                }
-            ),
-            
-            "type_operations": AutomationCapability(
-                name="Type Operations",
-                description="Advanced typing with validation and formatting",
-                category=AutomationType.BASIC_INTERACTION,
-                complexity="simple",
-                examples=[
-                    "Type with character-by-character simulation",
-                    "Type with validation and error handling",
-                    "Type with auto-complete handling",
-                    "Type with special character support"
-                ],
-                selectors=[
-                    "input[type='text']",
-                    "input[type='email']",
-                    "textarea",
-                    "div[contenteditable='true']"
-                ],
-                validation_rules={
-                    "clear_before_type": True,
-                    "validate_input": True,
-                    "handle_autocomplete": True,
-                    "special_chars": True
-                }
-            ),
-            
-            # Data Extraction
-            "data_extraction": AutomationCapability(
-                name="Data Extraction",
-                description="Extract structured and unstructured data from web pages",
-                category=AutomationType.DATA_EXTRACTION,
-                complexity="complex",
-                examples=[
-                    "Extract product information from e-commerce sites",
-                    "Scrape financial data from banking portals",
-                    "Extract patient data from healthcare systems",
-                    "Gather educational content from learning platforms"
-                ],
-                selectors=[
-                    "table tr td",
-                    "div[class*='product']",
-                    "span[class*='price']",
-                    "//div[contains(@class, 'data')]"
-                ],
-                validation_rules={
-                    "data_validation": True,
-                    "format_output": True,
-                    "handle_pagination": True,
-                    "export_formats": ["json", "csv", "excel"]
-                }
-            ),
-            
-            # File Operations
-            "file_operations": AutomationCapability(
-                name="File Operations",
-                description="Upload, download, and process files automatically",
-                category=AutomationType.FILE_OPERATIONS,
-                complexity="medium",
-                examples=[
-                    "Upload documents to government portals",
-                    "Download reports from banking systems",
-                    "Process image files for OCR",
-                    "Handle multiple file formats"
-                ],
-                selectors=[
-                    "input[type='file']",
-                    "a[href*='download']",
-                    "button[class*='upload']",
-                    "//input[@type='file']"
-                ],
-                validation_rules={
-                    "file_size_limit": "10MB",
-                    "supported_formats": ["pdf", "doc", "jpg", "png"],
-                    "virus_scan": True,
-                    "backup_files": True
-                }
-            ),
-            
-            # Form Handling
-            "form_handling": AutomationCapability(
-                name="Form Handling",
-                description="Handle complex forms with validation and submission",
-                category=AutomationType.FORM_HANDLING,
-                complexity="complex",
-                examples=[
-                    "Fill multi-step registration forms",
-                    "Handle dynamic form fields",
-                    "Submit forms with validation",
-                    "Process form errors and retry"
-                ],
-                selectors=[
-                    "form",
-                    "input[required]",
-                    "select",
-                    "textarea"
-                ],
-                validation_rules={
-                    "validate_required_fields": True,
-                    "handle_errors": True,
-                    "multi_step_support": True,
-                    "auto_save": True
-                }
-            ),
-            
-            # Visual Testing
-            "visual_testing": AutomationCapability(
-                name="Visual Testing",
-                description="Visual regression testing and UI validation",
-                category=AutomationType.VISUAL_TESTING,
-                complexity="complex",
-                examples=[
-                    "Compare screenshots for visual changes",
-                    "Validate UI elements and layouts",
-                    "Test responsive design across devices",
-                    "Detect visual anomalies"
-                ],
-                selectors=[
-                    "body",
-                    "div[class*='container']",
-                    "img",
-                    "//div[contains(@class, 'layout')]"
-                ],
-                validation_rules={
-                    "screenshot_comparison": True,
-                    "pixel_perfect": False,
-                    "responsive_testing": True,
-                    "visual_ai": True
-                }
-            ),
-            
-            # API Integration
-            "api_integration": AutomationCapability(
-                name="API Integration",
-                description="Integrate with REST APIs and web services",
-                category=AutomationType.API_INTEGRATION,
-                complexity="complex",
-                examples=[
-                    "Call REST APIs for data retrieval",
-                    "Submit data via API endpoints",
-                    "Handle authentication tokens",
-                    "Process API responses"
-                ],
-                selectors=[
-                    "script[src*='api']",
-                    "div[data-api]",
-                    "//script[contains(@src, 'api')]"
-                ],
-                validation_rules={
-                    "authentication": True,
-                    "rate_limiting": True,
-                    "error_handling": True,
-                    "response_validation": True
-                }
-            ),
-            
-            # E-commerce Automation
-            "ecommerce": AutomationCapability(
-                name="E-commerce Automation",
-                description="Complete e-commerce workflow automation",
-                category=AutomationType.ECOMMERCE,
-                complexity="complex",
-                examples=[
-                    "Product search and comparison",
-                    "Shopping cart management",
-                    "Checkout process automation",
-                    "Order tracking and management"
-                ],
-                selectors=[
-                    "div[class*='product']",
-                    "button[class*='add-to-cart']",
-                    "input[class*='search']",
-                    "//div[contains(@class, 'checkout')]"
-                ],
-                validation_rules={
-                    "price_validation": True,
-                    "inventory_check": True,
-                    "shipping_calculation": True,
-                    "payment_processing": True
-                }
-            ),
-            
-            # Banking Automation
-            "banking": AutomationCapability(
-                name="Banking Automation",
-                description="Secure banking operations and financial data handling",
-                category=AutomationType.BANKING,
-                complexity="complex",
-                examples=[
-                    "Account balance checking",
-                    "Transaction history retrieval",
-                    "Bill payment automation",
-                    "Financial report generation"
-                ],
-                selectors=[
-                    "div[class*='account']",
-                    "table[class*='transaction']",
-                    "input[class*='amount']",
-                    "//div[contains(@class, 'balance')]"
-                ],
-                validation_rules={
-                    "security_validation": True,
-                    "encryption": True,
-                    "audit_trail": True,
-                    "compliance": True
-                }
-            ),
-            
-            # Healthcare Automation
-            "healthcare": AutomationCapability(
-                name="Healthcare Automation",
-                description="Healthcare system automation with HIPAA compliance",
-                category=AutomationType.HEALTHCARE,
-                complexity="complex",
-                examples=[
-                    "Patient portal access",
-                    "Appointment scheduling",
-                    "Medical record retrieval",
-                    "Prescription management"
-                ],
-                selectors=[
-                    "div[class*='patient']",
-                    "input[class*='appointment']",
-                    "table[class*='medical']",
-                    "//div[contains(@class, 'health')]"
-                ],
-                validation_rules={
-                    "hipaa_compliance": True,
-                    "data_encryption": True,
-                    "access_control": True,
-                    "audit_logging": True
-                }
-            ),
-            
-            # Education Automation
-            "education": AutomationCapability(
-                name="Education Automation",
-                description="Educational platform automation and content management",
-                category=AutomationType.EDUCATION,
-                complexity="medium",
-                examples=[
-                    "Course enrollment automation",
-                    "Grade checking and reporting",
-                    "Assignment submission",
-                    "Learning content management"
-                ],
-                selectors=[
-                    "div[class*='course']",
-                    "table[class*='grade']",
-                    "input[class*='assignment']",
-                    "//div[contains(@class, 'learning')]"
-                ],
-                validation_rules={
-                    "grade_validation": True,
-                    "deadline_checking": True,
-                    "content_verification": True,
-                    "progress_tracking": True
-                }
-            ),
-            
-            # Government Automation
-            "government": AutomationCapability(
-                name="Government Automation",
-                description="Government portal automation with compliance",
-                category=AutomationType.GOVERNMENT,
-                complexity="complex",
-                examples=[
-                    "Document submission automation",
-                    "Application processing",
-                    "License renewal automation",
-                    "Government form handling"
-                ],
-                selectors=[
-                    "form[class*='government']",
-                    "input[class*='document']",
-                    "div[class*='application']",
-                    "//form[contains(@class, 'gov')]"
-                ],
-                validation_rules={
-                    "compliance_checking": True,
-                    "document_validation": True,
-                    "deadline_management": True,
-                    "status_tracking": True
-                }
-            ),
-            
-            # Social Media Automation
-            "social_media": AutomationCapability(
-                name="Social Media Automation",
-                description="Social media platform automation and content management",
-                category=AutomationType.SOCIAL_MEDIA,
-                complexity="medium",
-                examples=[
-                    "Content posting automation",
-                    "Engagement monitoring",
-                    "Analytics data collection",
-                    "Social media management"
-                ],
-                selectors=[
-                    "div[class*='post']",
-                    "button[class*='like']",
-                    "textarea[class*='comment']",
-                    "//div[contains(@class, 'social')]"
-                ],
-                validation_rules={
-                    "content_moderation": True,
-                    "engagement_tracking": True,
-                    "analytics_collection": True,
-                    "scheduling": True
-                }
-            ),
-            
-            # Email Automation
-            "email_automation": AutomationCapability(
-                name="Email Automation",
-                description="Email processing and automation workflows",
-                category=AutomationType.EMAIL_AUTOMATION,
-                complexity="medium",
-                examples=[
-                    "Email parsing and processing",
-                    "Automated email responses",
-                    "Email filtering and categorization",
-                    "Email campaign management"
-                ],
-                selectors=[
-                    "div[class*='email']",
-                    "input[type='email']",
-                    "textarea[class*='message']",
-                    "//div[contains(@class, 'mail')]"
-                ],
-                validation_rules={
-                    "spam_filtering": True,
-                    "content_analysis": True,
-                    "auto_response": True,
-                    "email_tracking": True
-                }
-            ),
-            
-            # Database Operations
-            "database_operations": AutomationCapability(
-                name="Database Operations",
-                description="Database interaction and data management",
-                category=AutomationType.DATABASE_OPERATIONS,
-                complexity="complex",
-                examples=[
-                    "Database query automation",
-                    "Data import/export operations",
-                    "Database backup automation",
-                    "Data synchronization"
-                ],
-                selectors=[
-                    "div[class*='database']",
-                    "table[class*='data']",
-                    "input[class*='query']",
-                    "//div[contains(@class, 'db')]"
-                ],
-                validation_rules={
-                    "data_integrity": True,
-                    "backup_verification": True,
-                    "performance_monitoring": True,
-                    "security_validation": True
-                }
-            ),
-            
-            # Custom Workflows
-            "custom_workflow": AutomationCapability(
-                name="Custom Workflows",
-                description="Custom automation workflows and business processes",
-                category=AutomationType.CUSTOM_WORKFLOW,
-                complexity="complex",
-                examples=[
-                    "Business process automation",
-                    "Custom data processing",
-                    "Workflow orchestration",
-                    "Integration automation"
-                ],
-                selectors=[
-                    "div[class*='workflow']",
-                    "button[class*='process']",
-                    "div[class*='business']",
-                    "//div[contains(@class, 'custom')]"
-                ],
-                validation_rules={
-                    "workflow_validation": True,
-                    "error_handling": True,
-                    "rollback_support": True,
-                    "monitoring": True
-                }
-            )
-        }
-    
-    async def get_capability(self, name: str) -> Optional[AutomationCapability]:
-        """Get a specific automation capability"""
-        return self.capabilities.get(name)
-    
-    async def get_capabilities_by_category(self, category: AutomationType) -> List[AutomationCapability]:
-        """Get all capabilities for a specific category"""
-        return [cap for cap in self.capabilities.values() if cap.category == category]
-    
-    async def get_all_capabilities(self) -> List[AutomationCapability]:
-        """Get all automation capabilities"""
-        return list(self.capabilities.values())
+        """Initialize all automation capabilities."""
+        capabilities = {}
+        
+        # Web Automation Capabilities
+        capabilities["web_navigation"] = AutomationCapability(
+            name="Web Navigation",
+            description="Advanced web navigation with intelligent waiting and error handling",
+            category=AutomationCategory.WEB_AUTOMATION,
+            complexity=ComplexityLevel.MEDIUM,
+            examples=["Navigate to specific pages", "Handle redirects", "Wait for page loads"],
+            selectors=["//a[@href]", "//button", "//input[@type='submit']"],
+            validation_rules={"timeout": 30, "retry_attempts": 3},
+            dependencies=[],
+            estimated_duration=10,
+            risk_level="low",
+            compliance_requirements=[]
+        )
+        
+        capabilities["form_automation"] = AutomationCapability(
+            name="Form Automation",
+            description="Intelligent form filling with validation and error handling",
+            category=AutomationCategory.FORM_HANDLING,
+            complexity=ComplexityLevel.COMPLEX,
+            examples=["Fill complex forms", "Handle dynamic fields", "Validate inputs"],
+            selectors=["//input", "//select", "//textarea", "//button"],
+            validation_rules={"required_fields": True, "format_validation": True},
+            dependencies=["web_navigation"],
+            estimated_duration=30,
+            risk_level="medium",
+            compliance_requirements=["data_validation"]
+        )
+        
+        capabilities["data_extraction"] = AutomationCapability(
+            name="Data Extraction",
+            description="Advanced data extraction from web pages, tables, and documents",
+            category=AutomationCategory.DATA_EXTRACTION,
+            complexity=ComplexityLevel.COMPLEX,
+            examples=["Extract table data", "Parse JSON responses", "Handle pagination"],
+            selectors=["//table", "//div[@class='data']", "//span[@data-value]"],
+            validation_rules={"data_format": True, "completeness_check": True},
+            dependencies=["web_navigation"],
+            estimated_duration=20,
+            risk_level="low",
+            compliance_requirements=["data_integrity"]
+        )
+        
+        capabilities["api_integration"] = AutomationCapability(
+            name="API Integration",
+            description="REST API integration with authentication and error handling",
+            category=AutomationCategory.API_INTEGRATION,
+            complexity=ComplexityLevel.ENTERPRISE,
+            examples=["Call REST APIs", "Handle authentication", "Process responses"],
+            selectors=[],
+            validation_rules={"authentication": True, "rate_limiting": True},
+            dependencies=[],
+            estimated_duration=15,
+            risk_level="medium",
+            compliance_requirements=["api_security", "data_encryption"]
+        )
+        
+        capabilities["file_processing"] = AutomationCapability(
+            name="File Processing",
+            description="Advanced file operations including Excel, PDF, and CSV processing",
+            category=AutomationCategory.FILE_PROCESSING,
+            complexity=ComplexityLevel.COMPLEX,
+            examples=["Read Excel files", "Generate PDF reports", "Process CSV data"],
+            selectors=[],
+            validation_rules={"file_format": True, "backup_creation": True},
+            dependencies=[],
+            estimated_duration=25,
+            risk_level="low",
+            compliance_requirements=["data_backup"]
+        )
+        
+        capabilities["email_automation"] = AutomationCapability(
+            name="Email Automation",
+            description="Email sending, receiving, and processing automation",
+            category=AutomationCategory.EMAIL_AUTOMATION,
+            complexity=ComplexityLevel.ENTERPRISE,
+            examples=["Send automated emails", "Process email responses", "Handle attachments"],
+            selectors=[],
+            validation_rules={"email_validation": True, "attachment_handling": True},
+            dependencies=[],
+            estimated_duration=20,
+            risk_level="medium",
+            compliance_requirements=["email_security", "data_privacy"]
+        )
+        
+        capabilities["workflow_orchestration"] = AutomationCapability(
+            name="Workflow Orchestration",
+            description="Complex workflow orchestration with conditional logic and parallel execution",
+            category=AutomationCategory.WORKFLOW_ORCHESTRATION,
+            complexity=ComplexityLevel.ENTERPRISE,
+            examples=["Parallel task execution", "Conditional workflows", "Error recovery"],
+            selectors=[],
+            validation_rules={"workflow_validation": True, "rollback_capability": True},
+            dependencies=["web_navigation", "form_automation", "data_extraction"],
+            estimated_duration=60,
+            risk_level="high",
+            compliance_requirements=["audit_trail", "rollback_capability"]
+        )
+        
+        return capabilities
     
     async def analyze_automation_requirements(self, user_request: str) -> Dict[str, Any]:
-        """Analyze user request and determine required capabilities"""
-        analysis = {
-            "required_capabilities": [],
-            "complexity_level": "simple",
-            "estimated_duration": 0,
-            "risk_level": "low",
+        """Analyze user request to determine required capabilities."""
+        try:
+            prompt = f"""
+            Analyze this automation request: "{user_request}"
+            
+            Determine the required capabilities from these categories:
+            - web_automation: Navigation, clicking, form filling
+            - data_extraction: Extracting data from web pages, tables, documents
+            - form_handling: Complex form automation with validation
+            - api_integration: REST API calls, authentication
+            - file_processing: Excel, PDF, CSV file operations
+            - email_automation: Email sending, receiving, processing
+            - document_processing: Document parsing, OCR, text extraction
+            - workflow_orchestration: Complex workflows, parallel execution
+            - error_handling: Error recovery, retry logic
+            - compliance: Data validation, security, audit trails
+            
+            Return as JSON with:
+            - required_capabilities: List of capability names
+            - complexity_level: simple/medium/complex/enterprise
+            - estimated_duration: Time in seconds
+            - risk_level: low/medium/high
+            - compliance_requirements: List of compliance needs
+            - technical_requirements: List of technical needs
+            """
+            
+            response = await self.ai_provider.generate_response(prompt)
+            
+            try:
+                analysis = json.loads(response)
+            except json.JSONDecodeError:
+                # Fallback analysis
+                analysis = self._fallback_requirement_analysis(user_request)
+            
+            return analysis
+            
+        except Exception as e:
+            self.logger.error(f"Failed to analyze automation requirements: {e}")
+            return self._fallback_requirement_analysis(user_request)
+    
+    def _fallback_requirement_analysis(self, user_request: str) -> Dict[str, Any]:
+        """Fallback analysis when AI fails."""
+        request_lower = user_request.lower()
+        
+        capabilities = []
+        complexity = "simple"
+        duration = 30
+        risk = "low"
+        
+        if any(word in request_lower for word in ["form", "fill", "input", "submit"]):
+            capabilities.extend(["form_automation", "web_navigation"])
+            complexity = "medium"
+            duration = 45
+            
+        if any(word in request_lower for word in ["extract", "data", "table", "scrape"]):
+            capabilities.extend(["data_extraction", "web_navigation"])
+            complexity = "medium"
+            duration = 40
+            
+        if any(word in request_lower for word in ["api", "rest", "json", "http"]):
+            capabilities.extend(["api_integration"])
+            complexity = "complex"
+            duration = 25
+            
+        if any(word in request_lower for word in ["excel", "pdf", "file", "csv"]):
+            capabilities.extend(["file_processing"])
+            complexity = "medium"
+            duration = 35
+            
+        if any(word in request_lower for word in ["email", "mail", "send"]):
+            capabilities.extend(["email_automation"])
+            complexity = "complex"
+            duration = 30
+            
+        if any(word in request_lower for word in ["workflow", "parallel", "orchestrate"]):
+            capabilities.extend(["workflow_orchestration"])
+            complexity = "enterprise"
+            duration = 90
+            risk = "high"
+            
+        if not capabilities:
+            capabilities = ["web_navigation"]
+            
+        return {
+            "required_capabilities": capabilities,
+            "complexity_level": complexity,
+            "estimated_duration": duration,
+            "risk_level": risk,
             "compliance_requirements": [],
             "technical_requirements": []
         }
-        
-        user_request_lower = user_request.lower()
-        
-        # Analyze based on keywords and context
-        if any(word in user_request_lower for word in ["extract", "scrape", "data", "table"]):
-            analysis["required_capabilities"].append("data_extraction")
-            analysis["complexity_level"] = "medium"
-            analysis["estimated_duration"] += 300  # 5 minutes
-        
-        if any(word in user_request_lower for word in ["upload", "download", "file", "document"]):
-            analysis["required_capabilities"].append("file_operations")
-            analysis["complexity_level"] = "medium"
-            analysis["estimated_duration"] += 180  # 3 minutes
-        
-        if any(word in user_request_lower for word in ["form", "submit", "register", "apply"]):
-            analysis["required_capabilities"].append("form_handling")
-            analysis["complexity_level"] = "complex"
-            analysis["estimated_duration"] += 600  # 10 minutes
-        
-        if any(word in user_request_lower for word in ["visual", "screenshot", "ui", "layout"]):
-            analysis["required_capabilities"].append("visual_testing")
-            analysis["complexity_level"] = "complex"
-            analysis["estimated_duration"] += 240  # 4 minutes
-        
-        if any(word in user_request_lower for word in ["api", "rest", "service", "integration"]):
-            analysis["required_capabilities"].append("api_integration")
-            analysis["complexity_level"] = "complex"
-            analysis["estimated_duration"] += 480  # 8 minutes
-        
-        # Sector-specific analysis
-        if any(word in user_request_lower for word in ["flipkart", "amazon", "shop", "buy", "cart"]):
-            analysis["required_capabilities"].append("ecommerce")
-            analysis["complexity_level"] = "complex"
-            analysis["estimated_duration"] += 900  # 15 minutes
-        
-        if any(word in user_request_lower for word in ["bank", "account", "transaction", "payment"]):
-            analysis["required_capabilities"].append("banking")
-            analysis["complexity_level"] = "complex"
-            analysis["risk_level"] = "high"
-            analysis["compliance_requirements"].append("financial_security")
-            analysis["estimated_duration"] += 1200  # 20 minutes
-        
-        if any(word in user_request_lower for word in ["health", "medical", "patient", "appointment"]):
-            analysis["required_capabilities"].append("healthcare")
-            analysis["complexity_level"] = "complex"
-            analysis["risk_level"] = "high"
-            analysis["compliance_requirements"].append("hipaa")
-            analysis["estimated_duration"] += 1500  # 25 minutes
-        
-        if any(word in user_request_lower for word in ["course", "grade", "education", "learn"]):
-            analysis["required_capabilities"].append("education")
-            analysis["complexity_level"] = "medium"
-            analysis["estimated_duration"] += 600  # 10 minutes
-        
-        if any(word in user_request_lower for word in ["government", "gov", "license", "document"]):
-            analysis["required_capabilities"].append("government")
-            analysis["complexity_level"] = "complex"
-            analysis["compliance_requirements"].append("government_compliance")
-            analysis["estimated_duration"] += 1800  # 30 minutes
-        
-        # Add basic interactions if not specified
-        if not analysis["required_capabilities"]:
-            analysis["required_capabilities"].extend(["click_operations", "type_operations"])
-        
-        return analysis
     
     async def generate_automation_plan(self, user_request: str) -> Dict[str, Any]:
-        """Generate a comprehensive automation plan"""
-        analysis = await self.analyze_automation_requirements(user_request)
+        """Generate comprehensive automation plan."""
+        try:
+            # Analyze requirements
+            requirements = await self.analyze_automation_requirements(user_request)
+            
+            # Generate detailed plan
+            plan = {
+                "analysis": requirements,
+                "steps": [],
+                "capabilities_used": requirements["required_capabilities"],
+                "estimated_completion_time": requirements["estimated_duration"],
+                "risk_assessment": requirements["risk_level"],
+                "compliance_checklist": requirements["compliance_requirements"],
+                "validation": {"is_feasible": True, "warnings": [], "risks": [], "recommendations": []}
+            }
+            
+            # Generate steps for each capability
+            for capability_name in requirements["required_capabilities"]:
+                capability = self.capabilities.get(capability_name)
+                if capability:
+                    steps = await self._generate_capability_steps(capability, user_request)
+                    plan["steps"].extend(steps)
+            
+            return plan
+            
+        except Exception as e:
+            self.logger.error(f"Failed to generate automation plan: {e}")
+            return self._generate_fallback_plan(user_request)
+    
+    async def _generate_capability_steps(self, capability: AutomationCapability, user_request: str) -> List[Dict[str, Any]]:
+        """Generate steps for a specific capability."""
+        steps = []
         
-        plan = {
-            "analysis": analysis,
-            "steps": [],
-            "capabilities_used": [],
-            "estimated_completion_time": analysis["estimated_duration"],
-            "risk_assessment": analysis["risk_level"],
-            "compliance_checklist": analysis["compliance_requirements"]
+        if capability.category == AutomationCategory.WEB_AUTOMATION:
+            steps.extend([
+                {
+                    "action": "navigate",
+                    "description": f"Navigate to target page for {capability.name}",
+                    "timeout": 30,
+                    "retry_attempts": 3
+                },
+                {
+                    "action": "wait",
+                    "description": "Wait for page to load completely",
+                    "duration": 5
+                }
+            ])
+            
+        elif capability.category == AutomationCategory.FORM_HANDLING:
+            steps.extend([
+                {
+                    "action": "wait_for_element",
+                    "description": "Wait for form elements to be visible",
+                    "selector": "//form",
+                    "timeout": 10
+                },
+                {
+                    "action": "validate_form",
+                    "description": "Validate form structure and required fields",
+                    "validation_rules": capability.validation_rules
+                }
+            ])
+            
+        elif capability.category == AutomationCategory.DATA_EXTRACTION:
+            steps.extend([
+                {
+                    "action": "identify_data_sources",
+                    "description": "Identify data sources on the page",
+                    "selectors": capability.selectors
+                },
+                {
+                    "action": "extract_data",
+                    "description": "Extract data using identified selectors",
+                    "data_format": "structured"
+                }
+            ])
+            
+        elif capability.category == AutomationCategory.API_INTEGRATION:
+            steps.extend([
+                {
+                    "action": "authenticate_api",
+                    "description": "Authenticate with API service",
+                    "auth_type": "bearer_token"
+                },
+                {
+                    "action": "call_api",
+                    "description": "Make API call with proper error handling",
+                    "method": "POST",
+                    "timeout": 30
+                }
+            ])
+            
+        return steps
+    
+    def _generate_fallback_plan(self, user_request: str) -> Dict[str, Any]:
+        """Generate fallback automation plan."""
+        return {
+            "analysis": {
+                "required_capabilities": ["web_navigation"],
+                "complexity_level": "simple",
+                "estimated_duration": 30,
+                "risk_level": "low"
+            },
+            "steps": [
+                {
+                    "action": "navigate",
+                    "description": "Navigate to target website",
+                    "timeout": 30
+                },
+                {
+                    "action": "wait",
+                    "description": "Wait for page to load",
+                    "duration": 5
+                }
+            ],
+            "capabilities_used": ["web_navigation"],
+            "estimated_completion_time": 30,
+            "risk_assessment": "low",
+            "compliance_checklist": [],
+            "validation": {"is_feasible": True, "warnings": [], "risks": [], "recommendations": []}
         }
-        
-        # Generate steps based on required capabilities
-        for capability_name in analysis["required_capabilities"]:
-            capability = await self.get_capability(capability_name)
-            if capability:
-                plan["capabilities_used"].append(capability)
-                
-                # Add example steps for each capability
-                for example in capability.examples[:2]:  # Take first 2 examples
-                    plan["steps"].append({
-                        "action": example,
-                        "capability": capability_name,
-                        "selectors": capability.selectors,
-                        "validation": capability.validation_rules,
-                        "estimated_duration": 60  # 1 minute per step
-                    })
-        
-        return plan
     
     async def validate_automation_plan(self, plan: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate automation plan for feasibility and risks"""
-        validation = {
-            "is_feasible": True,
-            "warnings": [],
-            "risks": [],
-            "recommendations": []
+        """Validate automation plan for feasibility and risks."""
+        try:
+            validation = {
+                "is_feasible": True,
+                "warnings": [],
+                "risks": [],
+                "recommendations": []
+            }
+            
+            # Check capability dependencies
+            for capability_name in plan.get("capabilities_used", []):
+                capability = self.capabilities.get(capability_name)
+                if capability:
+                    # Check dependencies
+                    for dependency in capability.dependencies:
+                        if dependency not in plan.get("capabilities_used", []):
+                            validation["warnings"].append(f"Missing dependency: {dependency}")
+                    
+                    # Check risk level
+                    if capability.risk_level == "high":
+                        validation["risks"].append(f"High risk capability: {capability_name}")
+                    
+                    # Check compliance requirements
+                    for requirement in capability.compliance_requirements:
+                        if requirement not in plan.get("compliance_checklist", []):
+                            validation["recommendations"].append(f"Add compliance: {requirement}")
+            
+            # Check estimated duration
+            if plan.get("estimated_completion_time", 0) > 300:  # 5 minutes
+                validation["warnings"].append("Long execution time - consider optimization")
+            
+            # Check complexity
+            if plan.get("analysis", {}).get("complexity_level") == "enterprise":
+                validation["risks"].append("Enterprise complexity - requires careful testing")
+            
+            return validation
+            
+        except Exception as e:
+            self.logger.error(f"Failed to validate automation plan: {e}")
+            return {
+                "is_feasible": False,
+                "warnings": [f"Validation failed: {str(e)}"],
+                "risks": ["Unknown risks due to validation failure"],
+                "recommendations": ["Review and fix validation issues"]
+            }
+    
+    async def get_capability(self, capability_name: str) -> Optional[AutomationCapability]:
+        """Get a specific automation capability."""
+        return self.capabilities.get(capability_name)
+    
+    async def list_capabilities(self) -> List[Dict[str, Any]]:
+        """List all available automation capabilities."""
+        return [
+            {
+                "name": cap.name,
+                "description": cap.description,
+                "category": cap.category.value,
+                "complexity": cap.complexity.value,
+                "examples": cap.examples,
+                "estimated_duration": cap.estimated_duration,
+                "risk_level": cap.risk_level
+            }
+            for cap in self.capabilities.values()
+        ]
+    
+    async def execute_capability(self, capability_name: str, page: Page, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a specific automation capability."""
+        try:
+            capability = self.capabilities.get(capability_name)
+            if not capability:
+                return {"success": False, "error": f"Capability not found: {capability_name}"}
+            
+            self.logger.info(f"Executing capability: {capability_name}")
+            
+            if capability.category == AutomationCategory.WEB_AUTOMATION:
+                return await self._execute_web_automation(page, context)
+            elif capability.category == AutomationCategory.FORM_HANDLING:
+                return await self._execute_form_automation(page, context)
+            elif capability.category == AutomationCategory.DATA_EXTRACTION:
+                return await self._execute_data_extraction(page, context)
+            elif capability.category == AutomationCategory.API_INTEGRATION:
+                return await self._execute_api_integration(context)
+            elif capability.category == AutomationCategory.FILE_PROCESSING:
+                return await self._execute_file_processing(context)
+            else:
+                return {"success": False, "error": f"Capability execution not implemented: {capability_name}"}
+                
+        except Exception as e:
+            self.logger.error(f"Failed to execute capability {capability_name}: {e}")
+            return {"success": False, "error": str(e)}
+    
+    async def _execute_web_automation(self, page: Page, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute web automation capability."""
+        try:
+            # Navigate to target URL
+            url = context.get("url", "")
+            if url:
+                await page.goto(url, wait_until="networkidle")
+                await asyncio.sleep(2)
+            
+            # Execute web automation steps
+            steps = context.get("steps", [])
+            results = []
+            
+            for step in steps:
+                result = await self._execute_web_step(page, step)
+                results.append(result)
+                
+                if not result["success"]:
+                    break
+                    
+                await asyncio.sleep(1)
+            
+            return {
+                "success": all(r["success"] for r in results),
+                "results": results,
+                "capability": "web_automation"
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _execute_web_step(self, page: Page, step: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a single web automation step."""
+        try:
+            action = step.get("action", "")
+            selector = step.get("selector", "")
+            
+            if action == "click":
+                element = await page.wait_for_selector(selector, timeout=10000)
+                if element:
+                    await element.click()
+                    return {"success": True, "action": "click"}
+                    
+            elif action == "type":
+                element = await page.wait_for_selector(selector, timeout=10000)
+                if element:
+                    text = step.get("text", "")
+                    await element.fill(text)
+                    return {"success": True, "action": "type", "text": text}
+                    
+            elif action == "wait":
+                duration = step.get("duration", 2)
+                await asyncio.sleep(duration)
+                return {"success": True, "action": "wait", "duration": duration}
+                
+            return {"success": False, "error": f"Unknown action: {action}"}
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _execute_form_automation(self, page: Page, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute form automation capability."""
+        try:
+            form_data = context.get("form_data", {})
+            results = []
+            
+            for field_name, field_value in form_data.items():
+                # Find form field
+                selector = f"//input[@name='{field_name}' or @id='{field_name}']"
+                element = await page.wait_for_selector(selector, timeout=10000)
+                
+                if element:
+                    await element.fill(str(field_value))
+                    results.append({"field": field_name, "success": True})
+                else:
+                    results.append({"field": field_name, "success": False, "error": "Field not found"})
+            
+            # Submit form
+            submit_selector = "//button[@type='submit']"
+            submit_button = await page.wait_for_selector(submit_selector, timeout=10000)
+            if submit_button:
+                await submit_button.click()
+                results.append({"action": "submit", "success": True})
+            
+            return {
+                "success": all(r.get("success", False) for r in results),
+                "results": results,
+                "capability": "form_automation"
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _execute_data_extraction(self, page: Page, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute data extraction capability."""
+        try:
+            selectors = context.get("selectors", [])
+            extracted_data = {}
+            
+            for selector in selectors:
+                elements = await page.query_selector_all(selector)
+                data = []
+                
+                for element in elements:
+                    text = await element.text_content()
+                    if text:
+                        data.append(text.strip())
+                
+                extracted_data[selector] = data
+            
+            return {
+                "success": True,
+                "data": extracted_data,
+                "capability": "data_extraction"
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _execute_api_integration(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute API integration capability."""
+        try:
+            url = context.get("url", "")
+            method = context.get("method", "GET")
+            headers = context.get("headers", {})
+            data = context.get("data", {})
+            
+            async with aiohttp.ClientSession() as session:
+                if method.upper() == "GET":
+                    async with session.get(url, headers=headers) as response:
+                        result = await response.json()
+                elif method.upper() == "POST":
+                    async with session.post(url, headers=headers, json=data) as response:
+                        result = await response.json()
+                else:
+                    return {"success": False, "error": f"Unsupported method: {method}"}
+            
+            return {
+                "success": True,
+                "response": result,
+                "capability": "api_integration"
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _execute_file_processing(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute file processing capability."""
+        try:
+            file_path = context.get("file_path", "")
+            operation = context.get("operation", "read")
+            
+            if operation == "read_excel":
+                df = pd.read_excel(file_path)
+                data = df.to_dict("records")
+                return {
+                    "success": True,
+                    "data": data,
+                    "capability": "file_processing"
+                }
+            elif operation == "write_excel":
+                data = context.get("data", [])
+                df = pd.DataFrame(data)
+                df.to_excel(file_path, index=False)
+                return {
+                    "success": True,
+                    "file_path": file_path,
+                    "capability": "file_processing"
+                }
+            else:
+                return {"success": False, "error": f"Unsupported operation: {operation}"}
+                
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def get_performance_metrics(self) -> Dict[str, Any]:
+        """Get performance metrics for all capabilities."""
+        return {
+            "total_executions": len(self.execution_history),
+            "success_rate": self._calculate_success_rate(),
+            "average_duration": self._calculate_average_duration(),
+            "error_patterns": self.error_patterns,
+            "success_patterns": self.success_patterns,
+            "capabilities_used": list(self.capabilities.keys())
         }
-        
-        # Check complexity
-        if plan["analysis"]["complexity_level"] == "complex":
-            validation["warnings"].append("High complexity automation - may require manual intervention")
-        
-        # Check risk level
-        if plan["analysis"]["risk_level"] == "high":
-            validation["risks"].append("High-risk automation - ensure proper security measures")
-            validation["recommendations"].append("Implement additional security validation")
-        
-        # Check compliance requirements
-        if plan["analysis"]["compliance_requirements"]:
-            validation["recommendations"].append(f"Ensure compliance with: {', '.join(plan['analysis']['compliance_requirements'])}")
-        
-        # Check estimated duration
-        if plan["estimated_completion_time"] > 3600:  # More than 1 hour
-            validation["warnings"].append("Long-running automation - consider breaking into smaller tasks")
-        
-        return validation
-
-# Example usage
-async def main():
-    """Example of using advanced automation capabilities"""
-    capabilities = AdvancedAutomationCapabilities()
     
-    # Example requests
-    requests = [
-        "Extract product data from Flipkart and save to Excel",
-        "Fill government application form and submit documents",
-        "Check bank account balance and download transaction history",
-        "Schedule medical appointment and send confirmation email"
-    ]
-    
-    for request in requests:
-        print(f"\n=== Analyzing: {request} ===")
-        plan = await capabilities.generate_automation_plan(request)
-        validation = await capabilities.validate_automation_plan(plan)
+    def _calculate_success_rate(self) -> float:
+        """Calculate overall success rate."""
+        if not self.execution_history:
+            return 0.0
         
-        print(f"Required Capabilities: {[cap.name for cap in plan['capabilities_used']]}")
-        print(f"Complexity: {plan['analysis']['complexity_level']}")
-        print(f"Estimated Time: {plan['estimated_completion_time']} seconds")
-        print(f"Risks: {validation['risks']}")
-        print(f"Recommendations: {validation['recommendations']}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        successful = sum(1 for execution in self.execution_history if execution.get("success", False))
+        return (successful / len(self.execution_history)) * 100
+    
+    def _calculate_average_duration(self) -> float:
+        """Calculate average execution duration."""
+        if not self.execution_history:
+            return 0.0
+        
+        durations = [execution.get("duration", 0) for execution in self.execution_history]
+        return sum(durations) / len(durations)

@@ -58,7 +58,7 @@ class MultiAgentOrchestrator:
         self.ai_provider = AIProvider(config.ai)
         
         # Initialize advanced automation capabilities
-        self.advanced_capabilities = AdvancedAutomationCapabilities()
+        self.advanced_capabilities = AdvancedAutomationCapabilities(config, self.ai_provider)
         
         # Initialize media capture first
         if hasattr(config, 'database') and hasattr(config.database, 'media_path'):

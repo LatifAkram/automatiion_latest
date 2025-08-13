@@ -924,6 +924,65 @@ async def generate_automation_plan(
             "error": str(e)
         }
 
+@app.post("/automation/test-comprehensive")
+async def test_comprehensive_automation(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Test comprehensive automation with real execution."""
+    try:
+        instructions = request.get("instructions", "")
+        url = request.get("url", "https://www.google.com")
+        
+        logging.info(f"Starting comprehensive automation test: {instructions}")
+        
+        # Test 1: Real browser automation
+        browser_result = await orch.execute_intelligent_automation(instructions, url)
+        
+        # Test 2: Advanced capabilities analysis
+        capabilities_analysis = await orch.advanced_capabilities.analyze_automation_requirements(instructions)
+        
+        # Test 3: Generate comprehensive plan
+        automation_plan = await orch.advanced_capabilities.generate_automation_plan(instructions)
+        
+        # Test 4: Validate plan
+        plan_validation = await orch.advanced_capabilities.validate_automation_plan(automation_plan)
+        
+        # Test 5: Get performance metrics
+        performance_metrics = await orch.advanced_capabilities.get_performance_metrics()
+        
+        # Test 6: List all capabilities
+        all_capabilities = await orch.advanced_capabilities.list_capabilities()
+        
+        comprehensive_result = {
+            "test_status": "completed",
+            "browser_automation": browser_result,
+            "capabilities_analysis": capabilities_analysis,
+            "automation_plan": automation_plan,
+            "plan_validation": plan_validation,
+            "performance_metrics": performance_metrics,
+            "all_capabilities": all_capabilities,
+            "test_summary": {
+                "total_capabilities": len(all_capabilities),
+                "plan_feasible": plan_validation.get("is_feasible", False),
+                "complexity_level": capabilities_analysis.get("complexity_level", "unknown"),
+                "estimated_duration": capabilities_analysis.get("estimated_duration", 0),
+                "risk_level": capabilities_analysis.get("risk_level", "unknown"),
+                "browser_success": browser_result.get("status") == "completed"
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+        return comprehensive_result
+        
+    except Exception as e:
+        logging.error(f"Comprehensive automation test failed: {e}", exc_info=True)
+        return {
+            "test_status": "failed",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
 # Search endpoints
 @app.post("/search/web")
 async def web_search(request: dict, orch: MultiAgentOrchestrator = Depends(get_orchestrator)):
