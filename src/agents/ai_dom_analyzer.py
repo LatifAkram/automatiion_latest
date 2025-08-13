@@ -198,12 +198,14 @@ class AIDOMAnalyzer:
             try:
                 # Clean the response to extract JSON
                 cleaned_response = self._extract_json_from_response(ai_response)
+                self.logger.debug(f"Cleaned response: {cleaned_response[:500]}...")
                 ai_analysis = json.loads(cleaned_response)
                 self.logger.info(f"AI analysis completed: {len(ai_analysis)} categories")
                 return ai_analysis
             except json.JSONDecodeError as e:
                 self.logger.warning(f"AI response not valid JSON, using fallback analysis: {e}")
-                self.logger.warning(f"Raw response: {ai_response[:200]}...")
+                self.logger.warning(f"Raw response: {ai_response[:500]}...")
+                self.logger.warning(f"Cleaned response: {cleaned_response[:500]}...")
                 # Try to create a basic structure from the response
                 return self._create_basic_analysis_from_response(ai_response, page_content, instructions)
                 
@@ -216,11 +218,15 @@ class AIDOMAnalyzer:
         try:
             import re
             
+            # Log the response for debugging
+            self.logger.debug(f"Extracting JSON from response: {response[:500]}...")
+            
             # First, try to extract from code blocks with json language
             code_block_pattern = r'```json\s*(\{.*?\})\s*```'
             code_match = re.search(code_block_pattern, response, re.DOTALL)
             
             if code_match:
+                self.logger.debug("Found JSON in ```json code block")
                 return code_match.group(1)
             
             # Try to extract from code blocks without language specification
@@ -228,21 +234,35 @@ class AIDOMAnalyzer:
             code_match2 = re.search(code_block_pattern2, response, re.DOTALL)
             
             if code_match2:
+                self.logger.debug("Found JSON in ``` code block")
                 return code_match2.group(1)
             
             # Try to find JSON object with curly braces (from start to end)
             json_pattern = r'^\s*\{.*\}\s*$'
             if re.match(json_pattern, response, re.DOTALL):
+                self.logger.debug("Found JSON as complete response")
                 return response.strip()
             
-            # Try to find JSON object anywhere in the response
+            # Try to find JSON object anywhere in the response (more robust)
+            # Look for the first { and last } in the response
+            start_idx = response.find('{')
+            end_idx = response.rfind('}')
+            
+            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                json_content = response[start_idx:end_idx + 1]
+                self.logger.debug(f"Extracted JSON from positions {start_idx} to {end_idx}")
+                return json_content
+            
+            # Try to find JSON object with regex (fallback)
             json_pattern2 = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
             json_match = re.search(json_pattern2, response, re.DOTALL)
             
             if json_match:
+                self.logger.debug("Found JSON with regex pattern")
                 return json_match.group(0)
             
             # If still no JSON found, return the original response
+            self.logger.warning("No JSON found in response, returning original")
             return response
             
         except Exception as e:
