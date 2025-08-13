@@ -26,6 +26,157 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+/* Ensure proper text visibility */
+.text-white {
+  color: #ffffff !important;
+}
+
+.text-black {
+  color: #000000 !important;
+}
+
+.text-gray-900 {
+  color: #111827 !important;
+}
+
+.text-gray-800 {
+  color: #1f2937 !important;
+}
+
+.text-gray-700 {
+  color: #374151 !important;
+}
+
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.text-gray-500 {
+  color: #6b7280 !important;
+}
+
+.text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.text-gray-300 {
+  color: #d1d5db !important;
+}
+
+.text-gray-200 {
+  color: #e5e7eb !important;
+}
+
+.text-gray-100 {
+  color: #f3f4f6 !important;
+}
+
+/* Background colors */
+.bg-white {
+  background-color: #ffffff !important;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+.bg-gray-200 {
+  background-color: #e5e7eb !important;
+}
+
+.bg-gray-300 {
+  background-color: #d1d5db !important;
+}
+
+.bg-gray-400 {
+  background-color: #9ca3af !important;
+}
+
+.bg-gray-500 {
+  background-color: #6b7280 !important;
+}
+
+.bg-gray-600 {
+  background-color: #4b5563 !important;
+}
+
+.bg-gray-700 {
+  background-color: #374151 !important;
+}
+
+.bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+.bg-gray-900 {
+  background-color: #111827 !important;
+}
+
+.bg-black {
+  background-color: #000000 !important;
+}
+
+/* Blue colors for buttons and accents */
+.bg-blue-600 {
+  background-color: #2563eb !important;
+}
+
+.bg-blue-700 {
+  background-color: #1d4ed8 !important;
+}
+
+.text-blue-600 {
+  color: #2563eb !important;
+}
+
+.text-blue-700 {
+  color: #1d4ed8 !important;
+}
+
+/* Green colors for success states */
+.bg-green-600 {
+  background-color: #16a34a !important;
+}
+
+.bg-green-700 {
+  background-color: #15803d !important;
+}
+
+.text-green-600 {
+  color: #16a34a !important;
+}
+
+/* Red colors for error states */
+.bg-red-600 {
+  background-color: #dc2626 !important;
+}
+
+.text-red-600 {
+  color: #dc2626 !important;
+}
+
+/* Yellow colors for warnings */
+.bg-yellow-600 {
+  background-color: #ca8a04 !important;
+}
+
+.text-yellow-600 {
+  color: #ca8a04 !important;
+}
+
+/* Orange colors for handoff states */
+.bg-orange-600 {
+  background-color: #ea580c !important;
+}
+
+.text-orange-600 {
+  color: #ea580c !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

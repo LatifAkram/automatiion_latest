@@ -565,9 +565,9 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -587,7 +587,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowSearchResults(!showSearchResults)}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
             title="Toggle Search Results"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -596,11 +596,20 @@ export default function Home() {
           </button>
           <button
             onClick={() => setShowDashboard(!showDashboard)}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
             title="Toggle Dashboard"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </button>
+          <div className="w-px h-6 bg-gray-300"></div>
+          <button
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Theme Settings"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           </button>
         </div>
@@ -609,7 +618,7 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Chat Sessions Sidebar */}
-        <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+        <div className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
           <div className="p-4 border-b border-gray-200">
             <button
               onClick={createNewChat}
@@ -627,11 +636,13 @@ export default function Home() {
                 className={`p-3 rounded-lg cursor-pointer transition-colors ${
                   chat.id === currentChatId 
                     ? 'bg-blue-100 text-blue-900' 
-                    : 'hover:bg-gray-100'
+                    : 'hover:bg-gray-100 text-gray-900'
                 }`}
               >
                 <div className="font-medium truncate">{chat.title}</div>
-                <div className="text-sm text-gray-500 truncate">
+                <div className={`text-sm truncate ${
+                  chat.id === currentChatId ? 'text-blue-700' : 'text-gray-500'
+                }`}>
                   {chat.messages.length} messages
                 </div>
               </div>
@@ -640,7 +651,7 @@ export default function Home() {
         </div>
 
         {/* Main Chat Interface */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col bg-gray-50">
           <SimpleChatInterface
             messages={messages}
             isTyping={isTyping}
@@ -654,17 +665,17 @@ export default function Home() {
 
         {/* Search Results Panel */}
         {showSearchResults && (
-          <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+          <div className="w-80 bg-white border-l border-gray-200 flex flex-col shadow-sm">
             <div className="p-4 border-b border-gray-200">
               <h3 className="font-semibold text-gray-900">Search Results</h3>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
               {searchResults.map((result, index) => (
-                <div key={index} className="mb-4 p-3 border border-gray-200 rounded-lg">
+                <div key={index} className="mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                   <h4 className="font-medium text-blue-600 hover:underline cursor-pointer">
                     {result.title}
                   </h4>
-                  <p className="text-sm text-gray-600 mt-1">{result.snippet}</p>
+                  <p className="text-sm text-gray-700 mt-1">{result.snippet}</p>
                   <div className="text-xs text-gray-500 mt-2">{result.url}</div>
                 </div>
               ))}
@@ -674,7 +685,7 @@ export default function Home() {
 
         {/* Automation Dashboard */}
         {showDashboard && (
-          <div className="w-80 bg-white border-l border-gray-200">
+          <div className="w-80 bg-white border-l border-gray-200 shadow-sm">
             <AutomationDashboard
               metrics={automationMetrics}
               agents={agents}
@@ -689,19 +700,19 @@ export default function Home() {
       {handoffRequests.length > 0 && (
         <div className="fixed bottom-4 right-4 z-50">
           {handoffRequests.map(request => (
-            <div key={request.id} className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-2 max-w-sm">
+            <div key={request.id} className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-2 max-w-sm shadow-lg">
               <h4 className="font-medium text-yellow-800">Human Intervention Required</h4>
               <p className="text-sm text-yellow-700 mt-1">{request.reason}</p>
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => handleTakeover(request.id, { action: 'continue' })}
-                  className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                  className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
                 >
                   Take Over
                 </button>
                 <button
                   onClick={() => setHandoffRequests(prev => prev.filter(req => req.id !== request.id))}
-                  className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                  className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors"
                 >
                   Dismiss
                 </button>
