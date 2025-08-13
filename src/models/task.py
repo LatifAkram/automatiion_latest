@@ -1,53 +1,121 @@
 """
-Task Models
-==========
+Task Model
+=========
 
-Data models for task definitions and execution tracking.
+Task definition and status tracking for workflow execution.
 """
 
 from enum import Enum
+from typing import Dict, Any, Optional, List
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 
 
-class TaskType(str, Enum):
-    """Types of tasks that can be executed."""
-    WEB_AUTOMATION = "web_automation"
-    API_CALL = "api_call"
-    DOM_EXTRACTION = "dom_extraction"
-    DATA_PROCESSING = "data_processing"
-    FILE_OPERATION = "file_operation"
-    SEARCH = "search"
-    GENERAL = "general"
-
-
 class TaskStatus(str, Enum):
-    """Status of task execution."""
+    """Task execution status."""
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
-    TIMEOUT = "timeout"
+    RETRYING = "retrying"
+
+
+class TaskType(str, Enum):
+    """Task types for different automation scenarios."""
+    WEB_NAVIGATION = "web_navigation"
+    DATA_EXTRACTION = "data_extraction"
+    API_CALL = "api_call"
+    FILE_OPERATION = "file_operation"
+    DATA_PROCESSING = "data_processing"
+    EMAIL_SEND = "email_send"
+    DATABASE_QUERY = "database_query"
+    IMAGE_PROCESSING = "image_processing"
+    DOCUMENT_PROCESSING = "document_processing"
+    SOCIAL_MEDIA = "social_media"
+    ECOMMERCE = "ecommerce"
+    BANKING = "banking"
+    TRAVEL = "travel"
+    FINANCE = "finance"
+    HEALTHCARE = "healthcare"
+    EDUCATION = "education"
+    ENTERTAINMENT = "entertainment"
+    CUSTOM = "custom"
 
 
 class Task(BaseModel):
-    """Task definition and metadata."""
-    id: str
-    name: str
-    type: TaskType
-    description: Optional[str] = None
-    parameters: Dict[str, Any] = Field(default_factory=dict)
-    dependencies: List[str] = Field(default_factory=list)
-    timeout: int = 300  # seconds
-    retry_count: int = 0
-    max_retries: int = 3
-    priority: str = "medium"
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    """Task definition for workflow execution."""
+    
+    id: str = Field(..., description="Unique task identifier")
+    name: str = Field(..., description="Task name")
+    description: str = Field(default="", description="Task description")
+    type: TaskType = Field(..., description="Task type")
+    status: TaskStatus = Field(default=TaskStatus.PENDING, description="Task status")
+    
+    # Execution parameters
+    parameters: Dict[str, Any] = Field(default_factory=dict, description="Task parameters")
+    dependencies: List[str] = Field(default_factory=list, description="Task dependencies")
+    
+    # Timing
+    created_at: datetime = Field(default_factory=datetime.utcnow, description="Creation timestamp")
+    started_at: Optional[datetime] = Field(default=None, description="Start timestamp")
+    completed_at: Optional[datetime] = Field(default=None, description="Completion timestamp")
+    
+    # Results
+    result: Optional[Dict[str, Any]] = Field(default=None, description="Task result")
+    error: Optional[str] = Field(default=None, description="Error message if failed")
+    
+    # Performance metrics
+    execution_time: Optional[float] = Field(default=None, description="Execution time in seconds")
+    retry_count: int = Field(default=0, description="Number of retry attempts")
+    max_retries: int = Field(default=3, description="Maximum retry attempts")
+    
+    # Metadata
+    tags: List[str] = Field(default_factory=list, description="Task tags")
+    priority: int = Field(default=1, description="Task priority (1-10)")
     
     class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+        use_enum_values = True
+        
+    def is_completed(self) -> bool:
+        """Check if task is completed."""
+        return self.status in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED]
+        
+    def is_running(self) -> bool:
+        """Check if task is running."""
+        return self.status == TaskStatus.RUNNING
+        
+    def can_retry(self) -> bool:
+        """Check if task can be retried."""
+        return self.status == TaskStatus.FAILED and self.retry_count < self.max_retries
+        
+    def mark_started(self):
+        """Mark task as started."""
+        self.status = TaskStatus.RUNNING
+        self.started_at = datetime.utcnow()
+        
+    def mark_completed(self, result: Optional[Dict[str, Any]] = None):
+        """Mark task as completed."""
+        self.status = TaskStatus.COMPLETED
+        self.completed_at = datetime.utcnow()
+        self.result = result
+        
+        if self.started_at:
+            self.execution_time = (self.completed_at - self.started_at).total_seconds()
+            
+    def mark_failed(self, error: str):
+        """Mark task as failed."""
+        self.status = TaskStatus.FAILED
+        self.completed_at = datetime.utcnow()
+        self.error = error
+        
+        if self.started_at:
+            self.execution_time = (self.completed_at - self.started_at).total_seconds()
+            
+    def mark_retrying(self):
+        """Mark task for retry."""
+        self.status = TaskStatus.RETRYING
+        self.retry_count += 1
+        self.started_at = None
+        self.completed_at = None
+        self.error = None

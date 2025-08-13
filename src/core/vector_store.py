@@ -36,8 +36,14 @@ class VectorStore:
             # Ensure vector DB directory exists
             self.db_path.mkdir(parents=True, exist_ok=True)
             
-            # Initialize ChromaDB client
-            self.client = chromadb.PersistentClient(path=str(self.db_path))
+            # Initialize ChromaDB client with simple settings
+            self.client = chromadb.PersistentClient(
+                path=str(self.db_path),
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
             
             # Initialize collections with simple embedding function
             self.collections = {}

@@ -1,27 +1,21 @@
 """
-Core components for the Multi-Agent Automation Platform.
+Core Package
+===========
 
-This package contains the fundamental building blocks:
-- Configuration management
-- Database operations
-- Vector store for embeddings
-- AI provider abstraction
-- Audit logging
-- Multi-agent orchestration
+Core components of the multi-agent automation platform.
 """
 
+# Core components
 from .config import Config
 from .database import DatabaseManager
 from .vector_store import VectorStore
-from .ai_provider import AIProvider
 from .audit import AuditLogger
-from .orchestrator import MultiAgentOrchestrator
+from .ai_provider import AIProvider
 
 __all__ = [
-    "Config",
-    "DatabaseManager", 
-    "VectorStore",
-    "AIProvider",
-    "AuditLogger",
-    "MultiAgentOrchestrator"
+    'Config',
+    'DatabaseManager', 
+    'VectorStore',
+    'AuditLogger',
+    'AIProvider'
 ]

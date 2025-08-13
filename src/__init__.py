@@ -1,23 +1,14 @@
 """
-Autonomous Multi-Agent Automation Platform
-=========================================
+Multi-Agent Automation Platform
+==============================
 
-A comprehensive, autonomous, adaptive, multi-agent automation platform
+A comprehensive, autonomous, adaptive multi-agent automation platform
 capable of executing ultra-complex workflows across diverse domains.
-
-This package contains the core components:
-- Multi-agent orchestration
-- AI-powered planning and execution
-- Web automation with self-healing
-- Search and data extraction
-- Conversational AI with reasoning
-- Vector-based learning and memory
-- Enterprise compliance and audit
 """
 
 __version__ = "1.0.0"
-__author__ = "Multi-Agent Automation Platform"
-__description__ = "Autonomous Multi-Agent Automation Platform"
+__author__ = "Multi-Agent Automation Team"
+__description__ = "Advanced automation platform with AI-powered agents"
 
 # Core exports
 from .core.orchestrator import MultiAgentOrchestrator

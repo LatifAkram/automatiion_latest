@@ -95,7 +95,10 @@ class MultiAgentOrchestrator:
         for i in range(self.config.automation.max_parallel_agents):
             # Create media capture and selector drift detector instances
             media_capture = MediaCapture(self.config.database.media_path)
+            await media_capture.initialize()
+            
             selector_drift_detector = SelectorDriftDetector(self.config.automation)
+            await selector_drift_detector.initialize()
             
             execution_agent = ExecutionAgent(
                 config=self.config.automation,

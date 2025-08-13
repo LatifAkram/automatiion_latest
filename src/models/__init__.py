@@ -1,28 +1,25 @@
 """
-Data models for the Multi-Agent Automation Platform.
+Models Package
+=============
 
-This package contains the data structures and models:
-- Workflow definitions and execution
-- Task management and status tracking
-- Execution results and performance metrics
-- Conversation and message handling
+Data models for the multi-agent automation platform.
 """
 
-from .workflow import Workflow, WorkflowStatus, WorkflowExecution, WorkflowStep
-from .execution import ExecutionResult, PerformanceMetrics
+from .workflow import Workflow, WorkflowStep, WorkflowStatus
+from .task import Task, TaskStatus, TaskType
+from .execution import ExecutionResult, ExecutionLog
 from .conversation import Conversation, Message, MessageType
-from .task import TaskStatus, TaskType
 
 __all__ = [
-    "Workflow",
-    "WorkflowStatus", 
-    "WorkflowExecution",
-    "WorkflowStep",
-    "ExecutionResult",
-    "PerformanceMetrics",
-    "Conversation",
-    "Message",
-    "MessageType",
-    "TaskStatus",
-    "TaskType"
+    'Workflow',
+    'WorkflowStep', 
+    'WorkflowStatus',
+    'Task',
+    'TaskStatus',
+    'TaskType',
+    'ExecutionResult',
+    'ExecutionLog',
+    'Conversation',
+    'Message',
+    'MessageType'
 ]
