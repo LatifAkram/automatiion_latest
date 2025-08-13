@@ -201,22 +201,43 @@ class AIProvider:
     def _generate_fallback_response(self, prompt: str) -> str:
         """Generate a fallback response when no AI providers are available."""
         try:
-            # Simple keyword-based response generation
+            # Enhanced keyword-based response generation for automation workflows
             prompt_lower = prompt.lower()
             
-            if "workflow" in prompt_lower and "status" in prompt_lower:
-                return "I can see you're asking about workflow status. The workflow is currently in the planning phase. I'll provide more detailed updates once the execution begins."
-            elif "error" in prompt_lower or "failed" in prompt_lower:
-                return "I understand there's an issue. Let me analyze the error and suggest a solution. Could you provide more details about what specific error you're encountering?"
-            elif "help" in prompt_lower or "assist" in prompt_lower:
-                return "I'm here to help! I can assist with workflow planning, execution monitoring, error resolution, and general automation guidance. What specific area do you need help with?"
-            elif "optimize" in prompt_lower or "improve" in prompt_lower:
-                return "I can help optimize your automation workflows. Based on the current patterns, I recommend focusing on error handling and performance monitoring for better results."
+            # Automation workflow creation
+            if any(word in prompt_lower for word in ["create", "build", "make", "set up"]) and any(word in prompt_lower for word in ["workflow", "automation", "process"]):
+                return "I'd be happy to help you create an automation workflow! I can assist with various types of automation including web scraping, form filling, data extraction, and more. What specific task would you like to automate? Please provide details about the target website, actions needed, and expected outcomes."
+            
+            # Workflow status and monitoring
+            elif any(word in prompt_lower for word in ["status", "progress", "monitor", "track"]) and any(word in prompt_lower for word in ["workflow", "automation", "process"]):
+                return "I can help you monitor your automation workflows! The system provides real-time status updates, execution metrics, and performance analytics. Would you like me to show you the current workflow status or help you set up monitoring for a specific automation?"
+            
+            # Error handling and troubleshooting
+            elif any(word in prompt_lower for word in ["error", "failed", "issue", "problem", "troubleshoot", "fix"]):
+                return "I understand you're experiencing an issue with your automation. I can help you troubleshoot and resolve it! The platform includes advanced error detection, self-healing capabilities, and detailed logging. Could you share the specific error message or describe what's happening?"
+            
+            # Search and data gathering
+            elif any(word in prompt_lower for word in ["search", "find", "gather", "collect", "data", "information"]):
+                return "I can help you with search and data gathering tasks! The platform integrates with multiple search engines and can extract information from websites. What type of data are you looking for? I can help you set up automated data collection workflows."
+            
+            # Export and reporting
+            elif any(word in prompt_lower for word in ["export", "report", "download", "save", "generate"]):
+                return "I can help you export and generate reports! The platform supports multiple export formats including Excel, PDF, and JSON. You can also include screenshots and detailed execution logs. What type of report or export do you need?"
+            
+            # General help and assistance
+            elif any(word in prompt_lower for word in ["help", "assist", "support", "guide", "how"]):
+                return "I'm here to help you with all aspects of automation! I can assist with workflow creation, execution monitoring, error resolution, data extraction, and more. The platform is designed to handle complex automation tasks across various domains. What would you like to work on?"
+            
+            # Greeting and introduction
+            elif any(word in prompt_lower for word in ["hello", "hi", "hey", "greetings"]):
+                return "Hello! I'm your AI automation assistant. I can help you create, manage, and optimize automation workflows for various tasks including web automation, data extraction, form filling, and more. What would you like to automate today?"
+            
+            # Default response for automation context
             else:
-                return "I understand your request. I'm currently operating in fallback mode due to AI provider configuration. For full AI capabilities, please configure API keys for OpenAI, Anthropic, Google, or local LLM services."
+                return "I understand you're working with automation workflows. I can help you create, monitor, and optimize automation tasks. The platform supports web automation, data extraction, form filling, and more. What specific automation task would you like to work on? For enhanced AI capabilities, you can configure API keys for OpenAI, Anthropic, Google, or local LLM services."
                 
         except Exception as e:
-            return "I apologize, but I'm currently unable to provide a detailed response. Please check your AI provider configuration."
+            return "I apologize, but I'm currently experiencing technical difficulties. I can still help you with automation workflows using the platform's built-in capabilities. What would you like to automate?"
         
     def _generate_cache_key(self, prompt: str, max_tokens: int, temperature: float) -> str:
         """Generate cache key for response caching."""
