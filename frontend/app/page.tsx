@@ -438,7 +438,7 @@ export default function Home() {
             status: 'pending' as const,
             timestamp: new Date().toISOString(),
             screenshot: step.screenshot,
-            selector: step.selector || `[data-testid="${step.action?.toLowerCase().replace(/\s+/g, '-")}"]`,
+            selector: step.selector || `[data-testid="${step.action?.toLowerCase().replace(/\s+/g, '-')}"]`,
             value: step.value || '',
             duration: Math.floor(Math.random() * 2000) + 500 // Random duration between 500-2500ms
           })) || [];
@@ -473,7 +473,7 @@ export default function Home() {
               );
             }
             
-            realisticSteps.forEach((step, index) => {
+            realisticSteps.forEach((step: any, index: number) => {
               steps.push({
                 id: `step_${index}`,
                 action: step.action,
@@ -490,7 +490,7 @@ export default function Home() {
           setAutomationSteps(steps);
           
           // Simulate step progression
-          steps.forEach((step, index) => {
+          steps.forEach((step: any, index: number) => {
             setTimeout(() => {
               setCurrentAutomationStep(step);
               setAutomationSteps(prev => prev.map((s, i) => 
