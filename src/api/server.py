@@ -270,6 +270,35 @@ async def cancel_workflow(
 
 
 # Chat endpoints
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_endpoint(request: ChatRequest, orch: MultiAgentOrchestrator = Depends(get_orchestrator)):
+    """Enhanced chat endpoint with multi-agent capabilities."""
+    try:
+        # Get conversational agent
+        if not orch.conversational_agent:
+            return ChatResponse(
+                success=False,
+                message="Conversational agent not available",
+                response="I'm sorry, but the conversational agent is currently unavailable. Please try again later."
+            )
+        
+        # Process the chat request
+        response = await orch.conversational_agent.chat(request.message)
+        
+        return ChatResponse(
+            success=True,
+            message="Chat processed successfully",
+            response=response
+        )
+        
+    except Exception as e:
+        logging.error(f"Chat endpoint error: {e}", exc_info=True)
+        return ChatResponse(
+            success=False,
+            message=f"Chat processing failed: {str(e)}",
+            response="I apologize, but I encountered an error while processing your message. Please try again."
+        )
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat_with_agent(
     request: ChatRequest,
