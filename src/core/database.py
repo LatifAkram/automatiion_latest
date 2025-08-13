@@ -8,7 +8,7 @@ SQLite database management for workflows, execution logs, and performance metric
 import asyncio
 import logging
 import sqlite3
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from pathlib import Path
 
@@ -111,27 +111,44 @@ class DatabaseManager:
         
         self.connection.commit()
         
-    async def save_workflow(self, workflow: Workflow):
+    async def save_workflow(self, workflow: Union[Workflow, Dict[str, Any]]):
         """Save workflow to database."""
         try:
+            # Handle both Workflow objects and dictionaries
+            if isinstance(workflow, dict):
+                # Convert dictionary to Workflow object
+                workflow_obj = Workflow(
+                    id=workflow.get("id"),
+                    name=workflow.get("name", "Unnamed Workflow"),
+                    description=workflow.get("description", ""),
+                    domain=workflow.get("domain", "general"),
+                    status=WorkflowStatus(workflow.get("status", "planning")),
+                    created_at=datetime.fromisoformat(workflow.get("created_at")) if workflow.get("created_at") else datetime.utcnow(),
+                    updated_at=datetime.utcnow(),
+                    parameters=workflow.get("parameters", {}),
+                    tags=workflow.get("tags", [])
+                )
+            else:
+                workflow_obj = workflow
+                
             cursor = self.connection.cursor()
             cursor.execute("""
                 INSERT OR REPLACE INTO workflows 
                 (id, name, description, domain, status, parameters, created_at, updated_at, started_at, completed_at, created_by, tags)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                workflow.id,
-                workflow.name,
-                workflow.description,
-                workflow.domain,
-                workflow.status.value,
-                str(workflow.parameters),
-                workflow.created_at.isoformat(),
-                workflow.updated_at.isoformat(),
-                workflow.started_at.isoformat() if workflow.started_at else None,
-                workflow.completed_at.isoformat() if workflow.completed_at else None,
-                workflow.created_by,
-                str(workflow.tags)
+                workflow_obj.id,
+                workflow_obj.name,
+                workflow_obj.description,
+                workflow_obj.domain,
+                workflow_obj.status.value,
+                str(workflow_obj.parameters),
+                workflow_obj.created_at.isoformat(),
+                workflow_obj.updated_at.isoformat(),
+                workflow_obj.started_at.isoformat() if workflow_obj.started_at else None,
+                workflow_obj.completed_at.isoformat() if workflow_obj.completed_at else None,
+                workflow_obj.created_by,
+                str(workflow_obj.tags)
             ))
             self.connection.commit()
             

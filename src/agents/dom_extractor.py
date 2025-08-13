@@ -59,6 +59,55 @@ class DOMExtractionAgent:
             self.logger.error(f"Failed to initialize DOM extraction agent: {e}", exc_info=True)
             raise
             
+    async def extract_data(self, url: str, selectors: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Extract data from a URL using specified selectors or default patterns."""
+        try:
+            # Use default selectors if none provided
+            if selectors is None:
+                selectors = {
+                    "title": "h1, h2, h3",
+                    "content": "p, div",
+                    "links": "a[href]",
+                    "images": "img[src]"
+                }
+                
+            # Extract data using the existing method
+            result = await self.extract_from_url(url, selectors)
+            
+            # Log the extraction activity
+            if self.audit_logger:
+                try:
+                    await self.audit_logger.log_extraction_activity(
+                        url=url,
+                        content_type="web_page",
+                        fields_extracted=list(result.keys()),
+                        extraction_method="css_selectors",
+                        success=True
+                    )
+                except Exception as e:
+                    self.logger.warning(f"Failed to log extraction activity: {e}")
+                    
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Failed to extract data from {url}: {e}", exc_info=True)
+            
+            # Log failed extraction
+            if self.audit_logger:
+                try:
+                    await self.audit_logger.log_extraction_activity(
+                        url=url,
+                        content_type="web_page",
+                        fields_extracted=[],
+                        extraction_method="css_selectors",
+                        success=False,
+                        error=str(e)
+                    )
+                except Exception as log_error:
+                    self.logger.warning(f"Failed to log extraction error: {log_error}")
+                    
+            return {"error": str(e)}
+            
     def _load_extraction_patterns(self) -> Dict[str, Any]:
         """Load common extraction patterns for different content types."""
         return {

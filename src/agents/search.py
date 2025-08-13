@@ -78,6 +78,49 @@ class SearchAgent:
             self.logger.error(f"Failed to initialize search agent: {e}", exc_info=True)
             raise
             
+    async def search(self, query: str, max_results: int = 10, sources: List[str] = None) -> List[Dict[str, Any]]:
+        """Generic search method that searches across multiple sources."""
+        try:
+            if sources is None:
+                sources = ["duckduckgo"]  # Default to DuckDuckGo as it doesn't require API keys
+                
+            all_results = []
+            
+            for source in sources:
+                try:
+                    if source == "google":
+                        results = await self.search_google(query, max_results)
+                    elif source == "bing":
+                        results = await self.search_bing(query, max_results)
+                    elif source == "duckduckgo":
+                        results = await self.search_duckduckgo(query, max_results)
+                    elif source == "github":
+                        results = await self.search_github(query, max_results)
+                    elif source == "stack_overflow":
+                        results = await self.search_stack_overflow(query, max_results)
+                    elif source == "reddit":
+                        results = await self.search_reddit(query, max_results=max_results)
+                    elif source == "youtube":
+                        results = await self.search_youtube(query, max_results)
+                    elif source == "news":
+                        results = await self.search_news(query, max_results)
+                    else:
+                        self.logger.warning(f"Unknown search source: {source}")
+                        continue
+                        
+                    all_results.extend(results)
+                    
+                except Exception as e:
+                    self.logger.error(f"Failed to search {source}: {e}")
+                    continue
+                    
+            # Limit total results
+            return all_results[:max_results]
+            
+        except Exception as e:
+            self.logger.error(f"Search failed: {e}", exc_info=True)
+            return []
+
     async def search_google(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
         """Search Google using Custom Search API."""
         try:

@@ -52,6 +52,53 @@ class ConversationalAgent:
         
         self.logger.info("Conversational Agent initialized")
         
+    async def process_message(self, user_id: str, message: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Process a user message and return a response with context."""
+        try:
+            # Add user_id to context
+            if context is None:
+                context = {}
+            context["user_id"] = user_id
+            
+            # Get AI response
+            response = await self.chat(message, context)
+            
+            # Log the conversation
+            await self.audit_logger.log_conversation(
+                session_id=context.get("session_id", "default"),
+                message_type="user",
+                message_content=message,
+                user_id=user_id,
+                workflow_id=context.get("workflow_id"),
+                task_id=context.get("task_id")
+            )
+            
+            await self.audit_logger.log_conversation(
+                session_id=context.get("session_id", "default"),
+                message_type="ai",
+                message_content=response,
+                user_id="ai_system",
+                workflow_id=context.get("workflow_id"),
+                task_id=context.get("task_id")
+            )
+            
+            return {
+                "response": response,
+                "context": context,
+                "timestamp": datetime.utcnow().isoformat(),
+                "user_id": user_id
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to process message: {e}", exc_info=True)
+            return {
+                "response": "I apologize, but I encountered an error processing your message. Please try again.",
+                "error": str(e),
+                "context": context,
+                "timestamp": datetime.utcnow().isoformat(),
+                "user_id": user_id
+            }
+            
     def _load_reasoning_templates(self) -> Dict[str, Any]:
         """Load reasoning templates for different conversation types."""
         return {

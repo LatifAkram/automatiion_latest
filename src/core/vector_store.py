@@ -8,7 +8,7 @@ Vector database for semantic storage and learning capabilities using ChromaDB.
 import asyncio
 import logging
 import json
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from pathlib import Path
 
@@ -28,48 +28,30 @@ class VectorStore:
         self.logger = logging.getLogger(__name__)
         self.client = None
         self.collections = {}
+        self.db_path = Path(self.config.vector_db_path)
         
     async def initialize(self):
-        """Initialize vector store with ChromaDB."""
+        """Initialize vector store."""
         try:
-            if not CHROMA_AVAILABLE:
-                self.logger.warning("ChromaDB not available, using in-memory storage")
-                return
-                
             # Ensure vector DB directory exists
-            Path(self.config.vector_db_path).mkdir(parents=True, exist_ok=True)
+            self.db_path.mkdir(parents=True, exist_ok=True)
             
             # Initialize ChromaDB client
-            self.client = chromadb.PersistentClient(
-                path=self.config.vector_db_path,
-                settings=Settings(
-                    anonymized_telemetry=False,
-                    allow_reset=True
-                )
-            )
+            self.client = chromadb.PersistentClient(path=str(self.db_path))
             
-            # Initialize collections
-            await self._initialize_collections()
+            # Initialize collections with simple embedding function
+            self.collections = {}
             
-            self.logger.info(f"Vector store initialized: {self.config.vector_db_path}")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to initialize vector store: {e}", exc_info=True)
-            raise
-            
-    async def _initialize_collections(self):
-        """Initialize ChromaDB collections."""
-        try:
             # Workflow plans collection
             self.collections["workflow_plans"] = self.client.get_or_create_collection(
                 name="workflow_plans",
-                metadata={"description": "Workflow execution plans and strategies"}
+                metadata={"description": "Workflow planning and execution patterns"}
             )
             
             # Execution patterns collection
             self.collections["execution_patterns"] = self.client.get_or_create_collection(
                 name="execution_patterns",
-                metadata={"description": "Execution patterns and failure analysis"}
+                metadata={"description": "Successful and failed execution patterns"}
             )
             
             # Conversations collection
@@ -91,10 +73,13 @@ class VectorStore:
             )
             
             self.logger.info(f"Initialized {len(self.collections)} collections")
+            self.logger.info(f"Vector store initialized: {self.db_path}")
             
         except Exception as e:
-            self.logger.error(f"Failed to initialize collections: {e}", exc_info=True)
-            raise
+            self.logger.error(f"Failed to initialize vector store: {e}", exc_info=True)
+            # Continue without vector store
+            self.client = None
+            self.collections = {}
             
     async def store_plan(self, workflow_id: str, plan: Dict[str, Any]):
         """Store workflow plan in vector database."""
@@ -133,26 +118,46 @@ class VectorStore:
         except Exception as e:
             self.logger.error(f"Failed to store plan: {e}", exc_info=True)
             
-    async def store_execution_pattern(self, workflow_id: str, execution_result: Any):
-        """Store execution pattern for learning."""
+    async def store_execution_pattern(self, workflow_id: str, execution_result: Union[Any, Dict[str, Any]]):
+        """Store execution pattern for learning and optimization."""
         try:
             if not self.client:
                 self.logger.warning("Vector store not available, skipping pattern storage")
                 return
                 
+            # Handle both ExecutionResult objects and dictionaries
+            if isinstance(execution_result, dict):
+                success = execution_result.get("success", False)
+                duration = execution_result.get("duration", 0)
+                steps = execution_result.get("steps", [])
+                errors = execution_result.get("errors", [])
+            else:
+                success = execution_result.success
+                duration = execution_result.duration
+                steps = execution_result.steps
+                errors = execution_result.errors
+                
             # Create document content
             content = f"Execution Pattern: {workflow_id}\n"
-            content += f"Success: {execution_result.success}\n"
-            content += f"Duration: {execution_result.duration}s\n"
-            content += f"Steps: {len(execution_result.steps)}\n"
-            content += f"Errors: {len(execution_result.errors)}\n"
+            content += f"Success: {success}\n"
+            content += f"Duration: {duration}s\n"
+            content += f"Steps: {len(steps)}\n"
+            content += f"Errors: {len(errors)}\n"
             
             # Add step details
-            for step in execution_result.steps:
-                content += f"- {step.task_name}: {step.task_type} ({'success' if step.success else 'failed'})\n"
+            for step in steps:
+                if isinstance(step, dict):
+                    task_name = step.get("task_name", "Unknown")
+                    task_type = step.get("task_type", "Unknown")
+                    step_success = step.get("success", False)
+                else:
+                    task_name = step.task_name
+                    task_type = step.task_type
+                    step_success = step.success
+                content += f"- {task_name}: {task_type} ({'success' if step_success else 'failed'})\n"
                 
             # Add error details
-            for error in execution_result.errors:
+            for error in errors:
                 content += f"Error: {error}\n"
                 
             # Store in collection
@@ -160,17 +165,17 @@ class VectorStore:
                 documents=[content],
                 metadatas=[{
                     "workflow_id": workflow_id,
-                    "success": execution_result.success,
-                    "duration": execution_result.duration,
-                    "step_count": len(execution_result.steps),
-                    "error_count": len(execution_result.errors),
+                    "success": success,
+                    "duration": duration,
+                    "step_count": len(steps),
+                    "error_count": len(errors),
                     "created_at": datetime.utcnow().isoformat()
                 }],
                 ids=[f"exec_{workflow_id}_{datetime.utcnow().timestamp()}"]
             )
             
             # Store failure pattern if execution failed
-            if not execution_result.success:
+            if not success:
                 await self._store_failure_pattern(workflow_id, execution_result)
                 
             self.logger.info(f"Stored execution pattern for workflow {workflow_id}")
@@ -210,6 +215,37 @@ class VectorStore:
             
         except Exception as e:
             self.logger.error(f"Failed to store failure pattern: {e}", exc_info=True)
+            
+    async def find_execution_patterns(self, domain: str, pattern_type: str = "general") -> List[Dict[str, Any]]:
+        """Find relevant execution patterns."""
+        try:
+            if not self.client:
+                return []
+                
+            # Create query content
+            query_content = f"Execution Pattern Query\n"
+            query_content += f"Domain: {domain}\n"
+            query_content += f"Type: {pattern_type}\n"
+            
+            # Search for patterns
+            results = self.collections["execution_patterns"].query(
+                query_texts=[query_content],
+                n_results=10
+            )
+            
+            patterns = []
+            for i, doc in enumerate(results['documents'][0]):
+                patterns.append({
+                    "content": doc,
+                    "metadata": results['metadatas'][0][i],
+                    "distance": results['distances'][0][i] if 'distances' in results else 0.0
+                })
+                
+            return patterns
+            
+        except Exception as e:
+            self.logger.error(f"Failed to find execution patterns: {e}", exc_info=True)
+            return []
             
     async def find_similar_failures(self, execution_result: Any) -> List[Dict[str, Any]]:
         """Find similar failure patterns."""
