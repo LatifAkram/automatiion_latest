@@ -45,11 +45,8 @@ async def main():
         logger.info("Multi-agent orchestrator initialized")
         
         # Start the API server
-        api_task = asyncio.create_task(start_api_server(orchestrator))
-        logger.info("API server started")
-        
-        # Keep the main process running
-        await api_task
+        logger.info("Starting API server...")
+        start_api_server(orchestrator)
         
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")
