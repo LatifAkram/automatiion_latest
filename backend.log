@@ -1,94 +1,96 @@
-2025-08-13 10:15:08,780 - src.utils.logger - INFO - Logging configured with level: INFO
-2025-08-13 10:15:08,780 - __main__ - INFO - Configuration loaded successfully
-2025-08-13 10:15:08,780 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
-2025-08-13 10:15:08,781 - src.core.database - INFO - Database tables created successfully
-2025-08-13 10:15:08,781 - src.core.database - INFO - Database initialized: data/automation.db
-2025-08-13 10:15:08,848 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
-2025-08-13 10:15:08,849 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
-2025-08-13 10:15:08,849 - src.core.vector_store - INFO - Collection 'conversations' initialized
-2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Collection 'task_templates' initialized
-2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
-2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Initialized 5 collections
-2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
-2025-08-13 10:15:08,851 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
-2025-08-13 10:15:08,851 - src.core.ai_provider - INFO - Initializing AI providers...
-2025-08-13 10:15:08,851 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
-2025-08-13 10:15:08,852 - src.core.ai_provider - INFO - AI providers initialized. Available: []
-2025-08-13 10:15:08,852 - src.agents.planner - INFO - Planner Agent initialized
-2025-08-13 10:15:08,852 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 10:15:08,852 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 10:15:09,130 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 10:15:09,130 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 10:15:09,130 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 10:15:09,130 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 10:15:09,398 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 10:15:09,398 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 10:15:09,398 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 10:15:09,399 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 10:15:09,666 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 10:15:09,666 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 10:15:09,666 - src.core.ai_provider - INFO - Initializing AI providers...
-2025-08-13 10:15:09,666 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
-2025-08-13 10:15:09,666 - src.core.ai_provider - INFO - AI providers initialized. Available: []
-2025-08-13 10:15:09,668 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
-2025-08-13 10:15:09,669 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
-2025-08-13 10:15:09,670 - src.core.vector_store - INFO - Collection 'conversations' initialized
-2025-08-13 10:15:09,670 - src.core.vector_store - INFO - Collection 'task_templates' initialized
-2025-08-13 10:15:09,671 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
-2025-08-13 10:15:09,671 - src.core.vector_store - INFO - Initialized 5 collections
-2025-08-13 10:15:09,671 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
-2025-08-13 10:15:09,671 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
-2025-08-13 10:15:09,671 - src.agents.conversational - INFO - Conversational agent initialized successfully
-2025-08-13 10:15:09,671 - src.agents.search - INFO - Search agent initialized successfully
-2025-08-13 10:15:09,672 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
-2025-08-13 10:15:09,673 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
-2025-08-13 10:15:09,673 - __main__ - INFO - Multi-agent orchestrator initialized
-2025-08-13 10:15:09,673 - __main__ - INFO - Starting API server...
-INFO:     Started server process [243337]
+2025-08-13 10:23:07,503 - src.utils.logger - INFO - Logging configured with level: INFO
+2025-08-13 10:23:07,503 - __main__ - INFO - Configuration loaded successfully
+2025-08-13 10:23:07,503 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
+2025-08-13 10:23:07,504 - src.core.database - INFO - Database tables created successfully
+2025-08-13 10:23:07,504 - src.core.database - INFO - Database initialized: data/automation.db
+2025-08-13 10:23:07,573 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:23:07,574 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:23:07,575 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:23:07,575 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:23:07,576 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:23:07,576 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:23:07,576 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:23:07,576 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:23:07,576 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:23:07,577 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:23:07,577 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:23:07,577 - src.agents.planner - INFO - Planner Agent initialized
+2025-08-13 10:23:07,577 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:23:07,577 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:23:07,902 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:23:07,902 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:23:07,902 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:23:07,903 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:23:08,209 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:23:08,209 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:23:08,209 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:23:08,209 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:23:08,523 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:23:08,523 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:23:08,523 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:23:08,523 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:23:08,523 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:23:08,526 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:23:08,527 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:23:08,528 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:23:08,528 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:23:08,529 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:23:08,529 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:23:08,529 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:23:08,530 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:23:08,530 - src.agents.conversational - INFO - Conversational agent initialized successfully
+2025-08-13 10:23:08,530 - src.agents.search - INFO - Search agent initialized successfully
+2025-08-13 10:23:08,530 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
+2025-08-13 10:23:08,531 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
+2025-08-13 10:23:08,531 - __main__ - INFO - Multi-agent orchestrator initialized
+2025-08-13 10:23:08,531 - __main__ - INFO - Starting API server...
+INFO:     Started server process [249529]
 INFO:     Waiting for application startup.
-2025-08-13 10:15:09,697 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
-2025-08-13 10:15:09,697 - src.core.database - INFO - Database tables created successfully
-2025-08-13 10:15:09,697 - src.core.database - INFO - Database initialized: data/automation.db
-2025-08-13 10:15:09,700 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
-2025-08-13 10:15:09,701 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
-2025-08-13 10:15:09,702 - src.core.vector_store - INFO - Collection 'conversations' initialized
-2025-08-13 10:15:09,702 - src.core.vector_store - INFO - Collection 'task_templates' initialized
-2025-08-13 10:15:09,703 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
-2025-08-13 10:15:09,703 - src.core.vector_store - INFO - Initialized 5 collections
-2025-08-13 10:15:09,703 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
-2025-08-13 10:15:09,704 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
-2025-08-13 10:15:09,704 - src.core.ai_provider - INFO - Initializing AI providers...
-2025-08-13 10:15:09,705 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
-2025-08-13 10:15:09,705 - src.core.ai_provider - INFO - AI providers initialized. Available: []
-2025-08-13 10:15:09,705 - src.agents.planner - INFO - Planner Agent initialized
-2025-08-13 10:15:09,705 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 10:15:09,705 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 10:15:09,981 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 10:15:09,981 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 10:15:09,981 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 10:15:09,981 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 10:15:10,265 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 10:15:10,265 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 10:15:10,265 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 10:15:10,265 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 10:15:10,544 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 10:15:10,544 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 10:15:10,544 - src.core.ai_provider - INFO - Initializing AI providers...
-2025-08-13 10:15:10,545 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
-2025-08-13 10:15:10,545 - src.core.ai_provider - INFO - AI providers initialized. Available: []
-2025-08-13 10:15:10,547 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
-2025-08-13 10:15:10,548 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
-2025-08-13 10:15:10,549 - src.core.vector_store - INFO - Collection 'conversations' initialized
-2025-08-13 10:15:10,549 - src.core.vector_store - INFO - Collection 'task_templates' initialized
-2025-08-13 10:15:10,550 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
-2025-08-13 10:15:10,550 - src.core.vector_store - INFO - Initialized 5 collections
-2025-08-13 10:15:10,550 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
-2025-08-13 10:15:10,550 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
-2025-08-13 10:15:10,550 - src.agents.conversational - INFO - Conversational agent initialized successfully
-2025-08-13 10:15:10,551 - src.agents.search - INFO - Search agent initialized successfully
-2025-08-13 10:15:10,551 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
-2025-08-13 10:15:10,551 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
-2025-08-13 10:15:10,551 - root - INFO - API server initialized successfully
+2025-08-13 10:23:08,558 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
+2025-08-13 10:23:08,559 - src.core.database - INFO - Database tables created successfully
+2025-08-13 10:23:08,559 - src.core.database - INFO - Database initialized: data/automation.db
+2025-08-13 10:23:08,561 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:23:08,562 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:23:08,563 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:23:08,564 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:23:08,564 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:23:08,564 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:23:08,564 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:23:08,565 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:23:08,565 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:23:08,566 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:23:08,566 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:23:08,566 - src.agents.planner - INFO - Planner Agent initialized
+2025-08-13 10:23:08,566 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:23:08,566 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:23:08,892 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:23:08,892 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:23:08,892 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:23:08,892 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:23:09,224 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:23:09,225 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:23:09,225 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:23:09,225 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:23:09,545 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:23:09,545 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:23:09,545 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:23:09,546 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:23:09,546 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:23:09,549 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:23:09,550 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:23:09,550 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:23:09,551 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:23:09,551 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:23:09,551 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:23:09,551 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:23:09,552 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:23:09,552 - src.agents.conversational - INFO - Conversational agent initialized successfully
+2025-08-13 10:23:09,552 - src.agents.search - INFO - Search agent initialized successfully
+2025-08-13 10:23:09,552 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
+2025-08-13 10:23:09,553 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
+2025-08-13 10:23:09,553 - root - INFO - API server initialized successfully
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:55990 - "GET /health HTTP/1.1" 200 OK
+2025-08-13 10:23:21,735 - src.agents.search - INFO - Executing web search for: best laptops 2024
+2025-08-13 10:23:21,850 - src.agents.search - WARNING - Failed to parse JSON response: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=best+laptops+2024&format=json&no_html=1&skip_disambig=1'
+INFO:     127.0.0.1:40910 - "POST /search/web HTTP/1.1" 200 OK
