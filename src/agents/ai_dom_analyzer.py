@@ -345,6 +345,11 @@ class AIDOMAnalyzer:
         try:
             selectors = []
             
+            # Ensure element is a dictionary
+            if not isinstance(element, dict):
+                self.logger.warning(f"Element is not a dictionary: {type(element)}")
+                return []
+            
             # Priority 1: ID-based selectors
             if element.get("id"):
                 selectors.append(f"#{element['id']}")
