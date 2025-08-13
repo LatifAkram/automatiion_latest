@@ -209,8 +209,8 @@ class AIProvider:
         except Exception as e:
             raise Exception(f"Local LLM connection failed: {e}")
             
-    async def generate_response(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> str:
-        """Generate a response using available AI providers with intelligent fallback."""
+    async def generate_response(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7, timeout: int = 30) -> str:
+        """Generate a response using available AI providers with intelligent fallback and timeout."""
         try:
             # Try available providers in order with fallback
             providers_to_try = []
@@ -224,19 +224,25 @@ class AIProvider:
             if self.local_llm_client:
                 providers_to_try.append(("Local LLM", self._call_local_llm))
             
-            # Try each provider in order
+            # Try each provider in order with timeout
             for provider_name, provider_func in providers_to_try:
                 try:
-                    self.logger.info(f"Attempting to use {provider_name} for response generation")
-                    response = await provider_func(prompt, max_tokens, temperature)
+                    self.logger.info(f"Attempting to use {provider_name} for response generation (timeout: {timeout}s)")
+                    response = await asyncio.wait_for(
+                        provider_func(prompt, max_tokens, temperature),
+                        timeout=timeout
+                    )
                     self.logger.info(f"Successfully generated response using {provider_name}")
                     return response
+                except asyncio.TimeoutError:
+                    self.logger.warning(f"{provider_name} timed out after {timeout}s, trying next provider...")
+                    continue
                 except Exception as e:
                     self.logger.warning(f"{provider_name} failed: {e}, trying next provider...")
                     continue
             
             # If all providers failed, use fallback
-            self.logger.warning("All AI providers failed, using fallback response")
+            self.logger.warning("All AI providers failed or timed out, using fallback response")
             return self._generate_fallback_response(prompt)
                 
         except Exception as e:

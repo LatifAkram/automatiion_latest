@@ -134,12 +134,21 @@ class IntelligentAutomationAgent:
         try:
             self.logger.info(f"Starting intelligent automation: {instructions} on {url}")
             
-            # Step 1: Navigate to the website
-            await self.page.goto(url, wait_until="networkidle")
+            # Step 1: Navigate to the website with timeout
+            await asyncio.wait_for(
+                self.page.goto(url, wait_until="networkidle"),
+                timeout=30
+            )
             
-            # Step 2: AI-powered DOM analysis and automation plan generation
-            ai_dom_analysis = await self.ai_dom_analyzer.analyze_dom_with_ai(self.page, instructions)
-            automation_plan = await self._generate_automation_plan_with_ai(instructions, url, ai_dom_analysis)
+            # Step 2: AI-powered DOM analysis and automation plan generation with timeout
+            ai_dom_analysis = await asyncio.wait_for(
+                self.ai_dom_analyzer.analyze_dom_with_ai(self.page, instructions),
+                timeout=60
+            )
+            automation_plan = await asyncio.wait_for(
+                self._generate_automation_plan_with_ai(instructions, url, ai_dom_analysis),
+                timeout=30
+            )
             
             # Step 3: Predict success and optimize plan
             success_prediction = await self.advanced_learning.predict_automation_success({
@@ -154,8 +163,11 @@ class IntelligentAutomationAgent:
             optimization_result = await self.advanced_learning.optimize_automation_plan(automation_plan)
             optimized_plan = optimization_result.get("optimized_plan", automation_plan)
             
-            # Step 4: Execute the optimized automation plan
-            results = await self._execute_automation_plan_with_learning(optimized_plan, success_prediction)
+            # Step 4: Execute the optimized automation plan with timeout
+            results = await asyncio.wait_for(
+                self._execute_automation_plan_with_learning(optimized_plan, success_prediction),
+                timeout=120
+            )
             
             # Step 4: Capture final state
             final_screenshot = await self.media_capture.capture_screenshot(
@@ -173,6 +185,15 @@ class IntelligentAutomationAgent:
                 "timestamp": datetime.utcnow().isoformat()
             }
             
+        except asyncio.TimeoutError as e:
+            self.logger.error(f"Intelligent automation timed out: {e}")
+            return {
+                "status": "timeout",
+                "error": f"Automation timed out: {str(e)}",
+                "instructions": instructions,
+                "url": url,
+                "timestamp": datetime.utcnow().isoformat()
+            }
         except Exception as e:
             self.logger.error(f"Intelligent automation failed: {e}", exc_info=True)
             return {
