@@ -1011,8 +1011,7 @@ class ExecutionAgent:
             # Step 2: Try alternative booking sites
             alternative_sites = [
                 "https://www.skyscanner.com",
-                "https://www.kayak.com",
-                "https://www.expedia.com"
+                "https://www.kayak.com"
             ]
             
             for site in alternative_sites:
@@ -1037,7 +1036,7 @@ class ExecutionAgent:
                     })
                     
                     # Wait before next site
-                    await self.page.wait_for_timeout(2000)
+                    await asyncio.sleep(2)
                     
                 except Exception as e:
                     self.logger.warning(f"{site} failed: {e}")

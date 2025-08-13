@@ -1,186 +1,132 @@
-INFO:     Started server process [201671]
+INFO:     Started server process [223465]
 INFO:     Waiting for application startup.
 Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
 Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:54950 - "POST /chat HTTP/1.1" 200 OK
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:54960 - "POST /chat HTTP/1.1" 200 OK
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:54968 - "POST /chat HTTP/1.1" 200 OK
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:35176 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56468 - "GET /health HTTP/1.1" 200 OK
 WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.agents.executor:https://www.skyscanner.com failed: Page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://www.skyscanner.com/", waiting until "networkidle"
+
 WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-INFO:     127.0.0.1:34528 - "POST /automation/execute HTTP/1.1" 200 OK
-WARNING:src.agents.search:Failed to parse JSON response: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=latest+AI+automation+trends+2024&format=json&no_html=1&skip_disambig=1'
-INFO:     127.0.0.1:39678 - "POST /search HTTP/1.1" 200 OK
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:39090 - "POST /chat HTTP/1.1" 200 OK
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:39094 - "POST /chat HTTP/1.1" 200 OK
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:44720 - "POST /chat HTTP/1.1" 200 OK
-WARNING:src.core.ai_provider:All AI providers failed, using fallback response
-INFO:     127.0.0.1:44722 - "POST /chat HTTP/1.1" 200 OK
-ERROR:root:Export failed: No module named 'openpyxl'
+ERROR:root:Ticket booking failed: 'str' object has no attribute 'time'
 Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 450, in export_data
-    df.to_excel(excel_path, index=False, engine='openpyxl')
-    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/workspace/venv/lib/python3.13/site-packages/pandas/util/_decorators.py", line 333, in wrapper
-    return func(*args, **kwargs)
-  File "/workspace/venv/lib/python3.13/site-packages/pandas/core/generic.py", line 2436, in to_excel
-    formatter.write(
-    ~~~~~~~~~~~~~~~^
-        excel_writer,
-        ^^^^^^^^^^^^^
-    ...<6 lines>...
-        engine_kwargs=engine_kwargs,
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/workspace/venv/lib/python3.13/site-packages/pandas/io/formats/excel.py", line 943, in write
-    writer = ExcelWriter(
-        writer,
-    ...<2 lines>...
-        engine_kwargs=engine_kwargs,
-    )
-  File "/workspace/venv/lib/python3.13/site-packages/pandas/io/excel/_openpyxl.py", line 57, in __init__
-    from openpyxl.workbook import Workbook
-ModuleNotFoundError: No module named 'openpyxl'
-INFO:     127.0.0.1:42246 - "POST /export HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42256 - "POST /export HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33420 - "POST /workflows HTTP/1.1" 200 OK
-ERROR:src.core.orchestrator:Workflow execution failed: 'DatabaseManager' object has no attribute 'update_workflow_status'
+  File "/workspace/src/api/server.py", line 457, in execute_ticket_booking
+    "booking_id": f"booking_{int(time.time())}",
+                                 ^^^^^^^^^
+AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
+ERROR:root:Unhandled exception: 'str' object has no attribute 'time'
 Traceback (most recent call last):
-  File "/workspace/src/core/orchestrator.py", line 197, in _execute_workflow_async
-    await self._update_workflow_status(workflow_id, WorkflowStatus.PLANNING)
-  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
-    await self.database.update_workflow_status(workflow_id, status)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
-ERROR:asyncio:Task exception was never retrieved
-future: <Task finished name='Task-29' coro=<MultiAgentOrchestrator._execute_workflow_async() done, defined at /workspace/src/core/orchestrator.py:193> exception=AttributeError("'DatabaseManager' object has no attribute 'update_workflow_status'")>
-Traceback (most recent call last):
-  File "/workspace/src/core/orchestrator.py", line 197, in _execute_workflow_async
-    await self._update_workflow_status(workflow_id, WorkflowStatus.PLANNING)
-  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
-    await self.database.update_workflow_status(workflow_id, status)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
+  File "/workspace/src/api/server.py", line 457, in execute_ticket_booking
+    "booking_id": f"booking_{int(time.time())}",
+                                 ^^^^^^^^^
+AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/workspace/src/core/orchestrator.py", line 213, in _execute_workflow_async
-    await self._update_workflow_status(workflow_id, WorkflowStatus.FAILED)
-  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
-    await self.database.update_workflow_status(workflow_id, status)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
-INFO:     127.0.0.1:33426 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37076 - "GET /health HTTP/1.1" 200 OK
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-ERROR:src.agents.executor:Action failed: Page.fill: Error: Input of type "radio" cannot be filled
-Call log:
-  - waiting for locator("input[name=size]")
-    - locator resolved to 3 elements. Proceeding with the first one: <input name="size" type="radio" value="small"/>
-    - fill("large")
-  - attempting fill action
-    - waiting for element to be visible, enabled and editable
-
-INFO:     127.0.0.1:53766 - "POST /automation/execute HTTP/1.1" 200 OK
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-INFO:     127.0.0.1:58764 - "POST /automation/execute HTTP/1.1" 200 OK
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-INFO:     127.0.0.1:50818 - "POST /automation/execute HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51982 - "POST /workflows HTTP/1.1" 200 OK
-ERROR:src.core.orchestrator:Workflow execution failed: 'DatabaseManager' object has no attribute 'update_workflow_status'
-Traceback (most recent call last):
-  File "/workspace/src/core/orchestrator.py", line 197, in _execute_workflow_async
-    await self._update_workflow_status(workflow_id, WorkflowStatus.PLANNING)
-  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
-    await self.database.update_workflow_status(workflow_id, status)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
-ERROR:asyncio:Task exception was never retrieved
-future: <Task finished name='Task-36' coro=<MultiAgentOrchestrator._execute_workflow_async() done, defined at /workspace/src/core/orchestrator.py:193> exception=AttributeError("'DatabaseManager' object has no attribute 'update_workflow_status'")>
-Traceback (most recent call last):
-  File "/workspace/src/core/orchestrator.py", line 197, in _execute_workflow_async
-    await self._update_workflow_status(workflow_id, WorkflowStatus.PLANNING)
-  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
-    await self.database.update_workflow_status(workflow_id, status)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/workspace/src/core/orchestrator.py", line 213, in _execute_workflow_async
-    await self._update_workflow_status(workflow_id, WorkflowStatus.FAILED)
-  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
-    await self.database.update_workflow_status(workflow_id, status)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
-WARNING:src.agents.search:Failed to parse JSON response: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=AI+automation+trends+2024+machine+learning&format=json&no_html=1&skip_disambig=1'
-INFO:     127.0.0.1:48622 - "POST /search HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47396 - "POST /export HTTP/1.1" 200 OK
-ERROR:src.agents.executor:Real automation execution failed: Page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.makemytrip.com/flights/
-Call log:
-  - navigating to "https://www.makemytrip.com/flights/", waiting until "networkidle"
-Traceback (most recent call last):
-  File "/workspace/src/agents/executor.py", line 239, in execute_automation
-    actions = automation_request.get("actions", [])
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/workspace/venv/lib/python3.13/site-packages/playwright/async_api/_generated.py", line 8992, in goto
-    await self._impl_obj.goto(
-        url=url, timeout=timeout, waitUntil=wait_until, referer=referer
-    )
-  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_page.py", line 556, in goto
-    return await self._main_frame.goto(**locals_to_params(locals()))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_frame.py", line 153, in goto
-    await self._channel.send(
-        "goto", self._navigation_timeout, locals_to_params(locals())
-    )
-  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 69, in send
-    return await self._connection.wrap_api_call(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workspace/venv/lib/python3.13/site-packages/fastapi/routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     ...<3 lines>...
     )
     ^
-  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 558, in wrap_api_call
-    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
-playwright._impl._errors.Error: Page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.makemytrip.com/flights/
-Call log:
-  - navigating to "https://www.makemytrip.com/flights/", waiting until "networkidle"
+  File "/workspace/venv/lib/python3.13/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/api/server.py", line 466, in execute_ticket_booking
+    "booking_id": f"booking_{int(time.time())}",
+                                 ^^^^^^^^^
+AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
+INFO:     127.0.0.1:46688 - "POST /automation/ticket-booking HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/workspace/src/api/server.py", line 457, in execute_ticket_booking
+    "booking_id": f"booking_{int(time.time())}",
+                                 ^^^^^^^^^
+AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
 
-INFO:     127.0.0.1:59072 - "POST /automation/execute HTTP/1.1" 200 OK
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-INFO:     127.0.0.1:59086 - "POST /automation/execute HTTP/1.1" 200 OK
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/workspace/venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/venv/lib/python3.13/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/venv/lib/python3.13/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workspace/venv/lib/python3.13/site-packages/fastapi/routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/workspace/venv/lib/python3.13/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/api/server.py", line 466, in execute_ticket_booking
+    "booking_id": f"booking_{int(time.time())}",
+                                 ^^^^^^^^^
+AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
