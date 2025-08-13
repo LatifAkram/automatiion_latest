@@ -1,52 +1,76 @@
 # Autonomous Multi-Agent Automation Platform
 
-A comprehensive, AI-powered automation platform that executes ultra-complex workflows across all domains using intelligent multi-agent orchestration.
+A comprehensive, autonomous, adaptive, multi-agent automation platform capable of executing ultra-complex workflows across diverse domains including e-commerce, advisory, entertainment, banking, finance, insurance, stock market analysis, ticket booking, and beyond.
 
 ## 🚀 Core Vision
 
-Build an autonomous, adaptive, multi-agent automation platform that executes ultra-complex workflows across all domains (e-commerce, advisory, entertainment, banking, finance, insurance, stock market analysis, ticket booking, and beyond).
+This platform implements an intelligent multi-agent system with:
 
-## 🧠 Multi-Agent Architecture
+- **AI-1: Planner Agent** - Intelligent task breakdown and planning using various LLMs (GPT, Claude, Gemini, Local LLM)
+- **AI-2: Execution Agent** - Parallel workflow execution with Playwright/Selenium/Cypress for live automation
+- **AI-3: Conversational Agent** - Context-aware reasoning and human interaction
+- **Search Agents** - Multi-source data retrieval (Google, Bing, DuckDuckGo, GitHub, StackOverflow, etc.)
+- **DOM Extraction Agents** - Intelligent web page data extraction
+- **Learning & Self-Healing** - Vector DB + ML for adaptive behavior and auto-repair
+- **Enterprise Compliance** - Audit logging, RBAC, PII masking, compliance exports
 
-### AI-1: Planner Agent (Brain)
-- Uses GPT/Claude/Gemini/Local LLM to break down tasks into subtasks
-- Detects live data needs → spins up parallel Search Agents
-- Detects URLs in instructions → creates DOM Extraction Agents
-- Assigns tasks to Execution Agents with parallel scheduling
+## 🏗️ Architecture
 
-### AI-2: Execution Agents (Automation)
-- Use Playwright/Selenium/Cypress for live automation
-- Can run multiple workflows in parallel
-- Fetch DOM, fill forms, navigate UIs, trigger backend APIs
-- Capture screenshots + video for every step
-- Generate exportable automation scripts for replay
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Multi-Agent Orchestrator                 │
+├─────────────────────────────────────────────────────────────┤
+│  AI-1: Planner    │  AI-2: Executor    │  AI-3: Conversational │
+│  • Task Breakdown │  • Web Automation  │  • Context Management │
+│  • Live Data      │  • API Calls       │  • Reasoning          │
+│  • URL Detection  │  • DOM Extraction  │  • Human Takeover    │
+│  • Parallel Opt.  │  • Self-Healing    │  • Follow-up Tasks   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                    Data & Learning Layer                    │
+├─────────────────────────────────────────────────────────────┤
+│  SQLite Core DB   │  Vector DB         │  Local Media Storage │
+│  • Definitions    │  • Semantic Search │  • Screenshots       │
+│  • Audit Logs     │  • Learning        │  • Videos            │
+│  • Performance    │  • Self-Healing    │  • Exports           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
+│                  Enterprise Compliance Layer                │
+├─────────────────────────────────────────────────────────────┤
+│  Audit Logging    │  RBAC              │  PII Masking         │
+│  • Tamper-proof   │  • Role-based      │  • Data Protection   │
+│  • SOC2/GDPR      │  • Access Control  │  • Consent Workflow  │
+│  • HIPAA Ready    │  • Compliance      │  • Export Reports    │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### AI-3: Conversational Agent (Reasoning & Context)
-- Maintains context across sessions
-- Allows human takeover for tricky steps, then resumes automation
-- Provides reasoning behind decisions
-- Supports follow-up tasks after main workflow completes
+## 🎯 Key Features
 
-## 🏗️ Architecture Components
+### 🤖 Multi-Agent Intelligence
+- **Planner Agent**: Breaks down complex workflows, detects data needs, identifies parallel opportunities
+- **Execution Agent**: Handles web automation, API calls, data processing with self-healing
+- **Conversational Agent**: Maintains context, provides reasoning, enables human takeover
+- **Search Agents**: Multi-source data retrieval with better results than Perplexity AI
+- **DOM Extraction Agents**: Intelligent web page data extraction and parsing
 
-### Core Components
-- **Multi-Agent Orchestrator**: Central brain coordinating all agents
-- **AI Provider**: Unified interface for multiple AI services (OpenAI, Anthropic, Google Gemini, Local LLM)
-- **Vector Database**: Semantic storage for learning and self-healing
-- **Database Manager**: SQLite for workflow definitions and execution logs
-- **Audit Logger**: Comprehensive audit trail for compliance
+### 🔄 Adaptive Learning & Self-Healing
+- **Selector Drift Detection**: ML model predicts and detects UI changes
+- **Workflow Repair**: Auto-updates selectors, API calls, DOM parsing
+- **Test Farm**: Headless re-runs for reliability validation
+- **Performance Dashboard**: Real-time metrics and optimization
 
-### Advanced Features
-- **Selector Drift Detection**: ML model predicts breakage before it happens
-- **Workflow Repair**: Auto-updates selectors, API calls, or DOM parsing logic
-- **Test Farm**: Periodically re-runs saved workflows in headless mode
-- **Performance Dashboard**: Success rate, healing actions, run duration
+### 🏢 Enterprise-Grade Features
+- **AI Connector Builder**: Auto-generates connectors from API docs
+- **Continuous Test Farm**: Stress-testing and reliability metrics
+- **Compliance Layer**: Audit logging, RBAC, PII masking, consent workflow
+- **Compliance Export**: SOC2, GDPR, HIPAA ready reports
 
-### Enterprise Features
-- **AI Connector Builder**: Reads API docs and auto-generates integration connectors
-- **Continuous Automation Test Farm**: Cloud or local grid for stress-testing workflows
-- **Compliance & Governance**: Audit logging, RBAC, data masking, consent workflows
-- **SOC2/GDPR/HIPAA**: Generate compliance audit reports
+### 📊 Advanced Output & Reporting
+- **Automation Reports**: Step-by-step with screenshots, videos, code, audit logs
+- **Code Mode**: Export automation scripts
+- **Follow-up Mode**: Seamless task continuation
 
 ## 🛠️ Installation
 
@@ -60,10 +84,10 @@ Build an autonomous, adaptive, multi-agent automation platform that executes ult
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd autonomous-automation-platform
+cd multi-agent-automation-platform
 ```
 
-2. **Install dependencies**
+2. **Install Python dependencies**
 ```bash
 pip install -r requirements.txt
 ```
@@ -79,261 +103,233 @@ cp .env.example .env
 # Edit .env with your API keys and configuration
 ```
 
-5. **Run the platform**
+5. **Initialize the platform**
 ```bash
 python main.py
 ```
 
-### Environment Configuration
+## ⚙️ Configuration
 
-Create a `.env` file with the following variables:
+Create a `.env` file with the following configuration:
 
 ```env
-# AI Providers
-OPENAI_API_KEY=your_openai_key
-ANTHROPIC_API_KEY=your_anthropic_key
-GOOGLE_API_KEY=your_google_key
-LOCAL_LLM_URL=http://127.0.0.1:1234
+# AI Configuration
+AI_OPENAI_API_KEY=your_openai_key
+AI_ANTHROPIC_API_KEY=your_anthropic_key
+AI_GOOGLE_API_KEY=your_google_key
+AI_LOCAL_LLM_URL=http://127.0.0.1:1234
 
-# Search APIs
-GOOGLE_SEARCH_API_KEY=your_google_search_key
-GOOGLE_SEARCH_CX=your_search_engine_id
-BING_SEARCH_API_KEY=your_bing_key
-GITHUB_TOKEN=your_github_token
+# Search Configuration
+SEARCH_GOOGLE_SEARCH_API_KEY=your_google_search_key
+SEARCH_GOOGLE_SEARCH_CX=your_search_engine_id
+SEARCH_BING_SEARCH_API_KEY=your_bing_key
+SEARCH_GITHUB_TOKEN=your_github_token
 
-# Security
-ENCRYPTION_KEY=your_encryption_key
+# Database Configuration
+DATABASE_DATABASE_PATH=./data/automation.db
+DATABASE_VECTOR_DB_PATH=./data/vector_db
+
+# Automation Configuration
+AUTOMATION_BROWSER_TYPE=chromium
+AUTOMATION_HEADLESS=true
+AUTOMATION_BROWSER_TIMEOUT=30
+
+# Security Configuration
+SECURITY_SECRET_KEY=your_secret_key
+SECURITY_ENCRYPTION_KEY=your_encryption_key
 
 # API Configuration
-API_HOST=0.0.0.0
-API_PORT=8000
+API_API_HOST=0.0.0.0
+API_API_PORT=8000
 ```
 
-## 📖 Usage
+## 🚀 Usage
 
-### API Endpoints
-
-The platform provides a comprehensive REST API:
-
-#### Workflows
-- `POST /workflows` - Create and execute a new workflow
-- `GET /workflows/{id}` - Get workflow status
-- `GET /workflows` - List workflows
-- `DELETE /workflows/{id}` - Cancel workflow
-
-#### Chat
-- `POST /chat` - Chat with the conversational agent
-
-#### Analytics
-- `GET /analytics/performance` - Get performance metrics
-- `GET /analytics/agents` - Get agent status
-
-#### System
-- `GET /system/info` - Get system information
-- `POST /system/restart` - Restart the system
-
-### Example Workflow
+### Basic Workflow Execution
 
 ```python
-import requests
+from src import MultiAgentOrchestrator, Config
 
-# Create a workflow
+# Initialize the platform
+config = Config()
+orchestrator = MultiAgentOrchestrator(config)
+await orchestrator.initialize()
+
+# Define a workflow
 workflow_request = {
-    "name": "E-commerce Price Comparison",
-    "description": "Compare prices across multiple e-commerce sites",
+    "name": "E-commerce Price Monitoring",
+    "description": "Monitor product prices across multiple e-commerce sites",
     "domain": "ecommerce",
-    "parameters": {
-        "product": "laptop",
-        "budget": 1000,
-        "sites": ["amazon", "bestbuy", "newegg"]
-    }
+    "tasks": [
+        {
+            "name": "Search for products",
+            "type": "search",
+            "parameters": {
+                "query": "laptop computers",
+                "sources": ["google", "amazon", "bestbuy"]
+            }
+        },
+        {
+            "name": "Extract price data",
+            "type": "dom_extraction",
+            "parameters": {
+                "url": "https://amazon.com/search?q=laptop",
+                "selectors": {
+                    "product_name": ".product-title",
+                    "price": ".product-price",
+                    "rating": ".product-rating"
+                }
+            }
+        }
+    ]
 }
 
-response = requests.post("http://localhost:8000/workflows", json=workflow_request)
-workflow_id = response.json()["workflow_id"]
-
-# Check status
-status = requests.get(f"http://localhost:8000/workflows/{workflow_id}")
-print(status.json())
+# Execute the workflow
+execution = await orchestrator.execute_workflow(workflow_request)
+print(f"Workflow started with ID: {execution.workflow_id}")
 ```
 
-### Chat with AI Agent
+### Conversational Interaction
 
 ```python
 # Chat with the conversational agent
-chat_request = {
-    "message": "What's the status of my workflow?",
-    "session_id": "user_123",
-    "context": {"workflow_id": "workflow_456"}
-}
+response = await orchestrator.chat_with_agent(
+    "What's the status of my e-commerce monitoring workflow?",
+    session_id="user_123",
+    workflow_id="workflow_456"
+)
 
-response = requests.post("http://localhost:8000/chat", json=chat_request)
-print(response.json()["response"])
+print(f"AI Response: {response['response']}")
+print(f"Reasoning: {response['reasoning']}")
 ```
 
-## 🔧 Configuration
+### API Endpoints
 
-### AI Provider Configuration
+The platform exposes a REST API at `http://localhost:8000`:
 
-The platform supports multiple AI providers with automatic fallback:
+- `POST /workflows` - Create and execute workflows
+- `GET /workflows/{workflow_id}` - Get workflow status
+- `GET /workflows` - List all workflows
+- `POST /chat` - Chat with the conversational agent
+- `GET /agents/status` - Get agent status
+- `GET /metrics` - Get performance metrics
+
+## 🔧 Advanced Features
+
+### Self-Healing Workflows
+
+The platform automatically detects and fixes common issues:
 
 ```python
-# Priority order: OpenAI → Anthropic → Google Gemini → Local LLM
-DEFAULT_AI_PROVIDER=openai
-OPENAI_MODEL=gpt-4
-ANTHROPIC_MODEL=claude-3-sonnet-20240229
-GOOGLE_MODEL=gemini-2.0-flash-exp
-LOCAL_LLM_MODEL=deepseek-coder-v2-lite-instruct
+# The platform will automatically:
+# 1. Detect selector drift
+# 2. Find alternative selectors
+# 3. Update the workflow
+# 4. Re-execute failed steps
 ```
 
-### Automation Configuration
+### Multi-Source Search
 
 ```python
-BROWSER_TYPE=chromium  # chromium, firefox, webkit
-HEADLESS=true
-MAX_PARALLEL_AGENTS=5
-MAX_PARALLEL_WORKFLOWS=3
-CAPTURE_SCREENSHOTS=true
-CAPTURE_VIDEO=true
+search_results = await orchestrator.search_agent.comprehensive_search(
+    query="Python automation frameworks",
+    sources=["google", "github", "stackoverflow", "reddit"],
+    max_results=20
+)
 ```
 
-### Security Configuration
+### DOM Extraction
 
 ```python
-PII_DETECTION_ENABLED=true
-PII_MASKING_ENABLED=true
-RBAC_ENABLED=true
-AUDIT_RETENTION_DAYS=365
+extracted_data = await orchestrator.dom_extraction_agent.extract_from_url(
+    url="https://example.com",
+    selectors={
+        "title": "h1",
+        "content": ".main-content",
+        "metadata": "meta[name='description']"
+    },
+    content_type="article"
+)
 ```
 
-## 🧪 Testing
+## 📈 Performance & Monitoring
 
-### Run Tests
-```bash
-pytest tests/
-```
+### Real-time Metrics
 
-### Run Specific Test Categories
-```bash
-pytest tests/test_agents/ -v
-pytest tests/test_workflows/ -v
-pytest tests/test_api/ -v
-```
-
-### Performance Testing
-```bash
-pytest tests/test_performance/ -v
-```
-
-## 📊 Monitoring & Analytics
-
-### Performance Dashboard
-
-Access the performance dashboard at `http://localhost:8000/analytics/performance`:
-
-```json
-{
-  "performance_metrics": {
-    "workflow_success_rate": 0.95,
-    "avg_execution_time": 45.2,
-    "total_workflows": 1250,
-    "active_agents": 5
-  },
-  "active_workflows": 3,
-  "execution_agents": 5
-}
+```python
+metrics = orchestrator.get_performance_metrics()
+print(f"Success Rate: {metrics.success_rate:.2%}")
+print(f"Average Duration: {metrics.average_duration:.2f}s")
+print(f"Total Workflows: {metrics.total_workflows}")
 ```
 
 ### Agent Status
 
-Monitor agent status at `http://localhost:8000/analytics/agents`:
-
-```json
-{
-  "agents": [
-    {
-      "type": "execution",
-      "agent_id": "executor_0",
-      "is_busy": false,
-      "uptime": 3600
-    },
-    {
-      "type": "planner",
-      "agent_id": "planner",
-      "status": "active"
-    }
-  ]
-}
+```python
+status = orchestrator.get_agent_status()
+for agent_name, agent_status in status.items():
+    print(f"{agent_name}: {agent_status['status']}")
 ```
 
 ## 🔒 Security & Compliance
 
 ### Audit Logging
-Every action is logged with cryptographic hashes for tamper-proofing:
-- Workflow executions
-- Agent interactions
-- Data access
-- Configuration changes
 
-### Role-Based Access Control (RBAC)
-- User roles and permissions
-- Workflow access control
-- API endpoint restrictions
-- Data access controls
+All activities are logged with tamper-proof audit trails:
 
-### Data Protection
-- PII detection and masking
-- Encryption at rest and in transit
-- Data retention policies
-- Consent workflow management
-
-## 🚀 Deployment
-
-### Docker Deployment
-
-```dockerfile
-FROM python:3.9-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-RUN playwright install
-
-EXPOSE 8000
-CMD ["python", "main.py"]
+```python
+# Audit logs are automatically generated for:
+# - Workflow executions
+# - Agent interactions
+# - Data access
+# - Configuration changes
+# - Security events
 ```
 
-### Kubernetes Deployment
+### RBAC (Role-Based Access Control)
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: automation-platform
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: automation-platform
-  template:
-    metadata:
-      labels:
-        app: automation-platform
-    spec:
-      containers:
-      - name: automation-platform
-        image: automation-platform:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: OPENAI_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: api-keys
-              key: openai-key
+```python
+# Users can be assigned roles with specific permissions:
+# - Admin: Full access
+# - Operator: Workflow execution
+# - Viewer: Read-only access
+# - Auditor: Audit log access
 ```
+
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run specific test categories
+pytest tests/test_agents/
+pytest tests/test_core/
+pytest tests/test_api/
+
+# Run with coverage
+pytest --cov=src --cov-report=html
+```
+
+### Test Workflows
+
+```bash
+# Test specific workflow scenarios
+python -m pytest tests/test_workflows/ -v
+
+# Test self-healing capabilities
+python -m pytest tests/test_self_healing/ -v
+```
+
+## 📚 Documentation
+
+- [API Documentation](docs/api.md)
+- [Agent Architecture](docs/agents.md)
+- [Workflow Examples](docs/workflows.md)
+- [Configuration Guide](docs/configuration.md)
+- [Security & Compliance](docs/security.md)
 
 ## 🤝 Contributing
 
@@ -342,21 +338,6 @@ spec:
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-### Development Setup
-
-```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Install pre-commit hooks
-pre-commit install
-
-# Run linting
-black src/
-flake8 src/
-mypy src/
-```
 
 ## 📄 License
 
@@ -367,37 +348,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: [docs/](docs/)
 - **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/your-repo/discussions)
-- **Email**: support@automation-platform.com
 
 ## 🏆 Competitive Advantages
 
-- **Adaptive orchestration** → Beats static RPA workflows
-- **Parallel multi-agent execution** → Much faster than serial RPA flows
-- **Live-data awareness** → Can fetch and integrate real-time results
-- **Auto-heal** → Reduces maintenance cost dramatically
-- **Cross-domain capability** → Works in all industries without separate templates
-- **Compliance-ready** → Positions for enterprise adoption in regulated sectors
-
-## 🗺️ Roadmap
-
-### Phase 1: Core Platform (Current)
-- ✅ Multi-agent engine
-- ✅ SQLite + vector DB
-- ✅ Live data agents
-- ✅ Basic automation
-
-### Phase 2: Advanced Features (Q2 2024)
-- 🔄 AI Connector Builder
-- 🔄 Continuous Test Farm
-- 🔄 Enhanced self-healing
-- 🔄 Performance optimization
-
-### Phase 3: Enterprise Features (Q3 2024)
-- 📋 Compliance Layer
-- 📋 Public connector ecosystem
-- 📋 Enterprise orchestration scaling
-- 📋 Advanced security features
+- **Adaptive Orchestration**: Intelligent task distribution and optimization
+- **Parallel Multi-Agent Execution**: True concurrent workflow processing
+- **Live-Data Awareness**: Real-time data integration and processing
+- **Auto-Heal Capabilities**: Self-repairing workflows and selectors
+- **Cross-Domain Capability**: Works across any domain or industry
+- **Compliance-Ready**: Enterprise-grade security and audit features
 
 ---
 
-**Built with ❤️ by the Autonomous Automation Team**
+**Built with ❤️ for the future of automation**
