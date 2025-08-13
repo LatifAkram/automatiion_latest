@@ -178,18 +178,20 @@ export default function Home() {
     ]);
   }, []);
 
-  // Theme management
+  // Theme management - initialize from localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme;
     if (savedTheme) {
       setTheme(savedTheme);
     }
-    
-    // Apply theme
-    applyTheme(theme);
-  }, [theme]);
+  }, []); // Only run once on mount
 
-  const applyTheme = (selectedTheme: Theme) => {
+  // Apply theme when theme changes
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme, applyTheme]);
+
+  const applyTheme = React.useCallback((selectedTheme: Theme) => {
     const root = document.documentElement;
     
     if (selectedTheme === 'auto') {
@@ -199,8 +201,12 @@ export default function Home() {
       root.classList.toggle('dark', selectedTheme === 'dark');
     }
     
-    localStorage.setItem('theme', selectedTheme);
-  };
+    // Only update localStorage if it's different to prevent unnecessary updates
+    const currentStoredTheme = localStorage.getItem('theme');
+    if (currentStoredTheme !== selectedTheme) {
+      localStorage.setItem('theme', selectedTheme);
+    }
+  }, []);
 
   const toggleTheme = () => {
     const themes: Theme[] = ['light', 'dark', 'auto'];
