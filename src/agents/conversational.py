@@ -158,7 +158,9 @@ class ConversationalAgent:
         """
         try:
             # Create or get conversation session
-            session_id = context.get("session_id") if context else "default"
+            if context is None:
+                context = {}
+            session_id = context.get("session_id", "default")
             conversation = await self._get_or_create_conversation(session_id)
             
             # Add user message
@@ -166,7 +168,7 @@ class ConversationalAgent:
                 content=message,
                 message_type=MessageType.USER,
                 timestamp=datetime.utcnow(),
-                context=context or {}
+                context=context
             )
             conversation.add_message(user_message)
             
