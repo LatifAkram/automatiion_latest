@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import SimpleChatInterface from '../src/components/simple-chat-interface';
 import AutomationDashboard from '../src/components/automation-dashboard';
 import LiveAutomationDisplay from '../src/components/live-automation-display';

@@ -115,7 +115,7 @@ export default function LiveAutomationDisplay({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         className={`fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl ${
-          isMinimized ? 'w-80 h-16' : showFullscreen ? 'w-full h-full top-0 left-0' : 'w-96 h-96'
+          isMinimized ? 'w-80 h-16' : showFullscreen ? 'w-full h-full top-0 left-0' : 'w-[600px] h-[500px]'
         } transition-all duration-300`}
       >
         {/* Header */}
@@ -224,30 +224,51 @@ export default function LiveAutomationDisplay({
                   </div>
                   
                   <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
-                    <div className="w-full h-full bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                      {currentStep ? (
-                        <div className="text-center">
-                          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                            {getStepIcon(currentStep.action)}
-                          </div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                            {currentStep.action}
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {currentStep.description}
-                          </p>
-                          <div className="mt-4">
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                              <div className="bg-blue-500 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                    <div className="w-full h-full bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                      {/* Browser Header */}
+                      <div className="bg-gray-200 dark:bg-gray-700 p-2 flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        </div>
+                        <div className="flex-1 bg-white dark:bg-gray-800 rounded px-3 py-1 text-sm text-gray-600 dark:text-gray-400 mx-2">
+                          {browserUrl || 'Loading...'}
+                        </div>
+                      </div>
+                      
+                      {/* Browser Content */}
+                      <div className="flex-1 p-6 flex items-center justify-center">
+                        {currentStep ? (
+                          <div className="text-center max-w-md">
+                            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                              <div className="text-white">
+                                {getStepIcon(currentStep.action)}
+                              </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                              {currentStep.action}
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                              {currentStep.description}
+                            </p>
+                            <div className="space-y-2">
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full animate-pulse" style={{ width: '75%' }}></div>
+                              </div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Executing automation step...</p>
                             </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="text-center text-gray-500 dark:text-gray-400">
-                          <Monitor className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                          <p>Browser automation ready</p>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="text-center text-gray-500 dark:text-gray-400">
+                            <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Monitor className="w-12 h-12 text-blue-500 dark:text-blue-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold mb-2">Browser Automation Ready</h3>
+                            <p className="text-sm">Waiting for automation to begin...</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -308,7 +329,7 @@ export default function LiveAutomationDisplay({
               {/* Screenshots Tab */}
               {activeTab === 'screenshots' && (
                 <div className="h-full overflow-y-auto p-4">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-4">
                     {steps.filter(step => step.screenshot).map((step, index) => (
                       <motion.div
                         key={`screenshot_${step.id}_${index}`}
