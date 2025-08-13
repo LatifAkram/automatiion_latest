@@ -129,11 +129,15 @@ export default function SimpleChatInterface({
       )}
       
       <div className={`max-w-[70%] ${
-        message.type === 'user' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200'
+        message.type === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-50 border border-gray-200'
       } rounded-lg p-3 shadow-sm`}>
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-          <span className="text-xs opacity-70">
+          <p className={`text-sm whitespace-pre-wrap ${
+            message.type === 'user' ? 'text-white' : 'text-gray-900'
+          }`}>{message.content}</p>
+          <span className={`text-xs ${
+            message.type === 'user' ? 'text-white opacity-70' : 'text-gray-500'
+          }`}>
             {message.timestamp.toLocaleTimeString()}
           </span>
         </div>
