@@ -156,26 +156,50 @@ class ConversationalAgent:
             )
             conversation.add_message(user_message)
             
+            # Check if this is a handoff request
+            # if self._is_handoff_request(message):
+            #     return await self._handle_handoff_request(conversation, context)
+            
+            # Check if AI needs human intervention
+            # if self._needs_human_intervention(message, context):
+            #     return await self._request_human_intervention(conversation, context)
+            
             # Generate AI response with reasoning
             response = await self._generate_response(conversation, performance_metrics)
             
             # Add AI response
             ai_message = Message(
-                content=response["content"],
+                content=response if isinstance(response, str) else response.get("content", str(response)),
                 message_type=MessageType.AI,
                 timestamp=datetime.utcnow(),
-                context=response.get("context", {})
+                context=response.get("context", {}) if isinstance(response, dict) else {}
             )
             conversation.add_message(ai_message)
             
             # Store conversation in vector store
-            await self.vector_store.store_conversation(conversation)
+            await self.vector_store.store_conversation(conversation.session_id, {
+                "messages": [msg.to_dict() for msg in conversation.messages],
+                "session_id": conversation.session_id,
+                "created_at": conversation.created_at.isoformat(),
+                "updated_at": conversation.updated_at.isoformat(),
+                "context": conversation.context
+            })
             
             # Log conversation
             await self.audit_logger.log_conversation(
                 session_id=session_id,
-                user_message=user_message,
-                ai_response=ai_message
+                message_type="user",
+                message_content=user_message.content,
+                user_id=context.get("user_id", "unknown"),
+                workflow_id=context.get("workflow_id")
+            )
+            
+            await self.audit_logger.log_conversation(
+                session_id=session_id,
+                message_type="ai",
+                message_content=ai_message.content,
+                user_id="ai_system",
+                workflow_id=context.get("workflow_id")
             )
             
             return response["content"]
@@ -183,6 +207,88 @@ class ConversationalAgent:
         except Exception as e:
             self.logger.error(f"Chat failed: {e}", exc_info=True)
             return f"I apologize, but I encountered an error: {str(e)}"
+    
+    def _is_handoff_request(self, message: str) -> bool:
+        """Check if message is a handoff request."""
+        handoff_keywords = [
+            "take control", "handoff", "human intervention", "manual step",
+            "I need help", "can't proceed", "requires human input"
+        ]
+        return any(keyword.lower() in message.lower() for keyword in handoff_keywords)
+    
+    def _needs_human_intervention(self, message: str, context: Optional[Dict[str, Any]]) -> bool:
+        """Check if AI needs human intervention."""
+        intervention_triggers = [
+            "captcha", "verification", "login required", "payment required",
+            "form validation", "complex decision", "unexpected error",
+            "security check", "two-factor", "phone verification"
+        ]
+        
+        # Check message content
+        if any(trigger.lower() in message.lower() for trigger in intervention_triggers):
+            return True
+        
+        # Check context for automation issues
+        if context and context.get("automation_status") == "blocked":
+            return True
+        
+        return False
+    
+    async def _handle_handoff_request(self, conversation: Any, context: Optional[Dict[str, Any]]) -> str:
+        """Handle handoff request from user."""
+        handoff_id = f"handoff_{datetime.utcnow().timestamp()}"
+        
+        # Store handoff state
+        context = context or {}
+        context["handoff_id"] = handoff_id
+        context["handoff_status"] = "requested"
+        context["handoff_timestamp"] = datetime.utcnow().isoformat()
+        
+        return f"""🤝 **HUMAN INTERVENTION REQUESTED**
+
+I've identified that this task requires human intervention. Here's what I need help with:
+
+**Current Status**: {context.get('current_step', 'Unknown step')}
+**Issue**: {context.get('issue_description', 'Requires human input')}
+**Handoff ID**: {handoff_id}
+
+**What you can do:**
+1. **Take Control**: I'll pause the automation and let you handle this step
+2. **Provide Input**: Give me the information I need to continue
+3. **Skip Step**: If this step can be bypassed
+4. **Modify Approach**: Suggest a different way to handle this
+
+**To resume automation after you've handled the issue, simply say: "Resume automation"**
+
+I'm ready to hand over control whenever you are! 🚀"""
+    
+    async def _request_human_intervention(self, conversation: Any, context: Optional[Dict[str, Any]]) -> str:
+        """Request human intervention when AI encounters issues."""
+        intervention_id = f"intervention_{datetime.utcnow().timestamp()}"
+        
+        # Store intervention state
+        context = context or {}
+        context["intervention_id"] = intervention_id
+        context["intervention_status"] = "required"
+        context["intervention_timestamp"] = datetime.utcnow().isoformat()
+        
+        return f"""⚠️ **HUMAN INTERVENTION REQUIRED**
+
+I've encountered a situation that requires your expertise:
+
+**Issue**: {context.get('issue_description', 'Complex decision or verification required')}
+**Current Step**: {context.get('current_step', 'Unknown')}
+**Intervention ID**: {intervention_id}
+
+**Options:**
+1. **Guide Me**: Provide specific instructions on how to proceed
+2. **Take Over**: Handle this step manually and let me know when to resume
+3. **Alternative Approach**: Suggest a different method
+4. **Skip**: If this step can be safely bypassed
+
+**I'll wait for your guidance before proceeding.** 
+
+To continue after you've handled this, say: "Continue automation" 🎯"""
             
     async def _get_or_create_conversation(self, session_id: str) -> Conversation:
         """Get existing conversation or create new one."""
@@ -562,7 +668,13 @@ class ConversationalAgent:
         
         # Save all active conversations
         for session_id, conversation in self.active_conversations.items():
-            await self.vector_store.store_conversation(conversation)
+            await self.vector_store.store_conversation(conversation.session_id, {
+                "messages": [msg.to_dict() for msg in conversation.messages],
+                "session_id": conversation.session_id,
+                "created_at": conversation.created_at.isoformat(),
+                "updated_at": conversation.updated_at.isoformat(),
+                "context": conversation.context
+            })
             
         # Shutdown AI provider
         await self.ai_provider.shutdown()

@@ -119,7 +119,7 @@ class MultiAgentOrchestrator:
         
         # Initialize Search Agent
         self.search_agent = SearchAgent(
-            config=self.config.search,
+            config=self.config,
             audit_logger=self.audit_logger
         )
         await self.search_agent.initialize()

@@ -25,6 +25,15 @@ class Message(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     context: Dict[str, Any] = Field(default_factory=dict)
     
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert message to dictionary."""
+        return {
+            "content": self.content,
+            "message_type": self.message_type.value,
+            "timestamp": self.timestamp.isoformat(),
+            "context": self.context
+        }
+    
     class Config:
         json_encoders = {
             datetime: lambda v: v.isoformat()
@@ -38,6 +47,7 @@ class Conversation(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    context: Dict[str, Any] = Field(default_factory=dict)
     
     def add_message(self, message: Message):
         """Add a message to the conversation."""

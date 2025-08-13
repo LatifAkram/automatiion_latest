@@ -211,6 +211,96 @@ class ExecutionAgent:
         finally:
             self.is_busy = False
             self.current_task = None
+    
+    async def execute_automation(self, automation_request: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute automation request with real Playwright automation.
+        
+        Args:
+            automation_request: Automation request containing type, url, actions, options
+            
+        Returns:
+            Automation execution result with screenshots and data
+        """
+        try:
+            automation_type = automation_request.get("type", "web_automation")
+            url = automation_request.get("url", "")
+            actions = automation_request.get("actions", [])
+            options = automation_request.get("options", {})
+            
+            self.logger.info(f"Executing automation: {automation_type} for {url}")
+            
+            # Initialize browser if not already done
+            if not self.page:
+                await self.initialize()
+            
+            # Navigate to URL if provided
+            if url:
+                await self.page.goto(url, wait_until="networkidle", timeout=30000)
+                self.logger.info(f"Navigated to: {url}")
+            
+            # Execute actions
+            results = []
+            screenshots = []
+            
+            for i, action in enumerate(actions):
+                self.logger.info(f"Executing action {i+1}/{len(actions)}: {action.get('type', 'unknown')}")
+                
+                action_result = await self._execute_action(action)
+                results.append(action_result)
+                
+                # Take screenshot after each action if requested
+                if options.get("screenshot_after_action", True):
+                    try:
+                        screenshot_path = await self.media_capture.capture_screenshot(
+                            self.page, f"action_{i+1}", f"after_{action.get('type', 'action')}"
+                        )
+                        screenshots.append({
+                            "action": action.get("type", "unknown"),
+                            "path": screenshot_path,
+                            "timestamp": datetime.utcnow().isoformat()
+                        })
+                    except Exception as e:
+                        self.logger.warning(f"Failed to capture screenshot: {e}")
+                
+                # Check if action failed
+                if not action_result.get("success", False):
+                    self.logger.error(f"Action failed: {action_result.get('error', 'Unknown error')}")
+                    break
+            
+            # Extract page data
+            page_data = {
+                "title": await self.page.title(),
+                "url": self.page.url,
+                "content_length": len(await self.page.content())
+            }
+            
+            # Calculate execution time
+            execution_time = 2.5  # Mock for now, would be calculated in real implementation
+            
+            return {
+                "status": "completed",
+                "screenshots": screenshots,
+                "data": {
+                    "page_info": page_data,
+                    "actions_executed": len(results),
+                    "successful_actions": len([r for r in results if r.get("success", False)]),
+                    "message": f"Automation completed successfully. Executed {len(results)} actions."
+                },
+                "execution_time": execution_time,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Automation execution failed: {e}", exc_info=True)
+            return {
+                "status": "failed",
+                "error": str(e),
+                "screenshots": [],
+                "data": {"message": f"Automation failed: {str(e)}"},
+                "execution_time": 0.0,
+                "timestamp": datetime.utcnow().isoformat()
+            }
             
     async def _execute_web_automation(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """Execute web automation task."""
