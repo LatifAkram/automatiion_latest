@@ -971,6 +971,35 @@ class ExecutionAgent:
         except Exception as e:
             return {"success": False, "error": str(e)}
             
+    async def execute_intelligent_automation(self, instructions: str, url: str) -> Dict[str, Any]:
+        """Execute intelligent automation based on natural language instructions."""
+        try:
+            from .intelligent_automation import IntelligentAutomationAgent
+            from ..core.ai_provider import AIProvider
+            
+            # Initialize intelligent automation agent
+            ai_provider = AIProvider(self.config)
+            intelligent_agent = IntelligentAutomationAgent(self.config, ai_provider)
+            await intelligent_agent.initialize()
+            
+            # Execute the automation
+            result = await intelligent_agent.execute_natural_language_automation(instructions, url)
+            
+            # Cleanup
+            await intelligent_agent.shutdown()
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Intelligent automation failed: {e}", exc_info=True)
+            return {
+                "status": "failed",
+                "error": str(e),
+                "instructions": instructions,
+                "url": url,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
     async def execute_ticket_booking(self, booking_request: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute ticket booking automation with real websites.
