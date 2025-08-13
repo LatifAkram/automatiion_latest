@@ -166,7 +166,7 @@ class ConversationalAgent:
                 content=message,
                 message_type=MessageType.USER,
                 timestamp=datetime.utcnow(),
-                context=context
+                context=context or {}
             )
             conversation.add_message(user_message)
             
@@ -186,11 +186,14 @@ class ConversationalAgent:
                 response = await self._generate_response(conversation, performance_metrics)
             
             # Add AI response
+            response_content = response if isinstance(response, str) else response.get("content", str(response))
+            response_context = response.get("context", {}) if isinstance(response, dict) else {}
+            
             ai_message = Message(
-                content=response if isinstance(response, str) else response.get("content", str(response)),
+                content=response_content,
                 message_type=MessageType.AI,
                 timestamp=datetime.utcnow(),
-                context=response.get("context", {}) if isinstance(response, dict) else {}
+                context=response_context
             )
             conversation.add_message(ai_message)
             

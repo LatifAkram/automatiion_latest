@@ -282,8 +282,9 @@ async def chat_endpoint(request: ChatRequest, orch: MultiAgentOrchestrator = Dep
                 timestamp=datetime.utcnow().isoformat()
             )
         
-        # Process the chat request
-        response = await orch.conversational_agent.chat(request.message)
+        # Process the chat request with context
+        context = {"session_id": request.session_id or "default"}
+        response = await orch.conversational_agent.chat(request.message, context)
         
         return ChatResponse(
             response=response,
