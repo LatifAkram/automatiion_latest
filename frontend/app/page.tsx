@@ -301,13 +301,25 @@ export default function Home() {
     setIsTyping(true);
 
     try {
-      // Analyze message for automation intent
-      const isAutomationRequest = message.toLowerCase().includes('automate') || 
-                                 message.toLowerCase().includes('book') ||
-                                 message.toLowerCase().includes('search') ||
-                                 message.toLowerCase().includes('extract') ||
-                                 message.toLowerCase().includes('fill') ||
-                                 message.toLowerCase().includes('monitor');
+      // Analyze message for automation intent - more comprehensive detection
+      const automationKeywords = [
+        'automate', 'book', 'search', 'extract', 'fill', 'monitor', 'click', 'open', 'login', 
+        'sign', 'register', 'submit', 'enter', 'type', 'navigate', 'go to', 'visit', 'browse',
+        'scrape', 'collect', 'gather', 'fetch', 'download', 'upload', 'form', 'button', 'link'
+      ];
+      
+      const hasUrl = message.includes('http') || message.includes('www.');
+      const hasAutomationKeywords = automationKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword)
+      );
+      
+      const isAutomationRequest = hasUrl || hasAutomationKeywords || 
+                                 message.toLowerCase().includes('flipkart') ||
+                                 message.toLowerCase().includes('amazon') ||
+                                 message.toLowerCase().includes('google') ||
+                                 message.toLowerCase().includes('facebook') ||
+                                 message.toLowerCase().includes('twitter') ||
+                                 message.toLowerCase().includes('linkedin');
 
       const isSearchRequest = message.toLowerCase().includes('search') ||
                              message.toLowerCase().includes('find') ||
@@ -332,6 +344,15 @@ export default function Home() {
             }
           };
 
+      console.log('🔍 DEBUG: Automation detection:', {
+        message,
+        isAutomationRequest,
+        hasUrl,
+        hasAutomationKeywords,
+        endpoint,
+        requestBody
+      });
+
       const response = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -342,6 +363,7 @@ export default function Home() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 DEBUG: Response data:', data);
         
         // Handle automation response differently
         const content = isAutomationRequest 
