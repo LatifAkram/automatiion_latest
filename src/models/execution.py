@@ -1,18 +1,18 @@
 """
 Execution Models
-===============
+==============
 
-Data models for task execution, results, and logging.
+Models for execution results and performance tracking.
 """
 
 from enum import Enum
+from typing import Dict, Any, Optional, List
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 
 
 class ExecutionStatus(str, Enum):
-    """Execution status for tasks and steps."""
+    """Execution status."""
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -21,201 +21,108 @@ class ExecutionStatus(str, Enum):
     TIMEOUT = "timeout"
 
 
-class ExecutionStep(BaseModel):
-    """Individual execution step."""
-    task_id: str
-    task_name: str
-    task_type: str
-    start_time: datetime
-    end_time: Optional[datetime] = None
-    duration: Optional[float] = None
-    status: ExecutionStatus = ExecutionStatus.PENDING
-    success: bool = False
-    data: Dict[str, Any] = Field(default_factory=dict)
-    error: Optional[str] = None
-    artifacts: Dict[str, str] = Field(default_factory=dict)
-    retry_count: int = 0
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+class ExecutionLog(BaseModel):
+    """Individual execution log entry."""
+    
+    id: str = Field(..., description="Log entry ID")
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Log timestamp")
+    level: str = Field(..., description="Log level (INFO, WARNING, ERROR, DEBUG)")
+    message: str = Field(..., description="Log message")
+    context: Dict[str, Any] = Field(default_factory=dict, description="Log context")
     
     class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+        use_enum_values = True
 
 
 class ExecutionResult(BaseModel):
-    """Complete execution result."""
-    workflow_id: str
-    success: bool
-    steps: List[ExecutionStep] = Field(default_factory=list)
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    duration: float = 0.0
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    artifacts: Dict[str, str] = Field(default_factory=dict)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    """Result of workflow execution."""
     
-    def add_step(self, step: ExecutionStep):
-        """Add an execution step."""
+    workflow_id: str = Field(..., description="Workflow ID")
+    success: bool = Field(..., description="Execution success status")
+    status: ExecutionStatus = Field(..., description="Execution status")
+    
+    # Timing
+    started_at: datetime = Field(default_factory=datetime.utcnow, description="Start timestamp")
+    completed_at: Optional[datetime] = Field(default=None, description="Completion timestamp")
+    duration: float = Field(default=0.0, description="Execution duration in seconds")
+    
+    # Results
+    steps: List[Dict[str, Any]] = Field(default_factory=list, description="Execution steps")
+    errors: List[str] = Field(default_factory=list, description="Error messages")
+    warnings: List[str] = Field(default_factory=list, description="Warning messages")
+    
+    # Performance metrics
+    total_tasks: int = Field(default=0, description="Total tasks executed")
+    successful_tasks: int = Field(default=0, description="Successfully completed tasks")
+    failed_tasks: int = Field(default=0, description="Failed tasks")
+    
+    # Data
+    data_extracted: Dict[str, Any] = Field(default_factory=dict, description="Extracted data")
+    files_processed: List[str] = Field(default_factory=list, description="Processed files")
+    api_calls_made: int = Field(default=0, description="Number of API calls")
+    
+    # Logs
+    logs: List[ExecutionLog] = Field(default_factory=list, description="Execution logs")
+    
+    # Metadata
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    
+    class Config:
+        use_enum_values = True
+        
+    def add_step(self, step: Dict[str, Any]):
+        """Add execution step."""
         self.steps.append(step)
-        if step.success:
-            self.success = self.success and True
-        else:
-            self.success = False
-            if step.error:
-                self.errors.append(step.error)
-                
+        
     def add_error(self, error: str):
-        """Add an error message."""
+        """Add error message."""
         self.errors.append(error)
-        self.success = False
         
     def add_warning(self, warning: str):
-        """Add a warning message."""
+        """Add warning message."""
         self.warnings.append(warning)
         
-    def calculate_duration(self):
-        """Calculate total execution duration."""
-        if self.start_time and self.end_time:
-            self.duration = (self.end_time - self.start_time).total_seconds()
-        elif self.steps:
-            start_times = [step.start_time for step in self.steps if step.start_time]
-            end_times = [step.end_time for step in self.steps if step.end_time]
-            
-            if start_times and end_times:
-                self.start_time = min(start_times)
-                self.end_time = max(end_times)
-                self.duration = (self.end_time - self.start_time).total_seconds()
-                
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
-        self.calculate_duration()
+    def add_log(self, level: str, message: str, context: Optional[Dict[str, Any]] = None):
+        """Add execution log."""
+        log = ExecutionLog(
+            id=f"log_{len(self.logs)}_{datetime.utcnow().timestamp()}",
+            level=level,
+            message=message,
+            context=context or {}
+        )
+        self.logs.append(log)
+        
+    def mark_completed(self, success: bool = True):
+        """Mark execution as completed."""
+        self.completed_at = datetime.utcnow()
+        self.duration = (self.completed_at - self.started_at).total_seconds()
+        self.success = success
+        self.status = ExecutionStatus.COMPLETED if success else ExecutionStatus.FAILED
+        
+    def mark_failed(self, error: str):
+        """Mark execution as failed."""
+        self.add_error(error)
+        self.mark_completed(success=False)
+        
+    def get_success_rate(self) -> float:
+        """Get success rate as percentage."""
+        if self.total_tasks == 0:
+            return 0.0
+        return (self.successful_tasks / self.total_tasks) * 100
+        
+    def get_summary(self) -> Dict[str, Any]:
+        """Get execution summary."""
         return {
             "workflow_id": self.workflow_id,
             "success": self.success,
-            "steps_count": len(self.steps),
-            "errors_count": len(self.errors),
-            "warnings_count": len(self.warnings),
+            "status": self.status.value,
             "duration": self.duration,
-            "start_time": self.start_time.isoformat() if self.start_time else None,
-            "end_time": self.end_time.isoformat() if self.end_time else None,
-            "artifacts_count": len(self.artifacts),
-            "created_at": self.created_at.isoformat()
-        }
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-
-
-class ExecutionLog(BaseModel):
-    """Execution log for tracking workflow execution."""
-    workflow_id: str
-    steps: List[ExecutionStep] = Field(default_factory=list)
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    duration: float = 0.0
-    
-    def add_step(self, step: ExecutionStep):
-        """Add an execution step."""
-        self.steps.append(step)
-        if not self.start_time:
-            self.start_time = step.start_time
-        self.end_time = step.end_time
-        
-        if not step.success and step.error:
-            self.errors.append(step.error)
-            
-    def add_error(self, error: str):
-        """Add an error message."""
-        self.errors.append(error)
-        
-    def add_warning(self, warning: str):
-        """Add a warning message."""
-        self.warnings.append(warning)
-        
-    def is_successful(self) -> bool:
-        """Check if execution was successful."""
-        return len(self.errors) == 0 and all(step.success for step in self.steps)
-        
-    def get_progress(self) -> float:
-        """Get execution progress as percentage."""
-        if not self.steps:
-            return 0.0
-        completed = sum(1 for step in self.steps if step.status == ExecutionStatus.COMPLETED)
-        return (completed / len(self.steps)) * 100.0
-        
-    def get_duration(self) -> float:
-        """Get total execution duration."""
-        if self.start_time and self.end_time:
-            return (self.end_time - self.start_time).total_seconds()
-        return self.duration
-        
-    def to_execution_result(self) -> ExecutionResult:
-        """Convert to execution result."""
-        result = ExecutionResult(
-            workflow_id=self.workflow_id,
-            success=self.is_successful(),
-            steps=self.steps.copy(),
-            errors=self.errors.copy(),
-            warnings=self.warnings.copy(),
-            start_time=self.start_time,
-            end_time=self.end_time,
-            duration=self.get_duration()
-        )
-        return result
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
-
-
-class PerformanceMetrics(BaseModel):
-    """Performance metrics for workflows and tasks."""
-    workflow_id: str
-    total_executions: int = 0
-    successful_executions: int = 0
-    failed_executions: int = 0
-    avg_duration: float = 0.0
-    min_duration: float = 0.0
-    max_duration: float = 0.0
-    success_rate: float = 0.0
-    last_execution: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
-    def update_metrics(self, execution_result: ExecutionResult):
-        """Update metrics with new execution result."""
-        self.total_executions += 1
-        self.last_execution = execution_result.created_at
-        
-        if execution_result.success:
-            self.successful_executions += 1
-        else:
-            self.failed_executions += 1
-            
-        # Update duration metrics
-        duration = execution_result.duration
-        if self.total_executions == 1:
-            self.avg_duration = duration
-            self.min_duration = duration
-            self.max_duration = duration
-        else:
-            self.avg_duration = ((self.avg_duration * (self.total_executions - 1)) + duration) / self.total_executions
-            self.min_duration = min(self.min_duration, duration)
-            self.max_duration = max(self.max_duration, duration)
-            
-        # Update success rate
-        self.success_rate = self.successful_executions / self.total_executions
-        self.updated_at = datetime.utcnow()
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
+            "total_tasks": self.total_tasks,
+            "successful_tasks": self.successful_tasks,
+            "failed_tasks": self.failed_tasks,
+            "success_rate": self.get_success_rate(),
+            "error_count": len(self.errors),
+            "warning_count": len(self.warnings),
+            "api_calls": self.api_calls_made,
+            "files_processed": len(self.files_processed)
         }
