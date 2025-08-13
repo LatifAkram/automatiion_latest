@@ -247,7 +247,7 @@ class IntelligentAutomationAgent:
             
             # Use AI to generate plan with intelligent selectors
             prompt = f"""
-            Generate a detailed automation plan using AI-analyzed DOM elements:
+            Generate a detailed automation plan using AI-analyzed DOM elements.
             
             Instructions: {instructions}
             URL: {url}
@@ -274,7 +274,8 @@ class IntelligentAutomationAgent:
             4. Provides comprehensive error handling
             5. Uses advanced learning and auto-heal capabilities
             
-            Return as JSON with structure:
+            IMPORTANT: Return ONLY valid JSON without any additional text, markdown, or explanations.
+            
             {{
                 "steps": [
                     {{
@@ -327,11 +328,14 @@ class IntelligentAutomationAgent:
             
             try:
                 import json
-                plan = json.loads(response)
+                # Clean the response to extract JSON
+                cleaned_response = self._extract_json_from_response(response)
+                plan = json.loads(cleaned_response)
                 self.logger.info(f"Generated AI-powered automation plan with {len(plan.get('steps', []))} steps")
                 return plan
-            except json.JSONDecodeError:
-                self.logger.warning("Failed to parse AI response as JSON, using fallback plan")
+            except json.JSONDecodeError as e:
+                self.logger.warning(f"Failed to parse AI response as JSON: {e}")
+                self.logger.warning(f"Raw response: {response[:200]}...")
                 return await self._generate_fallback_plan_with_ai(instructions, url, ai_dom_analysis)
                 
         except Exception as e:
@@ -1217,6 +1221,33 @@ class IntelligentAutomationAgent:
                 
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    def _extract_json_from_response(self, response: str) -> str:
+        """Extract JSON from AI response that might contain extra text."""
+        try:
+            # Look for JSON object in the response
+            import re
+            
+            # Try to find JSON object with curly braces
+            json_pattern = r'\{.*\}'
+            json_match = re.search(json_pattern, response, re.DOTALL)
+            
+            if json_match:
+                return json_match.group(0)
+            
+            # If no JSON object found, try to extract from code blocks
+            code_block_pattern = r'```(?:json)?\s*(\{.*?\})\s*```'
+            code_match = re.search(code_block_pattern, response, re.DOTALL)
+            
+            if code_match:
+                return code_match.group(1)
+            
+            # If still no JSON found, return the original response
+            return response
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to extract JSON from response: {e}")
+            return response
             
     async def shutdown(self):
         """Shutdown the intelligent automation agent."""

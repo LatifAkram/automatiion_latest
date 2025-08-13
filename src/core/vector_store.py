@@ -344,14 +344,29 @@ class VectorStore:
             metadatas = results.get("metadatas", [[]])
             ids = results.get("ids", [[]])
             
+            # Handle empty results
+            if not documents or not documents[0]:
+                return formatted_results
+            
             for i in range(len(documents[0])):
                 try:
-                    doc_data = json.loads(documents[0][i]) if documents[0][i] else {}
+                    doc_content = documents[0][i] if documents[0] and i < len(documents[0]) else ""
+                    
+                    # Handle empty or invalid document content
+                    if not doc_content or doc_content.strip() == "":
+                        doc_data = {}
+                    else:
+                        try:
+                            doc_data = json.loads(doc_content)
+                        except json.JSONDecodeError:
+                            # If not valid JSON, treat as plain text
+                            doc_data = {"content": doc_content}
+                    
                     formatted_results.append({
-                        "id": ids[0][i] if ids and ids[0] else None,
+                        "id": ids[0][i] if ids and ids[0] and i < len(ids[0]) else f"doc_{i}",
                         "content": doc_data,
-                        "metadata": metadatas[0][i] if metadatas and metadatas[0] else {},
-                        "score": results.get("distances", [[]])[0][i] if results.get("distances") else None
+                        "metadata": metadatas[0][i] if metadatas and metadatas[0] and i < len(metadatas[0]) else {},
+                        "score": results.get("distances", [[]])[0][i] if results.get("distances") and results["distances"][0] and i < len(results["distances"][0]) else 0.0
                     })
                 except Exception as e:
                     self.logger.warning(f"Failed to format result {i}: {e}")
