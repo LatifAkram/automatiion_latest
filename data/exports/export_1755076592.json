@@ -1,0 +1,36 @@
+{
+  "export_time": "2025-08-13T09:16:32.397980",
+  "format": "json",
+  "data": {
+    "title": "Automation Test Report",
+    "content": [
+      {
+        "test": "Live Automation",
+        "status": "PASSED",
+        "actions": 6,
+        "success_rate": "100%"
+      },
+      {
+        "test": "Search Functionality",
+        "status": "PASSED",
+        "results": 5,
+        "sources": "Real"
+      },
+      {
+        "test": "Chat Interaction",
+        "status": "PASSED",
+        "sessions": 2,
+        "responses": "Contextual"
+      }
+    ],
+    "automation_details": {
+      "execution_time": "2.567365s",
+      "screenshots": 6,
+      "form_fields_filled": 3
+    }
+  },
+  "metadata": {
+    "generated_by": "Autonomous Automation Platform",
+    "version": "1.0.0"
+  }
+}
