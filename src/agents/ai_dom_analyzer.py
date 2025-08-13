@@ -304,12 +304,24 @@ class AIDOMAnalyzer:
             
             # Add learned patterns
             for pattern in learned_patterns.get("successful_selectors", []):
-                all_elements.append({
-                    "type": "learned",
-                    "selector": pattern.get("selector"),
-                    "confidence": pattern.get("success_rate", 0.5),
-                    "context": pattern.get("context", "")
-                })
+                # Ensure pattern is a dictionary
+                if isinstance(pattern, dict):
+                    all_elements.append({
+                        "type": "learned",
+                        "selector": pattern.get("selector"),
+                        "confidence": pattern.get("success_rate", 0.5),
+                        "context": pattern.get("context", "")
+                    })
+                elif isinstance(pattern, str):
+                    # If pattern is a string, treat it as a selector
+                    all_elements.append({
+                        "type": "learned",
+                        "selector": pattern,
+                        "confidence": 0.5,
+                        "context": "string_pattern"
+                    })
+                else:
+                    self.logger.warning(f"Unknown pattern type: {type(pattern)}")
             
             # Generate selectors for each element
             for element in all_elements:

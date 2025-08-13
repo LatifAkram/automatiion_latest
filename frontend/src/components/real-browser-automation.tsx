@@ -70,6 +70,17 @@ export default function RealBrowserAutomation({
   onViewCode,
   onDownloadReport
 }: RealBrowserAutomationProps) {
+  // Filter and validate steps to prevent duplicate keys
+  const validSteps = React.useMemo(() => {
+    if (!Array.isArray(steps)) return [];
+    return steps.filter(step => 
+      step && 
+      typeof step === 'object' && 
+      step.action && 
+      typeof step.action === 'string' && 
+      step.action.trim() !== ''
+    );
+  }, [steps]);
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeTab, setActiveTab] = useState<'browser' | 'steps' | 'screenshots' | 'code'>('browser');
   const [showFullscreen, setShowFullscreen] = useState(false);
@@ -150,7 +161,7 @@ export default function RealBrowserAutomation({
   if (!isVisible) return null;
 
   return (
-    <AnimatePresence>
+    <AnimatePresence key={`automation-${automationId || 'default'}`}>
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -299,7 +310,7 @@ export default function RealBrowserAutomation({
               {activeTab === 'steps' && (
                 <div className="h-full overflow-y-auto p-4">
                   <div className="space-y-3">
-                    {steps.filter(step => step && step.action && step.action.trim() !== '').map((step, index) => (
+                    {validSteps.map((step, index) => (
                       <motion.div
                         key={`real_step_${step.id || `step_${index}`}_${(step.action || 'unknown_action').replace(/\s+/g, '_')}`}
                         initial={{ opacity: 0, x: -20 }}
@@ -356,7 +367,7 @@ export default function RealBrowserAutomation({
               {activeTab === 'screenshots' && (
                 <div className="h-full overflow-y-auto p-4">
                   <div className="grid grid-cols-3 gap-4">
-                    {steps.filter(step => step && step.screenshot && step.action && step.action.trim() !== '').map((step, index) => (
+                    {validSteps.filter(step => step.screenshot).map((step, index) => (
                       <motion.div
                         key={`real_screenshot_${step.id || `screenshot_${index}`}_${(step.action || 'unknown_action').replace(/\s+/g, '_')}`}
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -424,7 +435,7 @@ async function runRealAutomation() {
     await page.goto('${browserUrl || 'https://example.com'}');
     
     // Real automation steps
-${steps.map(step => `    // ${step.action}
+                ${validSteps.map(step => `    // ${step.action}
     ${step.description}
     ${step.selector ? `await page.click('${step.selector}');` : ''}
     ${step.value ? `await page.fill('${step.selector}', '${step.value}');` : ''}`).join('\n')}
