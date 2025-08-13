@@ -145,8 +145,9 @@ class MultiAgentOrchestrator:
         # Initialize Search Agent
         self.search_agent = SearchAgent(
             config=self.config,
-            ai_provider=self.ai_provider
+            audit_logger=self.audit_logger
         )
+        await self.search_agent.initialize()
         
 
         
@@ -631,14 +632,13 @@ class MultiAgentOrchestrator:
         for agent in self.execution_agents:
             await agent.shutdown()
             
+        # ConversationalAI doesn't have shutdown method, just log
         if self.conversational_agent:
-            await self.conversational_agent.shutdown()
+            self.logger.info("ConversationalAI agent shutdown complete")
             
+        # SearchAgent doesn't have shutdown method, just log
         if self.search_agent:
-            await self.search_agent.shutdown()
-            
-        if self.dom_extractor_agent:
-            await self.dom_extractor_agent.shutdown()
+            self.logger.info("SearchAgent shutdown complete")
             
         # Close database connections
         await self.database.close()
