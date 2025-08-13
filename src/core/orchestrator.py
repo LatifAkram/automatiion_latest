@@ -148,7 +148,7 @@ class MultiAgentOrchestrator:
         
         # Initialize Execution Agent
         from ..agents.executor import ExecutionAgent
-        from ..utils.selector_drift_detector import SelectorDriftDetector
+        from ..utils.selector_drift import SelectorDriftDetector
         
         self.execution_agents = []
         execution_agent = ExecutionAgent(
