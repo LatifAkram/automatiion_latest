@@ -43,7 +43,7 @@ class MultiAgentOrchestrator:
         self.logger = logging.getLogger(__name__)
         
         # Core components
-        self.db_manager = DatabaseManager(config.database)
+        self.database = DatabaseManager(config.database)
         self.vector_store = VectorStore(config.database)
         self.audit_logger = AuditLogger(config)
         
@@ -68,7 +68,7 @@ class MultiAgentOrchestrator:
         self.logger.info("Initializing Multi-Agent Orchestrator...")
         
         # Initialize core components
-        await self.db_manager.initialize()
+        await self.database.initialize()
         await self.vector_store.initialize()
         await self.audit_logger.initialize()
         
@@ -130,13 +130,13 @@ class MultiAgentOrchestrator:
         
     async def _load_existing_workflows(self):
         """Load existing workflows from database."""
-        workflows = await self.db_manager.get_active_workflows()
+        workflows = await self.database.get_active_workflows()
         for workflow in workflows:
             self.active_workflows[workflow.id] = workflow
             
     async def _load_performance_metrics(self):
         """Load performance metrics from database."""
-        self.performance_metrics = await self.db_manager.get_performance_metrics()
+        self.performance_metrics = await self.database.get_performance_metrics()
         
     async def execute_workflow(self, workflow_request: Dict[str, Any]) -> str:
         """
@@ -164,7 +164,7 @@ class MultiAgentOrchestrator:
                 )
                 
                 # Store workflow
-                await self.db_manager.save_workflow(workflow)
+                await self.database.save_workflow(workflow)
                 self.active_workflows[workflow_id] = workflow
                 
                 # Start workflow execution
@@ -214,7 +214,7 @@ class MultiAgentOrchestrator:
         )
         
         # Store plan in database
-        await self.db_manager.save_workflow_plan(workflow_id, plan)
+        await self.database.save_workflow_plan(workflow_id, plan)
         
         return plan
         
@@ -262,7 +262,7 @@ class MultiAgentOrchestrator:
             )
             
             # Store execution result
-            await self.db_manager.save_execution_result(execution_result)
+            await self.database.save_execution_result(execution_result)
             
             return execution_result
             
@@ -352,7 +352,7 @@ class MultiAgentOrchestrator:
         }
         
         # Store metrics in database
-        await self.db_manager.save_performance_metrics(metrics_key, self.performance_metrics[metrics_key])
+        await self.database.save_performance_metrics(metrics_key, self.performance_metrics[metrics_key])
         
     async def _trigger_self_healing(self, workflow_id: str, execution_result: ExecutionResult):
         """Trigger self-healing mechanisms for failed workflows."""
@@ -400,7 +400,7 @@ class MultiAgentOrchestrator:
         workflow.status = status
         workflow.updated_at = datetime.utcnow()
         
-        await self.db_manager.update_workflow_status(workflow_id, status)
+        await self.database.update_workflow_status(workflow_id, status)
         
     async def get_workflow_status(self, workflow_id: str) -> Optional[Dict[str, Any]]:
         """Get current status of a workflow."""
@@ -408,7 +408,7 @@ class MultiAgentOrchestrator:
             return None
             
         workflow = self.active_workflows[workflow_id]
-        execution_result = await self.db_manager.get_latest_execution_result(workflow_id)
+        execution_result = await self.database.get_latest_execution_result(workflow_id)
         
         return {
             "id": workflow.id,
@@ -453,7 +453,7 @@ class MultiAgentOrchestrator:
             await self.dom_extractor_agent.shutdown()
             
         # Close database connections
-        await self.db_manager.shutdown()
+        await self.database.shutdown()
         await self.vector_store.shutdown()
         await self.audit_logger.shutdown()
         

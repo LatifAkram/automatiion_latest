@@ -427,7 +427,7 @@ async def global_exception_handler(request, exc):
 
 
 # Start the server
-async def start_api_server(orch: MultiAgentOrchestrator):
+def start_api_server(orch: MultiAgentOrchestrator):
     """Start the API server."""
     global orchestrator
     orchestrator = orch
@@ -436,7 +436,7 @@ async def start_api_server(orch: MultiAgentOrchestrator):
     
     config = orch.config.api
     
-    await uvicorn.run(
+    uvicorn.run(
         app,
         host=config.host,
         port=config.port,

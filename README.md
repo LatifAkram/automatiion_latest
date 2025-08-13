@@ -4,340 +4,378 @@ A comprehensive, autonomous, adaptive, multi-agent automation platform capable o
 
 ## 🚀 Core Vision
 
-This platform implements an intelligent multi-agent system with:
+This platform implements a sophisticated multi-agent system with:
 
-- **AI-1: Planner Agent** - Intelligent task breakdown and planning using various LLMs (GPT, Claude, Gemini, Local LLM)
-- **AI-2: Execution Agent** - Parallel workflow execution with Playwright/Selenium/Cypress for live automation
-- **AI-3: Conversational Agent** - Context-aware reasoning and human interaction
-- **Search Agents** - Multi-source data retrieval (Google, Bing, DuckDuckGo, GitHub, StackOverflow, etc.)
-- **DOM Extraction Agents** - Intelligent web page data extraction
-- **Learning & Self-Healing** - Vector DB + ML for adaptive behavior and auto-repair
-- **Enterprise Compliance** - Audit logging, RBAC, PII masking, compliance exports
+- **AI-1: Planner Agent** - Intelligent planning and task breakdown
+- **AI-2: Execution Agents** - Parallel workflow execution with self-healing
+- **AI-3: Conversational Agent** - Reasoning, context management, and human interaction
+- **Vector Database** - Learning and pattern recognition
+- **Enterprise Compliance** - Audit logging, PII detection, and governance
 
 ## 🏗️ Architecture
 
+### Multi-Agent System
+
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Multi-Agent Orchestrator                 │
-├─────────────────────────────────────────────────────────────┤
-│  AI-1: Planner    │  AI-2: Executor    │  AI-3: Conversational │
-│  • Task Breakdown │  • Web Automation  │  • Context Management │
-│  • Live Data      │  • API Calls       │  • Reasoning          │
-│  • URL Detection  │  • DOM Extraction  │  • Human Takeover    │
-│  • Parallel Opt.  │  • Self-Healing    │  • Follow-up Tasks   │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                    Data & Learning Layer                    │
-├─────────────────────────────────────────────────────────────┤
-│  SQLite Core DB   │  Vector DB         │  Local Media Storage │
-│  • Definitions    │  • Semantic Search │  • Screenshots       │
-│  • Audit Logs     │  • Learning        │  • Videos            │
-│  • Performance    │  • Self-Healing    │  • Exports           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────┐
-│                  Enterprise Compliance Layer                │
-├─────────────────────────────────────────────────────────────┤
-│  Audit Logging    │  RBAC              │  PII Masking         │
-│  • Tamper-proof   │  • Role-based      │  • Data Protection   │
-│  • SOC2/GDPR      │  • Access Control  │  • Consent Workflow  │
-│  • HIPAA Ready    │  • Compliance      │  • Export Reports    │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   AI-1: Planner │    │ AI-2: Execution │    │ AI-3: Conversational │
+│     Agent       │    │     Agents      │    │      Agent      │
+│                 │    │                 │    │                 │
+│ • Task Analysis │    │ • Web Automation│    │ • Context Mgmt  │
+│ • Plan Creation │    │ • API Calls     │    │ • Reasoning     │
+│ • Optimization  │    │ • Self-Healing  │    │ • Human Takeover│
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   Orchestrator  │
+                    │                 │
+                    │ • Coordination  │
+                    │ • Learning      │
+                    │ • Optimization  │
+                    └─────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   Vector Store  │
+                    │                 │
+                    │ • Pattern Storage│
+                    │ • Similarity Search│
+                    │ • Learning      │
+                    └─────────────────┘
 ```
 
-## 🎯 Key Features
+### Core Components
 
-### 🤖 Multi-Agent Intelligence
-- **Planner Agent**: Breaks down complex workflows, detects data needs, identifies parallel opportunities
-- **Execution Agent**: Handles web automation, API calls, data processing with self-healing
-- **Conversational Agent**: Maintains context, provides reasoning, enables human takeover
-- **Search Agents**: Multi-source data retrieval with better results than Perplexity AI
-- **DOM Extraction Agents**: Intelligent web page data extraction and parsing
+1. **Planner Agent (AI-1)**
+   - Breaks down complex workflows into executable tasks
+   - Detects live data needs and spins up Search Agents
+   - Identifies URLs for DOM Extraction Agents
+   - Optimizes plans based on historical performance
 
-### 🔄 Adaptive Learning & Self-Healing
-- **Selector Drift Detection**: ML model predicts and detects UI changes
-- **Workflow Repair**: Auto-updates selectors, API calls, DOM parsing
-- **Test Farm**: Headless re-runs for reliability validation
-- **Performance Dashboard**: Real-time metrics and optimization
+2. **Execution Agents (AI-2)**
+   - Uses Playwright/Selenium for web automation
+   - Handles API calls, data processing, file operations
+   - Implements selector drift detection and self-healing
+   - Captures screenshots and videos for every step
 
-### 🏢 Enterprise-Grade Features
-- **AI Connector Builder**: Auto-generates connectors from API docs
-- **Continuous Test Farm**: Stress-testing and reliability metrics
-- **Compliance Layer**: Audit logging, RBAC, PII masking, consent workflow
-- **Compliance Export**: SOC2, GDPR, HIPAA ready reports
+3. **Conversational Agent (AI-3)**
+   - Maintains context across sessions
+   - Provides reasoning for decisions
+   - Supports human takeover of workflow steps
+   - Better than ChatGPT/Cursor AI for automation context
 
-### 📊 Advanced Output & Reporting
-- **Automation Reports**: Step-by-step with screenshots, videos, code, audit logs
-- **Code Mode**: Export automation scripts
-- **Follow-up Mode**: Seamless task continuation
+4. **Search Agents**
+   - Google, Bing, DuckDuckGo search
+   - GitHub, StackOverflow, API docs
+   - News, Reddit, YouTube integration
+   - Results better than Perplexity AI
+
+5. **DOM Extraction Agents**
+   - Intelligent web scraping
+   - Structured data extraction
+   - Form detection and handling
+   - Visual similarity matching
 
 ## 🛠️ Installation
 
 ### Prerequisites
+
 - Python 3.8+
-- Node.js 16+ (for Playwright)
+- pip
 - Git
 
 ### Quick Start
 
 1. **Clone the repository**
-```bash
-git clone <repository-url>
-cd multi-agent-automation-platform
-```
+   ```bash
+   git clone <repository-url>
+   cd autonomous-automation-platform
+   ```
 
-2. **Install Python dependencies**
-```bash
-pip install -r requirements.txt
-```
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 3. **Install Playwright browsers**
-```bash
-playwright install
-```
+   ```bash
+   playwright install
+   ```
 
 4. **Set up environment variables**
-```bash
-cp .env.example .env
-# Edit .env with your API keys and configuration
-```
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
 
-5. **Initialize the platform**
-```bash
-python main.py
-```
+5. **Test the platform**
+   ```bash
+   python test_platform.py
+   ```
+
+6. **Start the platform**
+   ```bash
+   python main.py
+   ```
 
 ## ⚙️ Configuration
 
 Create a `.env` file with the following configuration:
 
 ```env
-# AI Configuration
-AI_OPENAI_API_KEY=your_openai_key
-AI_ANTHROPIC_API_KEY=your_anthropic_key
-AI_GOOGLE_API_KEY=your_google_key
-AI_LOCAL_LLM_URL=http://127.0.0.1:1234
+# Environment
+ENVIRONMENT=development
+LOG_LEVEL=INFO
+DATA_PATH=./data
 
-# Search Configuration
-SEARCH_GOOGLE_SEARCH_API_KEY=your_google_search_key
-SEARCH_GOOGLE_SEARCH_CX=your_search_engine_id
-SEARCH_BING_SEARCH_API_KEY=your_bing_key
-SEARCH_GITHUB_TOKEN=your_github_token
+# AI Providers
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+GOOGLE_API_KEY=your_google_key
+LOCAL_LLM_URL=http://127.0.0.1:1234
 
-# Database Configuration
-DATABASE_DATABASE_PATH=./data/automation.db
-DATABASE_VECTOR_DB_PATH=./data/vector_db
+# Search APIs
+GOOGLE_SEARCH_API_KEY=your_google_search_key
+GOOGLE_SEARCH_CX=your_search_engine_id
+BING_SEARCH_API_KEY=your_bing_key
+GITHUB_TOKEN=your_github_token
+STACK_OVERFLOW_KEY=your_stackoverflow_key
 
-# Automation Configuration
-AUTOMATION_BROWSER_TYPE=chromium
-AUTOMATION_HEADLESS=true
-AUTOMATION_BROWSER_TIMEOUT=30
+# Automation
+BROWSER_TYPE=chromium
+HEADLESS=true
+MAX_PARALLEL_AGENTS=5
+MAX_PARALLEL_WORKFLOWS=3
 
-# Security Configuration
-SECURITY_SECRET_KEY=your_secret_key
-SECURITY_ENCRYPTION_KEY=your_encryption_key
-
-# API Configuration
-API_API_HOST=0.0.0.0
-API_API_PORT=8000
+# API Server
+API_HOST=0.0.0.0
+API_PORT=8000
 ```
 
 ## 🚀 Usage
 
-### Basic Workflow Execution
+### Starting the Platform
 
-```python
-from src import MultiAgentOrchestrator, Config
-
-# Initialize the platform
-config = Config()
-orchestrator = MultiAgentOrchestrator(config)
-await orchestrator.initialize()
-
-# Define a workflow
-workflow_request = {
-    "name": "E-commerce Price Monitoring",
-    "description": "Monitor product prices across multiple e-commerce sites",
-    "domain": "ecommerce",
-    "tasks": [
-        {
-            "name": "Search for products",
-            "type": "search",
-            "parameters": {
-                "query": "laptop computers",
-                "sources": ["google", "amazon", "bestbuy"]
-            }
-        },
-        {
-            "name": "Extract price data",
-            "type": "dom_extraction",
-            "parameters": {
-                "url": "https://amazon.com/search?q=laptop",
-                "selectors": {
-                    "product_name": ".product-title",
-                    "price": ".product-price",
-                    "rating": ".product-rating"
-                }
-            }
-        }
-    ]
-}
-
-# Execute the workflow
-execution = await orchestrator.execute_workflow(workflow_request)
-print(f"Workflow started with ID: {execution.workflow_id}")
+```bash
+python main.py
 ```
 
-### Conversational Interaction
-
-```python
-# Chat with the conversational agent
-response = await orchestrator.chat_with_agent(
-    "What's the status of my e-commerce monitoring workflow?",
-    session_id="user_123",
-    workflow_id="workflow_456"
-)
-
-print(f"AI Response: {response['response']}")
-print(f"Reasoning: {response['reasoning']}")
-```
+The platform will:
+1. Initialize all AI agents
+2. Set up the vector database
+3. Start the FastAPI server
+4. Begin listening for workflow requests
 
 ### API Endpoints
 
-The platform exposes a REST API at `http://localhost:8000`:
+Once running, access the API at `http://localhost:8000`:
 
-- `POST /workflows` - Create and execute workflows
-- `GET /workflows/{workflow_id}` - Get workflow status
-- `GET /workflows` - List all workflows
-- `POST /chat` - Chat with the conversational agent
-- `GET /agents/status` - Get agent status
-- `GET /metrics` - Get performance metrics
+- **Health Check**: `GET /health`
+- **Create Workflow**: `POST /workflows`
+- **Get Workflow Status**: `GET /workflows/{workflow_id}`
+- **List Workflows**: `GET /workflows`
+- **Chat with Agent**: `POST /chat`
+- **Performance Metrics**: `GET /analytics/performance`
+- **Agent Status**: `GET /analytics/agents`
+- **System Info**: `GET /system/info`
+
+### Example Workflow Request
+
+```python
+import requests
+
+# Create a workflow
+workflow_request = {
+    "name": "E-commerce Product Research",
+    "description": "Research products on multiple e-commerce sites",
+    "domain": "ecommerce",
+    "parameters": {
+        "product": "laptop",
+        "budget": 1000,
+        "sites": ["amazon", "bestbuy", "newegg"]
+    },
+    "tags": ["research", "ecommerce", "automation"]
+}
+
+response = requests.post("http://localhost:8000/workflows", json=workflow_request)
+workflow_id = response.json()["workflow_id"]
+
+# Check status
+status = requests.get(f"http://localhost:8000/workflows/{workflow_id}")
+print(status.json())
+```
+
+### Chat with the Agent
+
+```python
+# Chat with the conversational agent
+chat_request = {
+    "message": "What's the status of my workflow?",
+    "session_id": "user123",
+    "context": {"workflow_id": workflow_id}
+}
+
+response = requests.post("http://localhost:8000/chat", json=chat_request)
+print(response.json()["response"])
+```
 
 ## 🔧 Advanced Features
 
-### Self-Healing Workflows
+### Self-Healing Capabilities
 
 The platform automatically detects and fixes common issues:
 
-```python
-# The platform will automatically:
-# 1. Detect selector drift
-# 2. Find alternative selectors
-# 3. Update the workflow
-# 4. Re-execute failed steps
-```
+- **Selector Drift**: When web elements change, the system finds alternative selectors
+- **API Failures**: Automatic retry with exponential backoff
+- **Data Validation**: Ensures extracted data meets expected formats
+- **Performance Optimization**: Learns from past executions to improve future runs
 
-### Multi-Source Search
+### Learning and Optimization
 
-```python
-search_results = await orchestrator.search_agent.comprehensive_search(
-    query="Python automation frameworks",
-    sources=["google", "github", "stackoverflow", "reddit"],
-    max_results=20
-)
-```
+- **Vector Database**: Stores execution patterns for similarity search
+- **Performance Metrics**: Tracks success rates, execution times, and failure patterns
+- **Template Reuse**: Identifies and reuses successful workflow patterns
+- **Continuous Improvement**: Automatically optimizes based on historical data
 
-### DOM Extraction
+### Enterprise Compliance
 
-```python
-extracted_data = await orchestrator.dom_extraction_agent.extract_from_url(
-    url="https://example.com",
-    selectors={
-        "title": "h1",
-        "content": ".main-content",
-        "metadata": "meta[name='description']"
-    },
-    content_type="article"
-)
-```
+- **Audit Logging**: Comprehensive logging of all activities
+- **PII Detection**: Automatic detection and masking of sensitive data
+- **RBAC**: Role-based access control for enterprise deployments
+- **Compliance Reports**: SOC2, GDPR, HIPAA compliance reporting
 
-## 📈 Performance & Monitoring
+## 📊 Monitoring and Analytics
 
-### Real-time Metrics
+### Performance Dashboard
 
-```python
-metrics = orchestrator.get_performance_metrics()
-print(f"Success Rate: {metrics.success_rate:.2%}")
-print(f"Average Duration: {metrics.average_duration:.2f}s")
-print(f"Total Workflows: {metrics.total_workflows}")
+Access real-time metrics at `http://localhost:8000/analytics/performance`:
+
+```json
+{
+  "total_workflows": 150,
+  "successful_workflows": 142,
+  "failed_workflows": 8,
+  "success_rate": 0.947,
+  "avg_execution_time": 45.2,
+  "active_agents": 3,
+  "queue_size": 2
+}
 ```
 
 ### Agent Status
 
-```python
-status = orchestrator.get_agent_status()
-for agent_name, agent_status in status.items():
-    print(f"{agent_name}: {agent_status['status']}")
-```
+Monitor individual agent health at `http://localhost:8000/analytics/agents`:
 
-## 🔒 Security & Compliance
-
-### Audit Logging
-
-All activities are logged with tamper-proof audit trails:
-
-```python
-# Audit logs are automatically generated for:
-# - Workflow executions
-# - Agent interactions
-# - Data access
-# - Configuration changes
-# - Security events
-```
-
-### RBAC (Role-Based Access Control)
-
-```python
-# Users can be assigned roles with specific permissions:
-# - Admin: Full access
-# - Operator: Workflow execution
-# - Viewer: Read-only access
-# - Auditor: Audit log access
+```json
+{
+  "agents": [
+    {
+      "type": "execution",
+      "agent_id": "exec_001",
+      "is_busy": false,
+      "current_task": null,
+      "uptime": 3600,
+      "tasks_completed": 45
+    }
+  ]
+}
 ```
 
 ## 🧪 Testing
 
-### Run Tests
+### Run Platform Tests
 
 ```bash
-# Run all tests
-pytest
-
-# Run specific test categories
-pytest tests/test_agents/
-pytest tests/test_core/
-pytest tests/test_api/
-
-# Run with coverage
-pytest --cov=src --cov-report=html
+python test_platform.py
 ```
 
-### Test Workflows
+### Run Unit Tests
 
 ```bash
-# Test specific workflow scenarios
-python -m pytest tests/test_workflows/ -v
-
-# Test self-healing capabilities
-python -m pytest tests/test_self_healing/ -v
+pytest tests/
 ```
 
-## 📚 Documentation
+### Run Integration Tests
 
-- [API Documentation](docs/api.md)
-- [Agent Architecture](docs/agents.md)
-- [Workflow Examples](docs/workflows.md)
-- [Configuration Guide](docs/configuration.md)
-- [Security & Compliance](docs/security.md)
+```bash
+pytest tests/integration/
+```
+
+## 🔒 Security
+
+### PII Detection
+
+The platform automatically detects and masks:
+
+- Email addresses
+- Phone numbers
+- Social Security numbers
+- Credit card numbers
+- IP addresses
+
+### Audit Trail
+
+All activities are logged with:
+
+- Timestamp and user identification
+- Action details and context
+- Before/after state changes
+- Compliance metadata
+
+### Encryption
+
+- Data at rest encryption
+- Secure API communication
+- Encrypted audit logs
+- Secure credential storage
+
+## 🚀 Deployment
+
+### Docker Deployment
+
+```bash
+# Build the image
+docker build -t automation-platform .
+
+# Run the container
+docker run -p 8000:8000 -v ./data:/app/data automation-platform
+```
+
+### Kubernetes Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: automation-platform
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: automation-platform
+  template:
+    metadata:
+      labels:
+        app: automation-platform
+    spec:
+      containers:
+      - name: automation-platform
+        image: automation-platform:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
 
 ## 📄 License
 
@@ -345,18 +383,30 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Documentation**: [docs/](docs/)
+- **Documentation**: [API Docs](http://localhost:8000/docs)
 - **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/your-repo/discussions)
 
-## 🏆 Competitive Advantages
+## 🎯 Roadmap
 
-- **Adaptive Orchestration**: Intelligent task distribution and optimization
-- **Parallel Multi-Agent Execution**: True concurrent workflow processing
-- **Live-Data Awareness**: Real-time data integration and processing
-- **Auto-Heal Capabilities**: Self-repairing workflows and selectors
-- **Cross-Domain Capability**: Works across any domain or industry
-- **Compliance-Ready**: Enterprise-grade security and audit features
+### Phase 1: Core Platform ✅
+- [x] Multi-agent orchestration
+- [x] SQLite database integration
+- [x] Vector database for learning
+- [x] Live data agents (Search, DOM Extraction)
+- [x] Basic self-healing capabilities
+
+### Phase 2: Advanced Features 🚧
+- [ ] AI Connector Builder
+- [ ] Continuous Test Farm
+- [ ] Advanced selector drift detection
+- [ ] Performance optimization engine
+
+### Phase 3: Enterprise Features 📋
+- [ ] Advanced compliance layer
+- [ ] Public connector ecosystem
+- [ ] Enterprise orchestration scaling
+- [ ] Multi-tenant support
 
 ---
 
