@@ -1,0 +1,63 @@
+{
+  "name": "autonomous-automation-frontend",
+  "version": "1.0.0",
+  "description": "Visual Workflow Designer for Autonomous Multi-Agent Automation Platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev": "concurrently \"npm run start\" \"npm run backend\"",
+    "backend": "cd ../ && python main.py"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "react-flow-renderer": "^10.3.17",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "@mui/material": "^5.14.0",
+    "@mui/icons-material": "^5.14.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "axios": "^1.4.0",
+    "react-router-dom": "^6.14.0",
+    "react-query": "^3.39.0",
+    "react-hook-form": "^7.44.0",
+    "yup": "^1.2.0",
+    "@hookform/resolvers": "^3.1.0",
+    "react-hot-toast": "^2.4.0",
+    "react-syntax-highlighter": "^15.5.0",
+    "monaco-editor": "^0.40.0",
+    "@monaco-editor/react": "^4.5.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-color": "^2.19.3",
+    "react-select": "^5.7.0",
+    "date-fns": "^2.30.0",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/lodash": "^4.14.195",
+    "@types/uuid": "^9.0.2",
+    "typescript": "^4.9.5",
+    "concurrently": "^8.0.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:8000"
+}
