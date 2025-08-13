@@ -228,7 +228,7 @@ class ExecutionAgent:
             actions = automation_request.get("actions", [])
             options = automation_request.get("options", {})
             
-            self.logger.info(f"Executing automation: {automation_type} for {url}")
+            self.logger.info(f"Executing real automation: {automation_type} for {url}")
             
             # Initialize browser if not already done
             if not self.page:
@@ -237,46 +237,51 @@ class ExecutionAgent:
             # Navigate to URL if provided
             if url:
                 await self.page.goto(url, wait_until="networkidle", timeout=30000)
-                self.logger.info(f"Navigated to: {url}")
+                self.logger.info(f"Successfully navigated to: {url}")
             
-            # Execute actions
+            # Execute actions with real Playwright
             results = []
             screenshots = []
+            start_time = datetime.utcnow()
             
             for i, action in enumerate(actions):
-                self.logger.info(f"Executing action {i+1}/{len(actions)}: {action.get('type', 'unknown')}")
+                self.logger.info(f"Executing real action {i+1}/{len(actions)}: {action.get('type', 'unknown')}")
                 
-                action_result = await self._execute_action(action)
+                # Skip navigate action if URL is already provided in the main request
+                if action.get('type') == 'navigate' and not action.get('url'):
+                    action_result = {"success": True, "message": "Navigation already completed"}
+                else:
+                    action_result = await self._execute_real_action(action)
+                
                 results.append(action_result)
                 
-                # Take screenshot after each action if requested
-                if options.get("screenshot_after_action", True):
-                    try:
-                        screenshot_path = await self.media_capture.capture_screenshot(
-                            self.page, f"action_{i+1}", f"after_{action.get('type', 'action')}"
-                        )
-                        screenshots.append({
-                            "action": action.get("type", "unknown"),
-                            "path": screenshot_path,
-                            "timestamp": datetime.utcnow().isoformat()
-                        })
-                    except Exception as e:
-                        self.logger.warning(f"Failed to capture screenshot: {e}")
+                # Take screenshot after each action
+                try:
+                    screenshot_path = await self.media_capture.capture_screenshot(
+                        self.page, f"action_{i+1}", f"after_{action.get('type', 'action')}"
+                    )
+                    screenshots.append({
+                        "action": action.get("type", "unknown"),
+                        "path": screenshot_path,
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+                except Exception as e:
+                    self.logger.warning(f"Failed to capture screenshot: {e}")
                 
                 # Check if action failed
                 if not action_result.get("success", False):
                     self.logger.error(f"Action failed: {action_result.get('error', 'Unknown error')}")
                     break
             
-            # Extract page data
+            # Extract real page data
             page_data = {
                 "title": await self.page.title(),
                 "url": self.page.url,
                 "content_length": len(await self.page.content())
             }
             
-            # Calculate execution time
-            execution_time = 2.5  # Mock for now, would be calculated in real implementation
+            # Calculate real execution time
+            execution_time = (datetime.utcnow() - start_time).total_seconds()
             
             return {
                 "status": "completed",
@@ -285,7 +290,7 @@ class ExecutionAgent:
                     "page_info": page_data,
                     "actions_executed": len(results),
                     "successful_actions": len([r for r in results if r.get("success", False)]),
-                    "message": f"Automation completed successfully. Executed {len(results)} actions.",
+                    "message": f"Real automation completed successfully. Executed {len(results)} actions.",
                     "automation_details": {
                         "url_visited": url,
                         "page_title": page_data.get("title", "Unknown"),
@@ -303,12 +308,12 @@ class ExecutionAgent:
             }
             
         except Exception as e:
-            self.logger.error(f"Automation execution failed: {e}", exc_info=True)
+            self.logger.error(f"Real automation execution failed: {e}", exc_info=True)
             return {
                 "status": "failed",
                 "error": str(e),
                 "screenshots": [],
-                "data": {"message": f"Automation failed: {str(e)}"},
+                "data": {"message": f"Real automation failed: {str(e)}"},
                 "execution_time": 0.0,
                 "timestamp": datetime.utcnow().isoformat()
             }
@@ -832,6 +837,103 @@ class ExecutionAgent:
                 "message": "General task executed successfully"
             }
             
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+            
+    async def _execute_real_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a real action using Playwright."""
+        try:
+            action_type = action.get("type", "unknown")
+            
+            if action_type == "navigate":
+                return await self._navigate_action(action)
+            elif action_type == "click":
+                return await self._click_action(action)
+            elif action_type == "type":
+                return await self._type_action(action)
+            elif action_type == "screenshot":
+                return await self._screenshot_action(action)
+            elif action_type == "wait":
+                return await self._wait_action(action)
+            elif action_type == "scroll":
+                return await self._scroll_action(action)
+            else:
+                return {
+                    "success": False,
+                    "error": f"Unknown action type: {action_type}"
+                }
+                
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    async def _navigate_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute navigation action."""
+        try:
+            url = action.get("url", "")
+            if url:
+                await self.page.goto(url, wait_until="networkidle", timeout=30000)
+                return {"success": True, "message": f"Navigated to {url}"}
+            else:
+                return {"success": False, "error": "No URL provided"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _click_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute click action."""
+        try:
+            selector = action.get("selector", "")
+            if selector:
+                await self.page.click(selector)
+                return {"success": True, "message": f"Clicked element: {selector}"}
+            else:
+                return {"success": False, "error": "No selector provided"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _type_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute type action."""
+        try:
+            selector = action.get("selector", "")
+            text = action.get("text", "")
+            if selector and text:
+                await self.page.fill(selector, text)
+                return {"success": True, "message": f"Typed '{text}' into {selector}"}
+            else:
+                return {"success": False, "error": "No selector or text provided"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _screenshot_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute screenshot action."""
+        try:
+            screenshot_path = await self.media_capture.capture_screenshot(
+                self.page, "manual_screenshot", "user_requested"
+            )
+            return {"success": True, "message": f"Screenshot saved: {screenshot_path}"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _wait_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute wait action."""
+        try:
+            wait_time = action.get("time", 1000)  # Default 1 second
+            await self.page.wait_for_timeout(wait_time)
+            return {"success": True, "message": f"Waited for {wait_time}ms"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def _scroll_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute scroll action."""
+        try:
+            direction = action.get("direction", "down")
+            if direction == "down":
+                await self.page.evaluate("window.scrollBy(0, 500)")
+            elif direction == "up":
+                await self.page.evaluate("window.scrollBy(0, -500)")
+            return {"success": True, "message": f"Scrolled {direction}"}
         except Exception as e:
             return {"success": False, "error": str(e)}
             

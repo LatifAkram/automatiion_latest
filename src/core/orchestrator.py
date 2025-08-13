@@ -135,6 +135,11 @@ class MultiAgentOrchestrator:
     def dom_extractor(self):
         """Get the DOM extractor agent."""
         return self.dom_extractor_agent
+    
+    @property
+    def execution_agent(self):
+        """Get the first available execution agent."""
+        return self.execution_agents[0] if self.execution_agents else None
         
     async def _load_existing_workflows(self):
         """Load existing workflows from database."""
