@@ -116,6 +116,10 @@ class IntelligentAutomationAgent:
             
             self.logger.info("Intelligent automation agent initialized successfully")
             
+            # Set page to not close automatically
+            self.page.set_default_timeout(30000)  # 30 seconds timeout
+            self.page.set_default_navigation_timeout(30000)  # 30 seconds navigation timeout
+            
         except Exception as e:
             self.logger.error(f"Failed to initialize intelligent automation agent: {e}")
             raise
@@ -134,11 +138,20 @@ class IntelligentAutomationAgent:
         try:
             self.logger.info(f"Starting intelligent automation: {instructions} on {url}")
             
-            # Step 1: Navigate to the website with timeout
+            # Step 1: Navigate to the website with timeout and proper wait
             await asyncio.wait_for(
                 self.page.goto(url, wait_until="networkidle"),
                 timeout=30
             )
+            
+            # Wait for page to fully load
+            await asyncio.wait_for(
+                self.page.wait_for_load_state("networkidle"),
+                timeout=10
+            )
+            
+            # Additional wait to ensure page is stable
+            await asyncio.sleep(3)
             
             # Step 2: AI-powered DOM analysis and automation plan generation with timeout
             ai_dom_analysis = await asyncio.wait_for(
@@ -174,7 +187,8 @@ class IntelligentAutomationAgent:
                 self.page, "intelligent_automation", "final_state"
             )
             
-            return {
+            # Format results for UI compatibility
+            formatted_results = {
                 "status": "completed",
                 "instructions": instructions,
                 "url": url,
@@ -182,8 +196,13 @@ class IntelligentAutomationAgent:
                 "results": results,
                 "screenshots": [final_screenshot],
                 "execution_time": results.get("execution_time", 0),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
+                "steps": results.get("steps", []),
+                "success_rate": results.get("success_rate", 100),
+                "error_details": results.get("error_details", "")
             }
+            
+            return formatted_results
             
         except asyncio.TimeoutError as e:
             self.logger.error(f"Intelligent automation timed out: {e}")
@@ -1099,8 +1118,8 @@ class IntelligentAutomationAgent:
                         else:
                             self.logger.error(f"Step {i+1} failed even after auto-heal")
                     
-                    # Small delay between steps
-                    await asyncio.sleep(1)
+                    # Proper delay between steps to ensure stability
+                    await asyncio.sleep(2)
                     
                 except Exception as e:
                     self.logger.error(f"Step {i+1} execution failed: {e}")
@@ -1132,9 +1151,24 @@ class IntelligentAutomationAgent:
             # Learn from execution
             learning_result = await self.advanced_learning.learn_from_execution(execution_result)
             
+            # Format steps for UI compatibility
+            formatted_steps = []
+            for i, step in enumerate(steps):
+                step_data = {
+                    "step": i + 1,
+                    "action": step.get("action", "unknown"),
+                    "description": step.get("description", ""),
+                    "status": "success" if i < len(completed_steps) else "failed",
+                    "duration": 2.0,  # Default duration
+                    "selector": step.get("primary_selector", ""),
+                    "screenshot": completed_steps[i].get("screenshot") if i < len(completed_steps) else None
+                }
+                formatted_steps.append(step_data)
+            
             return {
                 "success": success,
                 "execution_time": execution_time,
+                "steps": formatted_steps,
                 "completed_steps": len(completed_steps),
                 "total_steps": len(steps),
                 "errors": errors,
@@ -1142,7 +1176,8 @@ class IntelligentAutomationAgent:
                 "learning_applied": learning_result.get("learning_applied", False),
                 "performance_improvement": learning_result.get("performance_improvement", 0),
                 "suggestions": learning_result.get("suggestions", []),
-                "success_prediction": success_prediction
+                "success_prediction": success_prediction,
+                "success_rate": (len(completed_steps) / len(steps)) * 100 if steps else 100
             }
             
         except Exception as e:
