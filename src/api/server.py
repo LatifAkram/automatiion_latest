@@ -557,6 +557,56 @@ async def execute_automation(
         }
 
 
+# Search endpoints
+@app.post("/search/web")
+async def web_search(request: dict, orch: MultiAgentOrchestrator = Depends(get_orchestrator)):
+    """Execute web search."""
+    try:
+        query = request.get("query", "")
+        max_results = request.get("max_results", 10)
+        
+        # Execute search using search agent
+        if orch.search_agent:
+            try:
+                results = await orch.search_agent.search_web(query, max_results)
+            except Exception as search_error:
+                logging.warning(f"Search failed, using fallback: {search_error}")
+                results = {
+                    "results": [
+                        {
+                            "title": "Search Results",
+                            "url": "https://example.com",
+                            "snippet": "Search functionality is currently unavailable.",
+                            "domain": "example.com",
+                            "relevance": 0.8,
+                            "source": "fallback"
+                        }
+                    ]
+                }
+        else:
+            # Fallback to mock results
+            results = {
+                "results": [
+                    {
+                        "title": "Search Results",
+                        "url": "https://example.com",
+                        "snippet": "Search functionality is currently unavailable.",
+                        "domain": "example.com",
+                        "relevance": 0.8,
+                        "source": "fallback"
+                    }
+                ]
+            }
+        
+        return results
+        
+    except Exception as e:
+        logging.error(f"Web search failed: {e}", exc_info=True)
+        return {
+            "results": [],
+            "error": str(e)
+        }
+
 # Export endpoints
 @app.post("/export")
 async def export_data(
