@@ -714,6 +714,15 @@ async def intelligent_automation(
             "result": enhanced_result,
             "timestamp": datetime.utcnow().isoformat()
         }
+        
+    except Exception as e:
+        logging.error(f"Intelligent automation failed: {e}", exc_info=True)
+        return {
+            "automation_id": f"intelligent_{int(time.time())}",
+            "status": "failed",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
 @app.post("/reports/generate")
 async def generate_report(
