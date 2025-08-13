@@ -363,10 +363,9 @@ async def execute_automation(
         options = request.get("options", {})
         
         # Execute automation using execution agent
-        if orch.execution_agents:
+        if orch.execution_agent:
             try:
-                agent = orch.execution_agents[0]  # Use first available agent
-                result = await agent.execute_automation({
+                result = await orch.execution_agent.execute_automation({
                     "type": automation_type,
                     "url": url,
                     "actions": actions,

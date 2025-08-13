@@ -189,7 +189,20 @@ class SearchAgent:
             
             async with self.session.get(url, params=params) as response:
                 if response.status == 200:
-                    data = await response.json()
+                    try:
+                        data = await response.json()
+                    except Exception as json_error:
+                        self.logger.warning(f"Failed to parse JSON response: {json_error}")
+                        # Try to get text and parse manually
+                        text = await response.text()
+                        try:
+                            # Remove any JavaScript wrapper if present
+                            if text.startswith('ddg_spice_'):
+                                text = text.split('(', 1)[1].rsplit(')', 1)[0]
+                            data = json.loads(text)
+                        except Exception:
+                            # Fallback to web scraping
+                            return await self._scrape_search_results(query, max_results)
                     results = []
                     
                     # Add instant answer if available
@@ -199,7 +212,8 @@ class SearchAgent:
                             "url": data.get("AbstractURL", ""),
                             "snippet": data.get("Abstract", ""),
                             "source": "duckduckgo",
-                            "relevance": 0.9
+                            "relevance": 0.9,
+                            "domain": data.get("AbstractURL", "").split("/")[2] if data.get("AbstractURL") else "duckduckgo.com"
                         })
                         
                     # Add related topics
@@ -210,14 +224,15 @@ class SearchAgent:
                                 "url": topic.get("FirstURL", ""),
                                 "snippet": topic.get("Text", ""),
                                 "source": "duckduckgo",
-                                "relevance": 0.7
+                                "relevance": 0.7,
+                                "domain": topic.get("FirstURL", "").split("/")[2] if topic.get("FirstURL") else "duckduckgo.com"
                             })
                     
                     # If we don't have enough results, try web scraping
                     if len(results) < max_results:
                         web_results = await self._scrape_search_results(query, max_results - len(results))
                         results.extend(web_results)
-                            
+                        
                     return results[:max_results]
                 else:
                     # Fallback to web scraping
@@ -231,48 +246,85 @@ class SearchAgent:
     async def _scrape_search_results(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
         """Scrape search results from search engines for real-time data."""
         try:
-            # Use a search engine that allows scraping
-            search_url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
+            # Use multiple search engines for better results
+            search_engines = [
+                f"https://www.google.com/search?q={query.replace(' ', '+')}",
+                f"https://www.bing.com/search?q={query.replace(' ', '+')}",
+                f"https://search.yahoo.com/search?p={query.replace(' ', '+')}"
+            ]
             
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
             
-            async with self.session.get(search_url, headers=headers) as response:
-                if response.status == 200:
-                    html = await response.text()
-                    
-                    # Simple regex-based extraction (in production, use BeautifulSoup)
-                    import re
-                    results = []
-                    
-                    # Extract search results
-                    pattern = r'<h3[^>]*><a[^>]*href="([^"]*)"[^>]*>([^<]*)</a></h3>'
-                    matches = re.findall(pattern, html)
-                    
-                    for i, (url, title) in enumerate(matches[:max_results]):
-                        if url.startswith('/url?q='):
-                            url = url.split('/url?q=')[1].split('&')[0]
-                        
-                        # Extract snippet (simplified)
-                        snippet = f"Search result for: {query}"
-                        
-                        results.append({
-                            "title": title.strip(),
-                            "url": url,
-                            "snippet": snippet,
-                            "source": "web_scraping",
-                            "relevance": 0.8 - (i * 0.1)
-                        })
-                    
-                    return results
-                else:
-                    # Fallback to mock results with real-looking data
-                    return self._generate_fallback_results(query, max_results)
-                    
+            all_results = []
+            
+            for search_url in search_engines:
+                try:
+                    async with self.session.get(search_url, headers=headers, timeout=10) as response:
+                        if response.status == 200:
+                            html = await response.text()
+                            results = self._extract_search_results_from_html(html, query, search_url)
+                            all_results.extend(results)
+                            
+                            if len(all_results) >= max_results:
+                                break
+                                
+                except Exception as e:
+                    self.logger.warning(f"Failed to scrape {search_url}: {e}")
+                    continue
+            
+            # If we still don't have enough results, use fallback
+            if len(all_results) < max_results:
+                fallback_results = self._generate_fallback_results(query, max_results - len(all_results))
+                all_results.extend(fallback_results)
+            
+            return all_results[:max_results]
+            
         except Exception as e:
             self.logger.error(f"Web scraping error: {e}")
             return self._generate_fallback_results(query, max_results)
+    
+    def _extract_search_results_from_html(self, html: str, query: str, source_url: str) -> List[Dict[str, Any]]:
+        """Extract search results from HTML content."""
+        import re
+        results = []
+        
+        try:
+            # Extract search results using regex patterns
+            patterns = [
+                r'<h3[^>]*><a[^>]*href="([^"]*)"[^>]*>([^<]*)</a></h3>',
+                r'<a[^>]*href="([^"]*)"[^>]*>([^<]*)</a>',
+                r'<div[^>]*class="[^"]*result[^"]*"[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>([^<]*)</a>'
+            ]
+            
+            for pattern in patterns:
+                matches = re.findall(pattern, html, re.IGNORECASE | re.DOTALL)
+                
+                for i, (url, title) in enumerate(matches[:5]):  # Limit to 5 per pattern
+                    if url.startswith('/url?q='):
+                        url = url.split('/url?q=')[1].split('&')[0]
+                    elif url.startswith('/'):
+                        continue
+                    
+                    # Clean up title
+                    title = re.sub(r'<[^>]+>', '', title).strip()
+                    
+                    if title and len(title) > 10:  # Minimum meaningful length
+                        results.append({
+                            "title": title,
+                            "url": url,
+                            "snippet": f"Search result for: {query}",
+                            "source": "web_scraping",
+                            "relevance": 0.8 - (i * 0.1),
+                            "domain": url.split("/")[2] if url.startswith("http") else "unknown"
+                        })
+            
+            return results
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to extract results from HTML: {e}")
+            return []
     
     def _generate_fallback_results(self, query: str, max_results: int) -> List[Dict[str, Any]]:
         """Generate realistic fallback search results."""
