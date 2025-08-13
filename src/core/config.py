@@ -43,7 +43,7 @@ class AIConfig(BaseSettings):
     
     # Google
     google_api_key: Optional[str] = Field(default=None, env="GOOGLE_API_KEY")
-    google_model: str = Field(default="gemini-pro", env="GOOGLE_MODEL")
+    google_model: str = Field(default="gemini-2.0-flash-exp", env="GOOGLE_MODEL")
     google_max_tokens: int = Field(default=2000, env="GOOGLE_MAX_TOKENS")
     google_temperature: float = Field(default=0.7, env="GOOGLE_TEMPERATURE")
     
