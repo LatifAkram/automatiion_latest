@@ -980,7 +980,10 @@ class ExecutionAgent:
             from ..core.orchestrator import get_orchestrator
             orch = get_orchestrator()
             
-            intelligent_agent = IntelligentAutomationAgent(self.config, orch.ai_provider)
+            # Pass the main config instead of automation config
+            from ..core.orchestrator import get_orchestrator
+            orch = get_orchestrator()
+            intelligent_agent = IntelligentAutomationAgent(orch.config, orch.ai_provider)
             await intelligent_agent.initialize()
             
             # Execute the automation

@@ -393,6 +393,15 @@ class VectorStore:
             
         except Exception as e:
             self.logger.error(f"Failed to cleanup vector store: {e}", exc_info=True)
+            
+    async def shutdown(self):
+        """Shutdown vector store."""
+        try:
+            await self.cleanup()
+            self.logger.info("Vector store shutdown completed")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to shutdown vector store: {e}", exc_info=True)
 
 
 class MockCollection:

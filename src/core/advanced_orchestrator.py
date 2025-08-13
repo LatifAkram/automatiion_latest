@@ -19,6 +19,7 @@ from ..agents.parallel_executor import ParallelExecutor
 from ..agents.sector_specialists import SectorManager
 from ..utils.media_capture import MediaCapture
 from ..utils.code_generator import CodeGenerator
+from ..utils.selector_drift import SelectorDriftDetector
 
 
 class AdvancedOrchestrator:
@@ -27,12 +28,26 @@ class AdvancedOrchestrator:
     def __init__(self, config, ai_provider: AIProvider):
         self.config = config
         self.ai_provider = ai_provider
-        self.media_capture = MediaCapture(config)
+        # Initialize media capture with correct path
+        if hasattr(config, 'database') and hasattr(config.database, 'media_path'):
+            media_path = config.database.media_path
+        else:
+            media_path = 'data/media'
+        self.media_capture = MediaCapture(media_path)
         self.logger = logging.getLogger(__name__)
         
+        # Initialize core components
+        from ..core.database import DatabaseManager
+        from ..core.vector_store import VectorStore
+        from ..core.audit import AuditLogger
+        
+        self.database = DatabaseManager(config.database)
+        self.vector_store = VectorStore(config.database)
+        self.audit_logger = AuditLogger(config)
+        
         # Initialize all agents
-        self.planner_agent = PlannerAgent(config, ai_provider)
-        self.execution_agent = ExecutionAgent(config, ai_provider)
+        self.planner_agent = PlannerAgent(config.ai, self.vector_store, self.audit_logger)
+        self.execution_agent = ExecutionAgent(config.automation, self.media_capture, SelectorDriftDetector(config.automation), self.audit_logger)
         self.conversational_ai = ConversationalAI(config, ai_provider)
         self.parallel_executor = ParallelExecutor(config, ai_provider)
         self.sector_manager = SectorManager(config, ai_provider)
