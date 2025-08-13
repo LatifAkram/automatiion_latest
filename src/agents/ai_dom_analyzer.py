@@ -192,8 +192,8 @@ class AIDOMAnalyzer:
             }}
             """
             
-            # Get AI analysis
-            ai_response = await self.ai_provider.generate_response(prompt)
+            # Get AI analysis with timeout
+            ai_response = await self.ai_provider.generate_response(prompt, timeout=20)
             
             try:
                 # Clean the response to extract JSON
