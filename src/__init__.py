@@ -15,8 +15,8 @@ from .core.orchestrator import MultiAgentOrchestrator
 from .core.config import Config
 from .core.database import DatabaseManager
 from .core.vector_store import VectorStore
-from .core.ai_provider import AIProvider
 from .core.audit import AuditLogger
+from .core.ai_provider import AIProvider
 
 # Agent exports
 from .agents.planner import PlannerAgent
@@ -26,10 +26,10 @@ from .agents.search import SearchAgent
 from .agents.dom_extractor import DOMExtractionAgent
 
 # Model exports
-from .models.workflow import Workflow, WorkflowStatus, WorkflowExecution
-from .models.execution import ExecutionResult, PerformanceMetrics
+from .models.workflow import Workflow, WorkflowStep, WorkflowStatus
+from .models.task import Task, TaskStatus, TaskType
+from .models.execution import ExecutionResult, ExecutionLog
 from .models.conversation import Conversation, Message, MessageType
-from .models.task import TaskStatus, TaskType
 
 # Utility exports
 from .utils.media_capture import MediaCapture
@@ -39,33 +39,29 @@ from .utils.logger import setup_logging
 __all__ = [
     # Core
     "MultiAgentOrchestrator",
-    "Config", 
+    "Config",
     "DatabaseManager",
     "VectorStore",
-    "AIProvider",
     "AuditLogger",
+    "AIProvider",
     
     # Agents
     "PlannerAgent",
-    "ExecutionAgent", 
+    "ExecutionAgent",
     "ConversationalAgent",
     "SearchAgent",
     "DOMExtractionAgent",
     
     # Models
     "Workflow",
+    "WorkflowStep",
     "WorkflowStatus",
-    "WorkflowExecution", 
-    "ExecutionResult",
-    "PerformanceMetrics",
-    "Conversation",
-    "Message",
-    "MessageType",
+    "Task",
     "TaskStatus",
     "TaskType",
-    
-    # Utils
-    "MediaCapture",
-    "SelectorDriftDetector",
-    "setup_logging"
+    "ExecutionResult",
+    "ExecutionLog",
+    "Conversation",
+    "Message",
+    "MessageType"
 ]
