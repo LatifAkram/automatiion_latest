@@ -205,3 +205,88 @@ Traceback (most recent call last):
           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
 TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
 INFO:     127.0.0.1:32894 - "POST /chat HTTP/1.1" 200 OK
+ERROR:src.agents.search:DuckDuckGo search error: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=AI+automation+trends+2024&format=json&no_html=1&skip_disambig=1'
+INFO:     127.0.0.1:50242 - "POST /search HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response["content"],
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:52880 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57260 - "GET /health HTTP/1.1" 200 OK
+ERROR:src.agents.search:DuckDuckGo search error: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=AI+automation+trends+2024&format=json&no_html=1&skip_disambig=1'
+INFO:     127.0.0.1:57270 - "POST /search HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response["content"],
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:57286 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response["content"],
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:52532 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response["content"],
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:37536 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response["content"],
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:55278 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response["content"],
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:55152 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response if isinstance(response, str) else response.get("content", str(response)),
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:49702 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response if isinstance(response, str) else response.get("content", str(response)),
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:52686 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response if isinstance(response, str) else response.get("content", str(response)),
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:58494 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+Traceback (most recent call last):
+  File "/workspace/src/agents/conversational.py", line 172, in chat
+    content=response if isinstance(response, str) else response.get("content", str(response)),
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
+INFO:     127.0.0.1:50176 - "POST /chat HTTP/1.1" 200 OK
