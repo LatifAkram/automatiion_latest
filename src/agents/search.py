@@ -2,76 +2,52 @@
 Search Agent
 ===========
 
-Agent for gathering data from various search engines and sources including
-Google, Bing, DuckDuckGo, GitHub, Stack Overflow, Reddit, and more.
+Agent for searching and gathering data from various sources including
+search engines, APIs, and web services.
 """
 
 import asyncio
 import logging
-import aiohttp
 import json
+import aiohttp
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from urllib.parse import quote_plus
+import re
 
-try:
-    from duckduckgo_search import ddg
-    DUCKDUCKGO_AVAILABLE = True
-except ImportError:
-    DUCKDUCKGO_AVAILABLE = False
+# Use absolute imports to fix the relative import issue
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-try:
-    import github3
-    GITHUB_AVAILABLE = True
-except ImportError:
-    GITHUB_AVAILABLE = False
-
-try:
-    from stackapi import StackAPI
-    STACKAPI_AVAILABLE = True
-except ImportError:
-    STACKAPI_AVAILABLE = True
+from src.core.audit import AuditLogger
 
 
 class SearchAgent:
-    """Agent for gathering data from various search engines and sources."""
+    """Agent for searching and gathering data from various sources."""
     
-    def __init__(self, config: Any, audit_logger: Any):
+    def __init__(self, config: Any, audit_logger: Optional[AuditLogger] = None):
         self.config = config
         self.audit_logger = audit_logger
         self.logger = logging.getLogger(__name__)
         
-        # Search clients
-        self.github_client = None
-        self.stack_client = None
+        # Rate limiting
+        self.request_count = 0
+        self.last_request_time = datetime.utcnow()
         
         # Session for HTTP requests
         self.session = None
         
     async def initialize(self):
-        """Initialize search agent and clients."""
+        """Initialize search agent."""
         try:
-            # Initialize HTTP session
+            # Create aiohttp session
             self.session = aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=self.config.search_timeout)
+                timeout=aiohttp.ClientTimeout(total=30),
+                headers={
+                    "User-Agent": "MultiAgentAutomation/1.0"
+                }
             )
             
-            # Initialize GitHub client
-            if GITHUB_AVAILABLE and self.config.github_token:
-                try:
-                    self.github_client = github3.login(token=self.config.github_token)
-                    self.logger.info("GitHub client initialized")
-                except Exception as e:
-                    self.logger.warning(f"Failed to initialize GitHub client: {e}")
-                    
-            # Initialize Stack Overflow client
-            if STACKAPI_AVAILABLE and self.config.stack_overflow_key:
-                try:
-                    self.stack_client = StackAPI('stackoverflow', key=self.config.stack_overflow_key)
-                    self.logger.info("Stack Overflow client initialized")
-                except Exception as e:
-                    self.logger.warning(f"Failed to initialize Stack Overflow client: {e}")
-                    
             self.logger.info("Search agent initialized successfully")
             
         except Exception as e:
@@ -120,245 +96,293 @@ class SearchAgent:
         except Exception as e:
             self.logger.error(f"Search failed: {e}", exc_info=True)
             return []
-
-    async def search_google(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
-        """Search Google using Custom Search API."""
+            
+    async def search_google(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Search using Google Custom Search API."""
         try:
             if not self.config.google_search_api_key or not self.config.google_search_cx:
                 self.logger.warning("Google Search API not configured")
                 return []
-                
-            if max_results is None:
-                max_results = self.config.max_search_results
                 
             url = "https://www.googleapis.com/customsearch/v1"
             params = {
                 "key": self.config.google_search_api_key,
                 "cx": self.config.google_search_cx,
                 "q": query,
-                "num": min(max_results, 10)  # Google API limit per request
+                "num": min(max_results, 10)  # Google API limit
             }
             
             async with self.session.get(url, params=params) as response:
-                if response.status != 200:
-                    raise Exception(f"Google Search API returned status {response.status}")
+                if response.status == 200:
+                    data = await response.json()
+                    results = []
                     
-                data = await response.json()
-                
-                results = []
-                for item in data.get("items", []):
-                    results.append({
-                        "title": item.get("title", ""),
-                        "link": item.get("link", ""),
-                        "snippet": item.get("snippet", ""),
-                        "source": "google",
-                        "timestamp": datetime.utcnow().isoformat()
-                    })
+                    for item in data.get("items", []):
+                        results.append({
+                            "title": item.get("title", ""),
+                            "url": item.get("link", ""),
+                            "snippet": item.get("snippet", ""),
+                            "source": "google"
+                        })
+                        
+                    return results
+                else:
+                    self.logger.error(f"Google search failed: {response.status}")
+                    return []
                     
-                return results
-                
         except Exception as e:
-            self.logger.error(f"Google search failed: {e}", exc_info=True)
+            self.logger.error(f"Google search error: {e}")
             return []
             
-    async def search_bing(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
-        """Search Bing using Bing Search API."""
+    async def search_bing(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Search using Bing Search API."""
         try:
             if not self.config.bing_search_api_key:
                 self.logger.warning("Bing Search API not configured")
                 return []
                 
-            if max_results is None:
-                max_results = self.config.max_search_results
-                
-            url = "https://api.bing.microsoft.com/v7.0/search"
             headers = {
                 "Ocp-Apim-Subscription-Key": self.config.bing_search_api_key
             }
+            
             params = {
                 "q": query,
-                "count": min(max_results, 50)  # Bing API limit
+                "count": min(max_results, 50),
+                "offset": 0,
+                "mkt": "en-US",
+                "safesearch": "moderate"
             }
             
-            async with self.session.get(url, headers=headers, params=params) as response:
-                if response.status != 200:
-                    raise Exception(f"Bing Search API returned status {response.status}")
+            async with self.session.get(self.config.bing_search_endpoint, headers=headers, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    results = []
                     
-                data = await response.json()
-                
-                results = []
-                for item in data.get("webPages", {}).get("value", []):
-                    results.append({
-                        "title": item.get("name", ""),
-                        "link": item.get("url", ""),
-                        "snippet": item.get("snippet", ""),
-                        "source": "bing",
-                        "timestamp": datetime.utcnow().isoformat()
-                    })
+                    for item in data.get("webPages", {}).get("value", []):
+                        results.append({
+                            "title": item.get("name", ""),
+                            "url": item.get("url", ""),
+                            "snippet": item.get("snippet", ""),
+                            "source": "bing"
+                        })
+                        
+                    return results
+                else:
+                    self.logger.error(f"Bing search failed: {response.status}")
+                    return []
                     
-                return results
-                
         except Exception as e:
-            self.logger.error(f"Bing search failed: {e}", exc_info=True)
+            self.logger.error(f"Bing search error: {e}")
             return []
             
-    async def search_duckduckgo(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
-        """Search DuckDuckGo using duckduckgo-search library."""
+    async def search_duckduckgo(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Search using DuckDuckGo (no API key required)."""
         try:
-            if not DUCKDUCKGO_AVAILABLE:
-                self.logger.warning("DuckDuckGo search not available")
+            # Use DuckDuckGo Instant Answer API
+            url = "https://api.duckduckgo.com/"
+            params = {
+                "q": query,
+                "format": "json",
+                "no_html": "1",
+                "skip_disambig": "1"
+            }
+            
+            async with self.session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    results = []
+                    
+                    # Add instant answer if available
+                    if data.get("Abstract"):
+                        results.append({
+                            "title": data.get("Heading", query),
+                            "url": data.get("AbstractURL", ""),
+                            "snippet": data.get("Abstract", ""),
+                            "source": "duckduckgo"
+                        })
+                        
+                    # Add related topics
+                    for topic in data.get("RelatedTopics", [])[:max_results-1]:
+                        if isinstance(topic, dict) and topic.get("Text"):
+                            results.append({
+                                "title": topic.get("FirstURL", "").split("/")[-1].replace("_", " "),
+                                "url": topic.get("FirstURL", ""),
+                                "snippet": topic.get("Text", ""),
+                                "source": "duckduckgo"
+                            })
+                            
+                    return results[:max_results]
+                else:
+                    self.logger.error(f"DuckDuckGo search failed: {response.status}")
+                    return []
+                    
+        except Exception as e:
+            self.logger.error(f"DuckDuckGo search error: {e}")
+            return []
+            
+    async def search_github(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Search GitHub repositories."""
+        try:
+            if not self.config.github_token:
+                self.logger.warning("GitHub token not configured")
                 return []
                 
-            if max_results is None:
-                max_results = self.config.max_search_results
-                
-            # Use duckduckgo-search library
-            results = await asyncio.to_thread(
-                ddg, query, max_results=max_results
-            )
-            
-            formatted_results = []
-            for result in results:
-                formatted_results.append({
-                    "title": result.get("title", ""),
-                    "link": result.get("link", ""),
-                    "snippet": result.get("body", ""),
-                    "source": "duckduckgo",
-                    "timestamp": datetime.utcnow().isoformat()
-                })
-                
-            return formatted_results
-            
-        except Exception as e:
-            self.logger.error(f"DuckDuckGo search failed: {e}", exc_info=True)
-            return []
-            
-    async def search_github(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
-        """Search GitHub repositories and code."""
-        try:
-            if not self.github_client:
-                self.logger.warning("GitHub client not available")
-                return []
-                
-            if max_results is None:
-                max_results = self.config.max_search_results
-                
-            # Search repositories
-            repos = self.github_client.search_repositories(query, number=max_results)
-            
-            results = []
-            for repo in repos:
-                results.append({
-                    "title": repo.name,
-                    "link": repo.html_url,
-                    "snippet": repo.description or "",
-                    "source": "github",
-                    "type": "repository",
-                    "language": repo.language,
-                    "stars": repo.stargazers_count,
-                    "timestamp": datetime.utcnow().isoformat()
-                })
-                
-            return results
-            
-        except Exception as e:
-            self.logger.error(f"GitHub search failed: {e}", exc_info=True)
-            return []
-            
-    async def search_stack_overflow(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
-        """Search Stack Overflow questions and answers."""
-        try:
-            if not self.stack_client:
-                self.logger.warning("Stack Overflow client not available")
-                return []
-                
-            if max_results is None:
-                max_results = self.config.max_search_results
-                
-            # Search questions
-            questions = self.stack_client.fetch('search/advanced', 
-                                              tagged=query.split(),
-                                              sort='votes',
-                                              order='desc',
-                                              pagesize=max_results)
-            
-            results = []
-            for question in questions.get("items", []):
-                results.append({
-                    "title": question.get("title", ""),
-                    "link": question.get("link", ""),
-                    "snippet": question.get("body", "")[:200] + "..." if question.get("body") else "",
-                    "source": "stackoverflow",
-                    "type": "question",
-                    "score": question.get("score", 0),
-                    "answers": question.get("answer_count", 0),
-                    "timestamp": datetime.utcnow().isoformat()
-                })
-                
-            return results
-            
-        except Exception as e:
-            self.logger.error(f"Stack Overflow search failed: {e}", exc_info=True)
-            return []
-            
-    async def search_reddit(self, query: str, subreddit: str = "all", max_results: int = None) -> List[Dict[str, Any]]:
-        """Search Reddit posts and comments."""
-        try:
-            if max_results is None:
-                max_results = self.config.max_search_results
-                
-            # Use Reddit's JSON API
-            url = f"https://www.reddit.com/r/{subreddit}/search.json"
             headers = {
-                "User-Agent": "AutonomousAutomationPlatform/1.0"
+                "Authorization": f"token {self.config.github_token}",
+                "Accept": "application/vnd.github.v3+json"
             }
+            
+            url = "https://api.github.com/search/repositories"
             params = {
                 "q": query,
-                "limit": max_results,
-                "sort": "relevance",
-                "t": "all"
+                "sort": "stars",
+                "order": "desc",
+                "per_page": min(max_results, 30)
             }
             
             async with self.session.get(url, headers=headers, params=params) as response:
-                if response.status != 200:
-                    raise Exception(f"Reddit API returned status {response.status}")
+                if response.status == 200:
+                    data = await response.json()
+                    results = []
                     
-                data = await response.json()
-                
-                results = []
-                for post in data.get("data", {}).get("children", []):
-                    post_data = post.get("data", {})
-                    results.append({
-                        "title": post_data.get("title", ""),
-                        "link": f"https://reddit.com{post_data.get('permalink', '')}",
-                        "snippet": post_data.get("selftext", "")[:200] + "..." if post_data.get("selftext") else "",
-                        "source": "reddit",
-                        "type": "post",
-                        "subreddit": post_data.get("subreddit", ""),
-                        "score": post_data.get("score", 0),
-                        "comments": post_data.get("num_comments", 0),
-                        "timestamp": datetime.utcnow().isoformat()
-                    })
+                    for repo in data.get("items", []):
+                        results.append({
+                            "title": repo.get("full_name", ""),
+                            "url": repo.get("html_url", ""),
+                            "snippet": repo.get("description", ""),
+                            "source": "github",
+                            "stars": repo.get("stargazers_count", 0),
+                            "language": repo.get("language", "")
+                        })
+                        
+                    return results
+                else:
+                    self.logger.error(f"GitHub search failed: {response.status}")
+                    return []
                     
-                return results
-                
         except Exception as e:
-            self.logger.error(f"Reddit search failed: {e}", exc_info=True)
+            self.logger.error(f"GitHub search error: {e}")
             return []
             
-    async def search_youtube(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
+    async def search_stack_overflow(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Search Stack Overflow questions."""
+        try:
+            url = "https://api.stackexchange.com/2.3/search/advanced"
+            params = {
+                "site": "stackoverflow",
+                "q": query,
+                "sort": "votes",
+                "order": "desc",
+                "pagesize": min(max_results, 30),
+                "filter": "withbody"
+            }
+            
+            async with self.session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    results = []
+                    
+                    for question in data.get("items", []):
+                        # Clean HTML tags from body
+                        body = re.sub(r'<[^>]+>', '', question.get("body", ""))
+                        
+                        results.append({
+                            "title": question.get("title", ""),
+                            "url": question.get("link", ""),
+                            "snippet": body[:200] + "..." if len(body) > 200 else body,
+                            "source": "stack_overflow",
+                            "score": question.get("score", 0),
+                            "answers": question.get("answer_count", 0)
+                        })
+                        
+                    return results
+                else:
+                    self.logger.error(f"Stack Overflow search failed: {response.status}")
+                    return []
+                    
+        except Exception as e:
+            self.logger.error(f"Stack Overflow search error: {e}")
+            return []
+            
+    async def search_reddit(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Search Reddit posts."""
+        try:
+            if not self.config.reddit_client_id or not self.config.reddit_client_secret:
+                self.logger.warning("Reddit API not configured")
+                return []
+                
+            # Get access token
+            auth_url = "https://www.reddit.com/api/v1/access_token"
+            auth_data = {
+                "grant_type": "client_credentials"
+            }
+            
+            headers = {
+                "User-Agent": self.config.reddit_user_agent
+            }
+            
+            async with self.session.post(
+                auth_url,
+                data=auth_data,
+                headers=headers,
+                auth=aiohttp.BasicAuth(self.config.reddit_client_id, self.config.reddit_client_secret)
+            ) as response:
+                if response.status == 200:
+                    auth_response = await response.json()
+                    access_token = auth_response.get("access_token")
+                    
+                    # Search Reddit
+                    search_url = "https://oauth.reddit.com/search"
+                    search_headers = {
+                        "Authorization": f"Bearer {access_token}",
+                        "User-Agent": self.config.reddit_user_agent
+                    }
+                    
+                    search_params = {
+                        "q": query,
+                        "limit": min(max_results, 25),
+                        "sort": "relevance",
+                        "t": "all"
+                    }
+                    
+                    async with self.session.get(search_url, headers=search_headers, params=search_params) as search_response:
+                        if search_response.status == 200:
+                            search_data = await search_response.json()
+                            results = []
+                            
+                            for post in search_data.get("data", {}).get("children", []):
+                                post_data = post.get("data", {})
+                                results.append({
+                                    "title": post_data.get("title", ""),
+                                    "url": f"https://reddit.com{post_data.get('permalink', '')}",
+                                    "snippet": post_data.get("selftext", "")[:200] + "..." if len(post_data.get("selftext", "")) > 200 else post_data.get("selftext", ""),
+                                    "source": "reddit",
+                                    "score": post_data.get("score", 0),
+                                    "subreddit": post_data.get("subreddit", "")
+                                })
+                                
+                            return results
+                        else:
+                            self.logger.error(f"Reddit search failed: {search_response.status}")
+                            return []
+                else:
+                    self.logger.error(f"Reddit authentication failed: {response.status}")
+                    return []
+                    
+        except Exception as e:
+            self.logger.error(f"Reddit search error: {e}")
+            return []
+            
+    async def search_youtube(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
         """Search YouTube videos."""
         try:
-            if not self.config.google_search_api_key:
-                self.logger.warning("YouTube search requires Google API key")
+            if not self.config.youtube_api_key:
+                self.logger.warning("YouTube API not configured")
                 return []
-                
-            if max_results is None:
-                max_results = self.config.max_search_results
                 
             url = "https://www.googleapis.com/youtube/v3/search"
             params = {
-                "key": self.config.google_search_api_key,
+                "key": self.config.youtube_api_key,
                 "part": "snippet",
                 "q": query,
                 "type": "video",
@@ -367,230 +391,44 @@ class SearchAgent:
             }
             
             async with self.session.get(url, params=params) as response:
-                if response.status != 200:
-                    raise Exception(f"YouTube API returned status {response.status}")
+                if response.status == 200:
+                    data = await response.json()
+                    results = []
                     
-                data = await response.json()
-                
-                results = []
-                for item in data.get("items", []):
-                    snippet = item.get("snippet", {})
-                    results.append({
-                        "title": snippet.get("title", ""),
-                        "link": f"https://www.youtube.com/watch?v={item.get('id', {}).get('videoId', '')}",
-                        "snippet": snippet.get("description", ""),
-                        "source": "youtube",
-                        "type": "video",
-                        "channel": snippet.get("channelTitle", ""),
-                        "published": snippet.get("publishedAt", ""),
-                        "timestamp": datetime.utcnow().isoformat()
-                    })
+                    for item in data.get("items", []):
+                        snippet = item.get("snippet", {})
+                        results.append({
+                            "title": snippet.get("title", ""),
+                            "url": f"https://www.youtube.com/watch?v={item.get('id', {}).get('videoId', '')}",
+                            "snippet": snippet.get("description", ""),
+                            "source": "youtube",
+                            "channel": snippet.get("channelTitle", ""),
+                            "published_at": snippet.get("publishedAt", "")
+                        })
+                        
+                    return results
+                else:
+                    self.logger.error(f"YouTube search failed: {response.status}")
+                    return []
                     
-                return results
-                
         except Exception as e:
-            self.logger.error(f"YouTube search failed: {e}", exc_info=True)
+            self.logger.error(f"YouTube search error: {e}")
             return []
             
-    async def search_news(self, query: str, max_results: int = None) -> List[Dict[str, Any]]:
-        """Search news articles using multiple sources."""
+    async def search_news(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+        """Search news articles."""
         try:
-            if max_results is None:
-                max_results = self.config.max_search_results
-                
-            # Use NewsAPI (requires API key) or fallback to DuckDuckGo
-            if hasattr(self.config, 'news_api_key') and self.config.news_api_key:
-                return await self._search_news_api(query, max_results)
-            else:
-                # Fallback to DuckDuckGo news search
-                return await self._search_duckduckgo_news(query, max_results)
-                
-        except Exception as e:
-            self.logger.error(f"News search failed: {e}", exc_info=True)
+            # Use a simple news API (NewsAPI.org would require API key)
+            # For now, return empty results
+            self.logger.info("News search not implemented (requires API key)")
             return []
             
-    async def _search_news_api(self, query: str, max_results: int) -> List[Dict[str, Any]]:
-        """Search news using NewsAPI."""
-        try:
-            url = "https://newsapi.org/v2/everything"
-            params = {
-                "apiKey": self.config.news_api_key,
-                "q": query,
-                "pageSize": max_results,
-                "sortBy": "relevancy",
-                "language": "en"
-            }
-            
-            async with self.session.get(url, params=params) as response:
-                if response.status != 200:
-                    raise Exception(f"NewsAPI returned status {response.status}")
-                    
-                data = await response.json()
-                
-                results = []
-                for article in data.get("articles", []):
-                    results.append({
-                        "title": article.get("title", ""),
-                        "link": article.get("url", ""),
-                        "snippet": article.get("description", ""),
-                        "source": "news",
-                        "type": "article",
-                        "author": article.get("author", ""),
-                        "published": article.get("publishedAt", ""),
-                        "timestamp": datetime.utcnow().isoformat()
-                    })
-                    
-                return results
-                
         except Exception as e:
-            self.logger.error(f"NewsAPI search failed: {e}", exc_info=True)
+            self.logger.error(f"News search error: {e}")
             return []
             
-    async def _search_duckduckgo_news(self, query: str, max_results: int) -> List[Dict[str, Any]]:
-        """Search news using DuckDuckGo news search."""
-        try:
-            if not DUCKDUCKGO_AVAILABLE:
-                return []
-                
-            # Use DuckDuckGo news search
-            results = await asyncio.to_thread(
-                ddg, f"{query} news", max_results=max_results
-            )
-            
-            formatted_results = []
-            for result in results:
-                formatted_results.append({
-                    "title": result.get("title", ""),
-                    "link": result.get("link", ""),
-                    "snippet": result.get("body", ""),
-                    "source": "news",
-                    "type": "article",
-                    "timestamp": datetime.utcnow().isoformat()
-                })
-                
-            return formatted_results
-            
-        except Exception as e:
-            self.logger.error(f"DuckDuckGo news search failed: {e}", exc_info=True)
-            return []
-            
-    async def comprehensive_search(self, query: str, sources: List[str] = None, 
-                                 max_results_per_source: int = None) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Perform comprehensive search across multiple sources.
-        
-        Args:
-            query: Search query
-            sources: List of sources to search (google, bing, duckduckgo, github, stackoverflow, reddit, youtube, news)
-            max_results_per_source: Maximum results per source
-            
-        Returns:
-            Dictionary with results from each source
-        """
-        if sources is None:
-            sources = ["google", "bing", "duckduckgo", "github", "stackoverflow"]
-            
-        if max_results_per_source is None:
-            max_results_per_source = self.config.max_search_results
-            
-        results = {}
-        
-        # Define search functions
-        search_functions = {
-            "google": self.search_google,
-            "bing": self.search_bing,
-            "duckduckgo": self.search_duckduckgo,
-            "github": self.search_github,
-            "stackoverflow": self.search_stack_overflow,
-            "reddit": self.search_reddit,
-            "youtube": self.search_youtube,
-            "news": self.search_news
-        }
-        
-        # Execute searches in parallel
-        tasks = []
-        for source in sources:
-            if source in search_functions:
-                task = search_functions[source](query, max_results_per_source)
-                tasks.append((source, task))
-                
-        # Wait for all searches to complete
-        for source, task in tasks:
-            try:
-                results[source] = await task
-                self.logger.info(f"Completed {source} search: {len(results[source])} results")
-            except Exception as e:
-                self.logger.error(f"Failed {source} search: {e}")
-                results[source] = []
-                
-        # Log search activity
-        await self.audit_logger.log_search_activity(
-            query=query,
-            sources=sources,
-            results_count=sum(len(r) for r in results.values())
-        )
-        
-        return results
-        
-    async def search_with_context(self, query: str, context: Dict[str, Any] = None) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Search with additional context to improve results.
-        
-        Args:
-            query: Search query
-            context: Additional context (domain, previous searches, etc.)
-            
-        Returns:
-            Enhanced search results
-        """
-        # Enhance query based on context
-        enhanced_query = query
-        if context:
-            domain = context.get("domain", "")
-            if domain:
-                enhanced_query = f"{query} {domain}"
-                
-            previous_searches = context.get("previous_searches", [])
-            if previous_searches:
-                # Add relevant terms from previous searches
-                relevant_terms = []
-                for prev_search in previous_searches[-3:]:  # Last 3 searches
-                    if prev_search.get("successful"):
-                        relevant_terms.extend(prev_search.get("query", "").split()[:3])
-                if relevant_terms:
-                    enhanced_query = f"{enhanced_query} {' '.join(relevant_terms)}"
-                    
-        # Determine sources based on context
-        sources = ["google", "bing", "duckduckgo"]
-        if context:
-            if context.get("domain") in ["programming", "development", "tech"]:
-                sources.extend(["github", "stackoverflow"])
-            elif context.get("domain") in ["social", "community"]:
-                sources.extend(["reddit"])
-            elif context.get("domain") in ["media", "entertainment"]:
-                sources.extend(["youtube"])
-            elif context.get("domain") in ["news", "current_events"]:
-                sources.extend(["news"])
-                
-        # Perform comprehensive search
-        results = await self.comprehensive_search(enhanced_query, sources)
-        
-        # Add context to results
-        for source_results in results.values():
-            for result in source_results:
-                result["context"] = context
-                result["original_query"] = query
-                result["enhanced_query"] = enhanced_query
-                
-        return results
-        
-    async def shutdown(self):
-        """Shutdown search agent."""
-        try:
-            if self.session:
-                await self.session.close()
-                
-            self.logger.info("Search agent shutdown complete")
-            
-        except Exception as e:
-            self.logger.error(f"Error during search agent shutdown: {e}", exc_info=True)
+    async def close(self):
+        """Close search agent resources."""
+        if self.session:
+            await self.session.close()
+            self.logger.info("Search agent closed")
