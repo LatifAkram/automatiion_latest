@@ -1,22 +1,14 @@
-INFO:     Started server process [197885]
+INFO:     Started server process [201671]
 INFO:     Waiting for application startup.
 Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
 Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-INFO:     127.0.0.1:38062 - "POST /automation/execute HTTP/1.1" 200 OK
-WARNING:src.agents.search:Failed to parse JSON response: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=AI+automation+trends+2024&format=json&no_html=1&skip_disambig=1'
-INFO:     127.0.0.1:54148 - "POST /search HTTP/1.1" 200 OK
-WARNING:src.agents.search:Failed to parse JSON response: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=python&format=json&no_html=1&skip_disambig=1'
-INFO:     127.0.0.1:38126 - "POST /search HTTP/1.1" 200 OK
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-INFO:     127.0.0.1:37726 - "POST /automation/execute HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+INFO:     127.0.0.1:54950 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+INFO:     127.0.0.1:54960 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+INFO:     127.0.0.1:54968 - "POST /chat HTTP/1.1" 200 OK
+WARNING:src.core.ai_provider:All AI providers failed, using fallback response
+INFO:     127.0.0.1:35176 - "POST /chat HTTP/1.1" 200 OK
