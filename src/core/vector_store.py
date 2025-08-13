@@ -309,6 +309,32 @@ class VectorStore:
             self.logger.error(f"Failed to search conversations: {e}", exc_info=True)
             return []
             
+    async def get_conversation_history(self) -> List[Dict[str, Any]]:
+        """Get conversation history from vector store."""
+        try:
+            if "conversations" not in self.collections:
+                self.logger.warning("conversations collection not available")
+                return []
+                
+            # Get all conversations
+            results = self.collections["conversations"].get()
+            
+            conversations = []
+            for i, doc in enumerate(results.get("documents", [])):
+                try:
+                    conversation_data = json.loads(doc)
+                    conversations.append(conversation_data)
+                except Exception as e:
+                    self.logger.warning(f"Failed to parse conversation {i}: {e}")
+                    continue
+                    
+            self.logger.info(f"Retrieved {len(conversations)} conversations from history")
+            return conversations
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get conversation history: {e}", exc_info=True)
+            return []
+            
     def _format_search_results(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Format search results for consistent output."""
         formatted_results = []
@@ -398,3 +424,11 @@ class MockCollection:
     def count(self) -> int:
         """Mock count method."""
         return len(self.documents)
+        
+    def get(self):
+        """Mock get method."""
+        return {
+            "documents": [self.documents],
+            "metadatas": [self.metadatas],
+            "ids": [self.ids]
+        }
