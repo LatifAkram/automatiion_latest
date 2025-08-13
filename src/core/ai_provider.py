@@ -113,8 +113,35 @@ class AIProvider:
             except Exception as e:
                 self.logger.warning(f"Failed to initialize Anthropic: {e}")
                 
-        # Initialize Google
-        if self.config.google_api_key:
+        # Initialize Google Gemini
+        gemini_key = "AIzaSyBb-AFGtxM2biSnESY85nyk-fdR74O153c"
+        
+        if gemini_key:
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=gemini_key)
+                # Try Gemini 2.0 Flash Exp first, fallback to gemini-pro if not available
+                try:
+                    self.google_client = genai.GenerativeModel('gemini-2.0-flash-exp')
+                    # Test the model
+                    test_response = await asyncio.to_thread(
+                        self.google_client.generate_content,
+                        "test",
+                        generation_config=genai.types.GenerationConfig(max_output_tokens=10)
+                    )
+                    self.logger.info("Google Gemini 2.0 Flash Exp client initialized successfully")
+                except Exception as model_error:
+                    self.logger.warning(f"Gemini 2.0 Flash Exp not available, falling back to gemini-pro: {model_error}")
+                    self.google_client = genai.GenerativeModel('gemini-pro')
+                    self.logger.info("Google Gemini Pro client initialized as fallback")
+                
+                self.providers["google"]["available"] = True
+                self.providers["google"]["client"] = self.google_client
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize Google Gemini: {e}")
+                
+        # Also try with config key if different
+        elif self.config.google_api_key:
             try:
                 import google.generativeai as genai
                 genai.configure(api_key=self.config.google_api_key)

@@ -105,10 +105,14 @@ class IntelligentAutomationAgent:
     async def _generate_automation_plan(self, instructions: str, url: str) -> List[Dict[str, Any]]:
         """Generate automation plan from natural language instructions."""
         try:
-            # For now, use fallback plan generation
-            # TODO: Implement AI-powered plan generation when AI provider is stable
-            plan = await self._generate_fallback_plan(instructions)
-            return plan
+            # Use sector specialists for intelligent plan generation
+            from .sector_specialists import SectorManager
+            
+            sector_manager = SectorManager(self.config, self.ai_provider)
+            universal_plan = await sector_manager.generate_universal_plan(instructions, url)
+            
+            self.logger.info(f"Generated plan for sector: {universal_plan['sector']}")
+            return universal_plan['plan']
             
         except Exception as e:
             self.logger.error(f"Failed to generate automation plan: {e}")

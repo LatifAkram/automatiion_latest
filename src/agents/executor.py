@@ -976,12 +976,11 @@ class ExecutionAgent:
         try:
             from .intelligent_automation import IntelligentAutomationAgent
             
-            # Create a dummy AI provider for now
-            class DummyAIProvider:
-                async def generate_response(self, prompt):
-                    return "Fallback response"
+            # Use the orchestrator's AI provider
+            from ..core.orchestrator import get_orchestrator
+            orch = get_orchestrator()
             
-            intelligent_agent = IntelligentAutomationAgent(self.config, DummyAIProvider())
+            intelligent_agent = IntelligentAutomationAgent(self.config, orch.ai_provider)
             await intelligent_agent.initialize()
             
             # Execute the automation
