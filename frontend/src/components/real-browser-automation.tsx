@@ -299,9 +299,9 @@ export default function RealBrowserAutomation({
               {activeTab === 'steps' && (
                 <div className="h-full overflow-y-auto p-4">
                   <div className="space-y-3">
-                    {steps.map((step, index) => (
+                    {steps.filter(step => step && step.action).map((step, index) => (
                       <motion.div
-                        key={`real_step_${step.id || `step_${index}`}_${step.action?.replace(/\s+/g, '_') || 'step'}_${Date.now()}`}
+                        key={`real_step_${step.id || `step_${index}`}_${(step.action || 'unknown_action').replace(/\s+/g, '_')}`}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
@@ -356,9 +356,9 @@ export default function RealBrowserAutomation({
               {activeTab === 'screenshots' && (
                 <div className="h-full overflow-y-auto p-4">
                   <div className="grid grid-cols-3 gap-4">
-                    {steps.filter(step => step.screenshot).map((step, index) => (
+                    {steps.filter(step => step && step.screenshot && step.action).map((step, index) => (
                       <motion.div
-                        key={`real_screenshot_${step.id || `screenshot_${index}`}_${step.action?.replace(/\s+/g, '_') || 'screenshot'}_${Date.now()}`}
+                        key={`real_screenshot_${step.id || `screenshot_${index}`}_${(step.action || 'unknown_action').replace(/\s+/g, '_')}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
