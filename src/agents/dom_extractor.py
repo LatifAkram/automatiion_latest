@@ -414,3 +414,8 @@ class DOMExtractionAgent:
         if self.session:
             await self.session.close()
             self.logger.info("DOM extraction agent closed")
+    
+    async def shutdown(self):
+        """Shutdown DOM extraction agent."""
+        await self.close()
+        self.logger.info("DOM extraction agent shutdown complete")

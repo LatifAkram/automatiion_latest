@@ -1,97 +1,94 @@
-2025-08-13 06:57:09,992 - src.utils.logger - INFO - Logging configured with level: INFO
-2025-08-13 06:57:09,993 - __main__ - INFO - Configuration loaded successfully
-2025-08-13 06:57:09,993 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
-2025-08-13 06:57:09,994 - src.core.database - INFO - Database tables created successfully
-2025-08-13 06:57:09,994 - src.core.database - INFO - Database initialized: data/automation.db
-2025-08-13 06:57:10,064 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
-2025-08-13 06:57:10,065 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
-2025-08-13 06:57:10,065 - src.core.vector_store - INFO - Collection 'conversations' initialized
-2025-08-13 06:57:10,066 - src.core.vector_store - INFO - Collection 'task_templates' initialized
-2025-08-13 06:57:10,066 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
-2025-08-13 06:57:10,067 - src.core.vector_store - INFO - Initialized 5 collections
-2025-08-13 06:57:10,067 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
-2025-08-13 06:57:10,067 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
-2025-08-13 06:57:10,067 - src.core.ai_provider - INFO - Initializing AI providers...
-2025-08-13 06:57:10,068 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
-2025-08-13 06:57:10,068 - src.core.ai_provider - INFO - AI providers initialized. Available: []
-2025-08-13 06:57:10,068 - src.agents.planner - INFO - Planner Agent initialized
-2025-08-13 06:57:10,068 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 06:57:10,068 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 06:57:10,410 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 06:57:10,410 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 06:57:10,410 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 06:57:10,411 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 06:57:10,771 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 06:57:10,771 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 06:57:10,771 - src.utils.media_capture - INFO - Media capture initialized: data/media
-2025-08-13 06:57:10,772 - src.utils.selector_drift - INFO - Selector drift detector initialized
-2025-08-13 06:57:11,111 - src.agents.executor - INFO - Browser initialized: chromium
-2025-08-13 06:57:11,112 - src.agents.executor - INFO - Execution agent initialized successfully
-2025-08-13 06:57:11,112 - src.core.ai_provider - INFO - Initializing AI providers...
-2025-08-13 06:57:11,112 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
-2025-08-13 06:57:11,112 - src.core.ai_provider - INFO - AI providers initialized. Available: []
-2025-08-13 06:57:11,112 - src.agents.conversational - WARNING - Failed to load conversation history: 'VectorStore' object has no attribute 'get_conversation_history'
-2025-08-13 06:57:11,112 - src.agents.conversational - INFO - Conversational Agent initialized
-2025-08-13 06:57:11,112 - src.agents.search - INFO - Search agent initialized successfully
-2025-08-13 06:57:11,112 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
-2025-08-13 06:57:11,114 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
-2025-08-13 06:57:11,114 - __main__ - INFO - Multi-agent orchestrator initialized
-2025-08-13 06:57:11,114 - __main__ - INFO - Starting API server...
-2025-08-13 06:57:11,127 - __main__ - ERROR - Fatal error: asyncio.run() cannot be called from a running event loop
-Traceback (most recent call last):
-  File "/workspace/main.py", line 49, in main
-    start_api_server(orchestrator)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
-  File "/workspace/src/api/server.py", line 551, in start_api_server
-    uvicorn.run(
-    ~~~~~~~~~~~^
-        app,
-        ^^^^
-    ...<2 lines>...
-        log_level="info"
-        ^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/workspace/venv/lib/python3.13/site-packages/uvicorn/main.py", line 580, in run
-    server.run()
-    ~~~~~~~~~~^^
-  File "/workspace/venv/lib/python3.13/site-packages/uvicorn/server.py", line 67, in run
-    return asyncio.run(self.serve(sockets=sockets))
-           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.13/asyncio/runners.py", line 191, in run
-    raise RuntimeError(
-        "asyncio.run() cannot be called from a running event loop")
-RuntimeError: asyncio.run() cannot be called from a running event loop
-<sys>:0: RuntimeWarning: coroutine 'Server.serve' was never awaited
-RuntimeWarning: Enable tracemalloc to get the object allocation traceback
-2025-08-13 06:57:11,715 - asyncio - ERROR - Unclosed client session
-client_session: <aiohttp.client.ClientSession object at 0x7f667d9da990>
-2025-08-13 06:57:11,715 - asyncio - ERROR - Unclosed client session
-client_session: <aiohttp.client.ClientSession object at 0x7f667d9dafd0>
-Exception ignored in: <function BaseSubprocessTransport.__del__ at 0x7f66b30bd800>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/base_subprocess.py", line 130, in __del__
-  File "/usr/lib/python3.13/asyncio/base_subprocess.py", line 107, in close
-  File "/usr/lib/python3.13/asyncio/unix_events.py", line 802, in close
-  File "/usr/lib/python3.13/asyncio/unix_events.py", line 788, in write_eof
-  File "/usr/lib/python3.13/asyncio/base_events.py", line 827, in call_soon
-  File "/usr/lib/python3.13/asyncio/base_events.py", line 550, in _check_closed
-RuntimeError: Event loop is closed
-Exception ignored in: <function BaseSubprocessTransport.__del__ at 0x7f66b30bd800>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/base_subprocess.py", line 130, in __del__
-  File "/usr/lib/python3.13/asyncio/base_subprocess.py", line 107, in close
-  File "/usr/lib/python3.13/asyncio/unix_events.py", line 802, in close
-  File "/usr/lib/python3.13/asyncio/unix_events.py", line 788, in write_eof
-  File "/usr/lib/python3.13/asyncio/base_events.py", line 827, in call_soon
-  File "/usr/lib/python3.13/asyncio/base_events.py", line 550, in _check_closed
-RuntimeError: Event loop is closed
-Exception ignored in: <function BaseSubprocessTransport.__del__ at 0x7f66b30bd800>
-Traceback (most recent call last):
-  File "/usr/lib/python3.13/asyncio/base_subprocess.py", line 130, in __del__
-  File "/usr/lib/python3.13/asyncio/base_subprocess.py", line 107, in close
-  File "/usr/lib/python3.13/asyncio/unix_events.py", line 802, in close
-  File "/usr/lib/python3.13/asyncio/unix_events.py", line 788, in write_eof
-  File "/usr/lib/python3.13/asyncio/base_events.py", line 827, in call_soon
-  File "/usr/lib/python3.13/asyncio/base_events.py", line 550, in _check_closed
-RuntimeError: Event loop is closed
+2025-08-13 10:15:08,780 - src.utils.logger - INFO - Logging configured with level: INFO
+2025-08-13 10:15:08,780 - __main__ - INFO - Configuration loaded successfully
+2025-08-13 10:15:08,780 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
+2025-08-13 10:15:08,781 - src.core.database - INFO - Database tables created successfully
+2025-08-13 10:15:08,781 - src.core.database - INFO - Database initialized: data/automation.db
+2025-08-13 10:15:08,848 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:15:08,849 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:15:08,849 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:15:08,850 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:15:08,851 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:15:08,851 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:15:08,851 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:15:08,852 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:15:08,852 - src.agents.planner - INFO - Planner Agent initialized
+2025-08-13 10:15:08,852 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:15:08,852 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:15:09,130 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:15:09,130 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:15:09,130 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:15:09,130 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:15:09,398 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:15:09,398 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:15:09,398 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:15:09,399 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:15:09,666 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:15:09,666 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:15:09,666 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:15:09,666 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:15:09,666 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:15:09,668 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:15:09,669 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:15:09,670 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:15:09,670 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:15:09,671 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:15:09,671 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:15:09,671 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:15:09,671 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:15:09,671 - src.agents.conversational - INFO - Conversational agent initialized successfully
+2025-08-13 10:15:09,671 - src.agents.search - INFO - Search agent initialized successfully
+2025-08-13 10:15:09,672 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
+2025-08-13 10:15:09,673 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
+2025-08-13 10:15:09,673 - __main__ - INFO - Multi-agent orchestrator initialized
+2025-08-13 10:15:09,673 - __main__ - INFO - Starting API server...
+INFO:     Started server process [243337]
+INFO:     Waiting for application startup.
+2025-08-13 10:15:09,697 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
+2025-08-13 10:15:09,697 - src.core.database - INFO - Database tables created successfully
+2025-08-13 10:15:09,697 - src.core.database - INFO - Database initialized: data/automation.db
+2025-08-13 10:15:09,700 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:15:09,701 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:15:09,702 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:15:09,702 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:15:09,703 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:15:09,703 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:15:09,703 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:15:09,704 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:15:09,704 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:15:09,705 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:15:09,705 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:15:09,705 - src.agents.planner - INFO - Planner Agent initialized
+2025-08-13 10:15:09,705 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:15:09,705 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:15:09,981 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:15:09,981 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:15:09,981 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:15:09,981 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:15:10,265 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:15:10,265 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:15:10,265 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:15:10,265 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:15:10,544 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:15:10,544 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:15:10,544 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:15:10,545 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:15:10,545 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:15:10,547 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:15:10,548 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:15:10,549 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:15:10,549 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:15:10,550 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:15:10,550 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:15:10,550 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:15:10,550 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:15:10,550 - src.agents.conversational - INFO - Conversational agent initialized successfully
+2025-08-13 10:15:10,551 - src.agents.search - INFO - Search agent initialized successfully
+2025-08-13 10:15:10,551 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
+2025-08-13 10:15:10,551 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
+2025-08-13 10:15:10,551 - root - INFO - API server initialized successfully
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:55990 - "GET /health HTTP/1.1" 200 OK
