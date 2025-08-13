@@ -116,9 +116,12 @@ class IntelligentAutomationAgent:
             
             self.logger.info("Intelligent automation agent initialized successfully")
             
-            # Set page to not close automatically
+            # Set page to not close automatically and keep browser open
             self.page.set_default_timeout(30000)  # 30 seconds timeout
             self.page.set_default_navigation_timeout(30000)  # 30 seconds navigation timeout
+            
+            # Prevent browser from closing automatically
+            self.browser_keep_open = True
             
         except Exception as e:
             self.logger.error(f"Failed to initialize intelligent automation agent: {e}")
@@ -187,7 +190,7 @@ class IntelligentAutomationAgent:
                 self.page, "intelligent_automation", "final_state"
             )
             
-            # Format results for UI compatibility
+            # Format results for UI compatibility with detailed step information
             formatted_results = {
                 "status": "completed",
                 "instructions": instructions,
@@ -199,8 +202,22 @@ class IntelligentAutomationAgent:
                 "timestamp": datetime.utcnow().isoformat(),
                 "steps": results.get("steps", []),
                 "success_rate": results.get("success_rate", 100),
-                "error_details": results.get("error_details", "")
+                "error_details": results.get("error_details", ""),
+                "browser_kept_open": True,  # Indicate browser is kept open
+                "current_step": len(results.get("steps", [])),
+                "total_steps": len(automation_plan.get("steps", [])),
+                "ai_analysis": ai_dom_analysis,
+                "execution_details": {
+                    "completed_steps": results.get("completed_steps", 0),
+                    "total_steps": results.get("total_steps", 0),
+                    "errors": results.get("errors", []),
+                    "learning_applied": results.get("learning_applied", False),
+                    "performance_improvement": results.get("performance_improvement", 0)
+                }
             }
+            
+            # Keep browser open for user interaction
+            self.logger.info("Automation completed. Browser kept open for user interaction.")
             
             return formatted_results
             
@@ -1437,6 +1454,31 @@ class IntelligentAutomationAgent:
     async def shutdown(self):
         """Shutdown the intelligent automation agent."""
         try:
+            # Only close if browser_keep_open is False
+            if not getattr(self, 'browser_keep_open', False):
+                if self.page:
+                    await self.page.close()
+                if self.context:
+                    await self.context.close()
+                if self.browser:
+                    await self.browser.close()
+                if self.playwright:
+                    await self.playwright.stop()
+                self.logger.info("Intelligent automation agent shutdown complete")
+            else:
+                self.logger.info("Browser kept open for user interaction")
+                
+        except Exception as e:
+            self.logger.error(f"Error during intelligent automation agent shutdown: {e}")
+    
+    async def keep_browser_open(self):
+        """Keep the browser open for user interaction."""
+        self.browser_keep_open = True
+        self.logger.info("Browser will be kept open for user interaction")
+    
+    async def close_browser(self):
+        """Close the browser when user is done."""
+        try:
             if self.page:
                 await self.page.close()
             if self.context:
@@ -1445,8 +1487,19 @@ class IntelligentAutomationAgent:
                 await self.browser.close()
             if self.playwright:
                 await self.playwright.stop()
-                
-            self.logger.info("Intelligent automation agent shutdown complete")
-            
+            self.logger.info("Browser closed by user request")
         except Exception as e:
-            self.logger.error(f"Error during intelligent automation agent shutdown: {e}")
+            self.logger.error(f"Error closing browser: {e}")
+    
+    async def get_current_step_info(self) -> Dict[str, Any]:
+        """Get current step information for UI display."""
+        try:
+            return {
+                "current_url": self.page.url if self.page else "",
+                "page_title": await self.page.title() if self.page else "",
+                "browser_open": self.browser_keep_open,
+                "automation_status": "running" if self.browser_keep_open else "completed"
+            }
+        except Exception as e:
+            self.logger.error(f"Error getting current step info: {e}")
+            return {"error": str(e)}

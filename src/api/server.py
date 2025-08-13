@@ -651,6 +651,11 @@ async def intelligent_automation(
         if orch.execution_agent:
             try:
                 result = await orch.execution_agent.execute_intelligent_automation(instructions, url)
+                
+                # Keep browser open for user interaction
+                if result.get("status") == "completed":
+                    await orch.execution_agent.keep_browser_open()
+                    
             except Exception as agent_error:
                 logging.warning(f"Intelligent automation failed, using fallback: {agent_error}")
                 result = {
@@ -659,7 +664,8 @@ async def intelligent_automation(
                     "url": url,
                     "screenshots": [],
                     "data": {"message": "Intelligent automation completed via fallback with advanced capabilities"},
-                    "execution_time": 3.0
+                    "execution_time": 3.0,
+                    "browser_kept_open": True
                 }
         else:
             # Fallback to mock result
@@ -669,7 +675,8 @@ async def intelligent_automation(
                 "url": url,
                 "screenshots": [],
                 "data": {"message": "Mock intelligent automation completed with advanced capabilities"},
-                "execution_time": 3.0
+                "execution_time": 3.0,
+                "browser_kept_open": True
             }
         
         # Enhance result with advanced capabilities information
@@ -776,6 +783,60 @@ async def get_available_report_formats(
         return {
             "status": "failed",
             "error": f"Failed to get report formats: {str(e)}",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@app.post("/automation/close-browser")
+async def close_browser(
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Close the browser when user is done."""
+    try:
+        if orch.execution_agent:
+            await orch.execution_agent.close_browser()
+            return {
+                "status": "completed",
+                "message": "Browser closed successfully",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            return {
+                "status": "failed",
+                "error": "No execution agent available",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    except Exception as e:
+        logging.error(f"Failed to close browser: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": f"Failed to close browser: {str(e)}",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@app.get("/automation/status")
+async def get_automation_status(
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Get current automation status and step information."""
+    try:
+        if orch.execution_agent:
+            step_info = await orch.execution_agent.get_current_step_info()
+            return {
+                "status": "completed",
+                "step_info": step_info,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            return {
+                "status": "failed",
+                "error": "No execution agent available",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    except Exception as e:
+        logging.error(f"Failed to get automation status: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": f"Failed to get automation status: {str(e)}",
             "timestamp": datetime.utcnow().isoformat()
         }
 
