@@ -16,6 +16,7 @@ from ..utils.media_capture import MediaCapture
 from ..utils.selector_drift import SelectorDriftDetector
 from ..agents.ai_dom_analyzer import AIDOMAnalyzer
 from ..utils.advanced_learning import AdvancedLearningSystem
+from ..agents.parallel_sub_agents import ParallelSubAgentOrchestrator
 
 
 class IntelligentAutomationAgent:
@@ -51,6 +52,9 @@ class IntelligentAutomationAgent:
         
         # Initialize advanced learning system (will be fully initialized in initialize method)
         self.advanced_learning = None
+        
+        # Initialize parallel sub-agents orchestrator (will be fully initialized in initialize method)
+        self.parallel_orchestrator = None
         
         # Browser context
         self.browser = None
@@ -90,6 +94,12 @@ class IntelligentAutomationAgent:
             # Initialize advanced learning system
             self.advanced_learning = AdvancedLearningSystem(
                 config=self.config,
+                ai_provider=self.ai_provider,
+                vector_store=vector_store
+            )
+            
+            # Initialize parallel sub-agents orchestrator
+            self.parallel_orchestrator = ParallelSubAgentOrchestrator(
                 ai_provider=self.ai_provider,
                 vector_store=vector_store
             )
@@ -1078,6 +1088,37 @@ class IntelligentAutomationAgent:
                 "total_steps": 0
             }
 
+    async def execute_parallel_automation(self, instructions: str, url: str) -> Dict[str, Any]:
+        """Execute automation using parallel sub-agents for faster execution."""
+        try:
+            self.logger.info("Starting parallel automation execution")
+            
+            # Use parallel sub-agents orchestrator
+            result = await self.parallel_orchestrator.execute_parallel_automation(
+                instructions=instructions,
+                url=url,
+                page=self.page
+            )
+            
+            # Capture final screenshot
+            final_screenshot = await self.media_capture.capture_screenshot(
+                self.page, "parallel_automation", "final_state"
+            )
+            
+            # Add screenshot to result
+            result["final_screenshot"] = final_screenshot
+            
+            self.logger.info("Parallel automation execution completed")
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Parallel automation execution failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "parallel_execution": False
+            }
+
     async def _execute_step_with_auto_heal(self, step: Dict[str, Any], success_prediction: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a single step with auto-heal capabilities."""
         try:
@@ -1225,22 +1266,33 @@ class IntelligentAutomationAgent:
     def _extract_json_from_response(self, response: str) -> str:
         """Extract JSON from AI response that might contain extra text."""
         try:
-            # Look for JSON object in the response
             import re
             
-            # Try to find JSON object with curly braces
-            json_pattern = r'\{.*\}'
-            json_match = re.search(json_pattern, response, re.DOTALL)
-            
-            if json_match:
-                return json_match.group(0)
-            
-            # If no JSON object found, try to extract from code blocks
-            code_block_pattern = r'```(?:json)?\s*(\{.*?\})\s*```'
+            # First, try to extract from code blocks with json language
+            code_block_pattern = r'```json\s*(\{.*?\})\s*```'
             code_match = re.search(code_block_pattern, response, re.DOTALL)
             
             if code_match:
                 return code_match.group(1)
+            
+            # Try to extract from code blocks without language specification
+            code_block_pattern2 = r'```\s*(\{.*?\})\s*```'
+            code_match2 = re.search(code_block_pattern2, response, re.DOTALL)
+            
+            if code_match2:
+                return code_match2.group(1)
+            
+            # Try to find JSON object with curly braces (from start to end)
+            json_pattern = r'^\s*\{.*\}\s*$'
+            if re.match(json_pattern, response, re.DOTALL):
+                return response.strip()
+            
+            # Try to find JSON object anywhere in the response
+            json_pattern2 = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+            json_match = re.search(json_pattern2, response, re.DOTALL)
+            
+            if json_match:
+                return json_match.group(0)
             
             # If still no JSON found, return the original response
             return response
