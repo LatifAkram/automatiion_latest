@@ -38,6 +38,21 @@ class AIDOMAnalyzer:
         try:
             self.logger.info("Starting AI-powered DOM analysis")
             
+            # Test local LLM JSON capability first
+            json_capable = await self._test_local_llm_json_capability()
+            if not json_capable:
+                self.logger.warning("Local LLM cannot generate valid JSON, using fallback analysis")
+                page_content = await self._extract_page_content(page)
+                fallback_analysis = self._fallback_element_analysis(page_content, instructions)
+                return {
+                    "ai_analysis": fallback_analysis,
+                    "learned_patterns": {},
+                    "intelligent_selectors": [],
+                    "page_structure": page_content,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "fallback_used": True
+                }
+            
             # Get page content and structure
             page_content = await self._extract_page_content(page)
             
@@ -149,65 +164,61 @@ class AIDOMAnalyzer:
             html_content = page_content.get("html", "")
             visible_elements = context['visible_elements'][:50]  # Limit to first 50 visible elements
             
-            # AI prompt for element analysis
-            prompt = f"""
-            Analyze this web page for automation purposes:
+            # Simplified AI prompt for element analysis
+            prompt = f"""Analyze this web page for automation:
+
+Instructions: {instructions}
+Page Title: {context['page_title']}
+Domain: {context['domain']}
+
+HTML Content (first 1000 chars): {html_content[:1000]}
+
+Visible Elements: {len(context['visible_elements'])} elements found
+
+Please identify:
+1. Login elements (username, password, login button)
+2. Form fields (text, email, search)
+3. Navigation (menus, links, buttons)
+4. Content areas (headers, text)
+5. Interactive elements (buttons, links)
+
+For each element provide:
+- Purpose and function
+- Best selector (ID, class, XPath)
+- Confidence score (0-1)
+- Alternative selectors
+
+Return as JSON:
+{{
+    "login_elements": [],
+    "form_elements": [],
+    "navigation_elements": [],
+    "content_elements": [],
+    "interactive_elements": [],
+    "recommended_actions": []
+}}"""
             
-            Instructions: {instructions}
-            Page Title: {context['page_title']}
-            Domain: {context['domain']}
-            Total Elements: {context['elements_count']}
-            Visible Elements: {len(context['visible_elements'])}
-            
-            ACTUAL HTML CONTENT (first 2000 characters):
-            {html_content[:2000]}
-            
-            VISIBLE ELEMENTS DATA (first 50):
-            {json.dumps(visible_elements[:10], indent=2)}
-            
-            Please analyze the page and identify:
-            1. Login/authentication elements (username, password, login button)
-            2. Form input fields (text, email, phone, search)
-            3. Navigation elements (menus, links, buttons)
-            4. Content areas (headers, text, images)
-            5. Interactive elements (buttons, links, dropdowns)
-            
-            For each identified element, provide:
-            - Element purpose and function
-            - Best selector strategy (ID, class, XPath, text-based)
-            - Confidence score (0-1)
-            - Alternative selectors as fallbacks
-            
-            IMPORTANT: Use the actual HTML content and element data provided above.
-            Do not provide generic responses - analyze the specific page content.
-            
-            Return as JSON with structure:
-            {{
-                "login_elements": [...],
-                "form_elements": [...],
-                "navigation_elements": [...],
-                "content_elements": [...],
-                "interactive_elements": [...],
-                "recommended_actions": [...]
-            }}
-            """
-            
-            # Get AI analysis with timeout
-            ai_response = await self.ai_provider.generate_response(prompt, timeout=20)
-            
+            # Get AI analysis with timeout and better error handling
             try:
+                ai_response = await self.ai_provider.generate_response(prompt, timeout=20)
+                self.logger.debug(f"AI response received: {ai_response[:200]}...")
+                
                 # Clean the response to extract JSON
                 cleaned_response = self._extract_json_from_response(ai_response)
                 self.logger.debug(f"Cleaned response: {cleaned_response[:500]}...")
                 ai_analysis = json.loads(cleaned_response)
                 self.logger.info(f"AI analysis completed: {len(ai_analysis)} categories")
                 return ai_analysis
-            except json.JSONDecodeError as e:
-                self.logger.warning(f"AI response not valid JSON, using fallback analysis: {e}")
-                self.logger.warning(f"Raw response: {ai_response[:500]}...")
-                self.logger.warning(f"Cleaned response: {cleaned_response[:500]}...")
-                # Try to create a basic structure from the response
-                return self._create_basic_analysis_from_response(ai_response, page_content, instructions)
+                
+            except Exception as ai_error:
+                self.logger.warning(f"AI analysis failed: {ai_error}")
+                self.logger.warning(f"Raw response: {ai_response[:500] if 'ai_response' in locals() else 'No response'}...")
+                
+                # Try to create a basic structure from the response if available
+                if 'ai_response' in locals():
+                    return self._create_basic_analysis_from_response(ai_response, page_content, instructions)
+                else:
+                    return self._fallback_element_analysis(page_content, instructions)
                 
         except Exception as e:
             self.logger.error(f"AI element analysis failed: {e}")
@@ -646,3 +657,22 @@ class AIDOMAnalyzer:
         except Exception as e:
             self.logger.error(f"Failed to create basic analysis from response: {e}")
             return self._fallback_element_analysis(page_content, instructions)
+    
+    async def _test_local_llm_json_capability(self) -> bool:
+        """Test if local LLM can generate valid JSON responses."""
+        try:
+            test_prompt = "Return a simple JSON object with one field 'test' set to 'success'"
+            response = await self.ai_provider.generate_response(test_prompt, timeout=10)
+            
+            # Try to parse as JSON
+            try:
+                json.loads(response)
+                self.logger.info("Local LLM JSON capability test: SUCCESS")
+                return True
+            except json.JSONDecodeError:
+                self.logger.warning("Local LLM JSON capability test: FAILED - cannot generate valid JSON")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Local LLM JSON capability test failed: {e}")
+            return False
