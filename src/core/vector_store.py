@@ -1,41 +1,48 @@
 """
-Vector Store
-===========
+Vector Store Management
+======================
 
-Vector database for semantic storage and learning capabilities using ChromaDB.
+Vector database management using ChromaDB for storing and retrieving
+embeddings, plans, and patterns.
 """
 
 import asyncio
 import logging
 import json
-from typing import Dict, List, Optional, Any, Union
-from datetime import datetime
 from pathlib import Path
+from typing import Dict, List, Optional, Any
+from datetime import datetime
 
 try:
     import chromadb
     from chromadb.config import Settings
-    CHROMA_AVAILABLE = True
+    CHROMADB_AVAILABLE = True
 except ImportError:
-    CHROMA_AVAILABLE = False
+    CHROMADB_AVAILABLE = False
+    logging.warning("ChromaDB not available. Vector store functionality will be limited.")
 
 
 class VectorStore:
-    """Vector database for semantic storage and learning using ChromaDB."""
+    """Vector database manager using ChromaDB."""
     
     def __init__(self, config: Any):
         self.config = config
         self.logger = logging.getLogger(__name__)
         self.client = None
+        self.db_path = Path(config.vector_db_path)
         self.collections = {}
-        self.db_path = Path(self.config.vector_db_path)
+        
+        # Ensure directory exists
+        self.db_path.mkdir(parents=True, exist_ok=True)
         
     async def initialize(self):
-        """Initialize vector store."""
+        """Initialize vector store and collections."""
         try:
-            # Ensure vector DB directory exists
-            self.db_path.mkdir(parents=True, exist_ok=True)
-            
+            if not CHROMADB_AVAILABLE:
+                self.logger.warning("ChromaDB not available. Using mock vector store.")
+                await self._initialize_mock_store()
+                return
+                
             # Initialize ChromaDB client with simple settings
             self.client = chromadb.PersistentClient(
                 path=str(self.db_path),
@@ -45,426 +52,349 @@ class VectorStore:
                 )
             )
             
-            # Initialize collections with simple embedding function
-            self.collections = {}
+            # Initialize collections
+            await self._initialize_collections()
             
-            # Workflow plans collection
-            self.collections["workflow_plans"] = self.client.get_or_create_collection(
-                name="workflow_plans",
-                metadata={"description": "Workflow planning and execution patterns"}
-            )
-            
-            # Execution patterns collection
-            self.collections["execution_patterns"] = self.client.get_or_create_collection(
-                name="execution_patterns",
-                metadata={"description": "Successful and failed execution patterns"}
-            )
-            
-            # Conversations collection
-            self.collections["conversations"] = self.client.get_or_create_collection(
-                name="conversations",
-                metadata={"description": "Conversation history and context"}
-            )
-            
-            # Task templates collection
-            self.collections["task_templates"] = self.client.get_or_create_collection(
-                name="task_templates",
-                metadata={"description": "Reusable task templates and patterns"}
-            )
-            
-            # Failure patterns collection
-            self.collections["failure_patterns"] = self.client.get_or_create_collection(
-                name="failure_patterns",
-                metadata={"description": "Failure patterns and resolution strategies"}
-            )
-            
-            self.logger.info(f"Initialized {len(self.collections)} collections")
             self.logger.info(f"Vector store initialized: {self.db_path}")
             
         except Exception as e:
             self.logger.error(f"Failed to initialize vector store: {e}", exc_info=True)
-            # Continue without vector store
-            self.client = None
-            self.collections = {}
+            # Fallback to mock store
+            await self._initialize_mock_store()
             
-    async def store_plan(self, workflow_id: str, plan: Dict[str, Any]):
-        """Store workflow plan in vector database."""
+    async def _initialize_collections(self):
+        """Initialize ChromaDB collections."""
         try:
-            if not self.client:
-                self.logger.warning("Vector store not available, skipping plan storage")
-                return
-                
-            # Create document content
-            content = f"Workflow Plan: {plan.get('workflow_id', workflow_id)}\n"
-            content += f"Domain: {plan.get('analysis', {}).get('domain', 'general')}\n"
-            content += f"Tasks: {len(plan.get('tasks', []))}\n"
-            content += f"Estimated Duration: {plan.get('estimated_duration', 0)}s\n"
-            content += f"Success Probability: {plan.get('success_probability', 0.0)}\n"
+            # Define collection names and their metadata
+            collection_configs = {
+                "workflow_plans": {
+                    "description": "Stores workflow execution plans and strategies"
+                },
+                "execution_patterns": {
+                    "description": "Stores successful execution patterns and templates"
+                },
+                "conversations": {
+                    "description": "Stores conversation history and context"
+                },
+                "task_templates": {
+                    "description": "Stores reusable task templates and configurations"
+                },
+                "failure_patterns": {
+                    "description": "Stores failure patterns for learning and improvement"
+                }
+            }
             
-            # Add task details
-            for task in plan.get('tasks', []):
-                content += f"- {task.get('name', 'Unknown')}: {task.get('type', 'general')}\n"
+            # Create or get collections
+            for collection_name, metadata in collection_configs.items():
+                try:
+                    collection = self.client.get_or_create_collection(
+                        name=collection_name,
+                        metadata=metadata
+                    )
+                    self.collections[collection_name] = collection
+                    self.logger.info(f"Collection '{collection_name}' initialized")
+                except Exception as e:
+                    self.logger.warning(f"Failed to initialize collection '{collection_name}': {e}")
+                    # Create a mock collection
+                    self.collections[collection_name] = MockCollection(collection_name)
+                    
+            self.logger.info(f"Initialized {len(self.collections)} collections")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize collections: {e}", exc_info=True)
+            # Create mock collections as fallback
+            await self._initialize_mock_store()
+            
+    async def _initialize_mock_store(self):
+        """Initialize mock vector store when ChromaDB is not available."""
+        self.logger.info("Initializing mock vector store")
+        
+        # Create mock collections
+        collection_names = [
+            "workflow_plans",
+            "execution_patterns", 
+            "conversations",
+            "task_templates",
+            "failure_patterns"
+        ]
+        
+        for name in collection_names:
+            self.collections[name] = MockCollection(name)
+            
+        self.logger.info(f"Mock vector store initialized with {len(self.collections)} collections")
+        
+    async def store_plan(self, workflow_id: str, plan_data: Dict[str, Any]) -> bool:
+        """Store workflow execution plan."""
+        try:
+            if "workflow_plans" not in self.collections:
+                self.logger.error("workflow_plans collection not available")
+                return False
                 
-            # Store in collection
+            # Convert plan data to string for storage
+            content = json.dumps(plan_data, default=str)
+            
+            # Add to collection
             self.collections["workflow_plans"].add(
                 documents=[content],
                 metadatas=[{
                     "workflow_id": workflow_id,
-                    "domain": plan.get('analysis', {}).get('domain', 'general'),
-                    "task_count": len(plan.get('tasks', [])),
-                    "estimated_duration": plan.get('estimated_duration', 0),
-                    "success_probability": plan.get('success_probability', 0.0),
-                    "created_at": datetime.utcnow().isoformat()
+                    "created_at": datetime.utcnow().isoformat(),
+                    "plan_type": "execution_plan"
                 }],
                 ids=[f"plan_{workflow_id}"]
             )
             
-            self.logger.info(f"Stored plan for workflow {workflow_id}")
+            self.logger.info(f"Plan stored for workflow: {workflow_id}")
+            return True
             
         except Exception as e:
             self.logger.error(f"Failed to store plan: {e}", exc_info=True)
+            return False
             
-    async def store_execution_pattern(self, workflow_id: str, execution_result: Union[Any, Dict[str, Any]]):
-        """Store execution pattern for learning and optimization."""
+    async def store_pattern(self, pattern_type: str, pattern_data: Dict[str, Any]) -> bool:
+        """Store execution pattern."""
         try:
-            if not self.client:
-                self.logger.warning("Vector store not available, skipping pattern storage")
-                return
+            collection_name = "execution_patterns"
+            if collection_name not in self.collections:
+                self.logger.error(f"{collection_name} collection not available")
+                return False
                 
-            # Handle both ExecutionResult objects and dictionaries
-            if isinstance(execution_result, dict):
-                success = execution_result.get("success", False)
-                duration = execution_result.get("duration", 0)
-                steps = execution_result.get("steps", [])
-                errors = execution_result.get("errors", [])
-            else:
-                success = execution_result.success
-                duration = execution_result.duration
-                steps = execution_result.steps
-                errors = execution_result.errors
-                
-            # Create document content
-            content = f"Execution Pattern: {workflow_id}\n"
-            content += f"Success: {success}\n"
-            content += f"Duration: {duration}s\n"
-            content += f"Steps: {len(steps)}\n"
-            content += f"Errors: {len(errors)}\n"
+            content = json.dumps(pattern_data, default=str)
+            pattern_id = f"pattern_{pattern_type}_{datetime.utcnow().timestamp()}"
             
-            # Add step details
-            for step in steps:
-                if isinstance(step, dict):
-                    task_name = step.get("task_name", "Unknown")
-                    task_type = step.get("task_type", "Unknown")
-                    step_success = step.get("success", False)
-                else:
-                    task_name = step.task_name
-                    task_type = step.task_type
-                    step_success = step.success
-                content += f"- {task_name}: {task_type} ({'success' if step_success else 'failed'})\n"
-                
-            # Add error details
-            for error in errors:
-                content += f"Error: {error}\n"
-                
-            # Store in collection
-            self.collections["execution_patterns"].add(
+            self.collections[collection_name].add(
                 documents=[content],
                 metadatas=[{
-                    "workflow_id": workflow_id,
-                    "success": success,
-                    "duration": duration,
-                    "step_count": len(steps),
-                    "error_count": len(errors),
-                    "created_at": datetime.utcnow().isoformat()
+                    "pattern_type": pattern_type,
+                    "created_at": datetime.utcnow().isoformat(),
+                    "success_rate": pattern_data.get("success_rate", 0.0)
                 }],
-                ids=[f"exec_{workflow_id}_{datetime.utcnow().timestamp()}"]
+                ids=[pattern_id]
             )
             
-            # Store failure pattern if execution failed
-            if not success:
-                await self._store_failure_pattern(workflow_id, execution_result)
-                
-            self.logger.info(f"Stored execution pattern for workflow {workflow_id}")
+            self.logger.info(f"Pattern stored: {pattern_type}")
+            return True
             
         except Exception as e:
-            self.logger.error(f"Failed to store execution pattern: {e}", exc_info=True)
+            self.logger.error(f"Failed to store pattern: {e}", exc_info=True)
+            return False
             
-    async def _store_failure_pattern(self, workflow_id: str, execution_result: Any):
-        """Store failure pattern for analysis."""
+    async def store_conversation(self, conversation_id: str, conversation_data: Dict[str, Any]) -> bool:
+        """Store conversation data."""
         try:
-            content = f"Failure Pattern: {workflow_id}\n"
-            content += f"Duration: {execution_result.duration}s\n"
-            content += f"Steps: {len(execution_result.steps)}\n"
-            
-            # Add error details
-            for error in execution_result.errors:
-                content += f"Error: {error}\n"
+            if "conversations" not in self.collections:
+                self.logger.error("conversations collection not available")
+                return False
                 
-            # Add failed step details
-            for step in execution_result.steps:
-                if not step.success:
-                    content += f"Failed Step: {step.task_name} ({step.task_type}) - {step.error}\n"
-                    
-            # Store in failure patterns collection
-            self.collections["failure_patterns"].add(
-                documents=[content],
-                metadatas=[{
-                    "workflow_id": workflow_id,
-                    "duration": execution_result.duration,
-                    "step_count": len(execution_result.steps),
-                    "error_count": len(execution_result.errors),
-                    "failure_type": "execution_failure",
-                    "created_at": datetime.utcnow().isoformat()
-                }],
-                ids=[f"failure_{workflow_id}_{datetime.utcnow().timestamp()}"]
-            )
+            content = json.dumps(conversation_data, default=str)
             
-        except Exception as e:
-            self.logger.error(f"Failed to store failure pattern: {e}", exc_info=True)
-            
-    async def find_execution_patterns(self, domain: str, pattern_type: str = "general") -> List[Dict[str, Any]]:
-        """Find relevant execution patterns."""
-        try:
-            if not self.client:
-                return []
-                
-            # Create query content
-            query_content = f"Execution Pattern Query\n"
-            query_content += f"Domain: {domain}\n"
-            query_content += f"Type: {pattern_type}\n"
-            
-            # Search for patterns
-            results = self.collections["execution_patterns"].query(
-                query_texts=[query_content],
-                n_results=10
-            )
-            
-            patterns = []
-            for i, doc in enumerate(results['documents'][0]):
-                patterns.append({
-                    "content": doc,
-                    "metadata": results['metadatas'][0][i],
-                    "distance": results['distances'][0][i] if 'distances' in results else 0.0
-                })
-                
-            return patterns
-            
-        except Exception as e:
-            self.logger.error(f"Failed to find execution patterns: {e}", exc_info=True)
-            return []
-            
-    async def find_similar_failures(self, execution_result: Any) -> List[Dict[str, Any]]:
-        """Find similar failure patterns."""
-        try:
-            if not self.client:
-                return []
-                
-            # Create query content
-            query_content = f"Failure Pattern Query\n"
-            query_content += f"Error Count: {len(execution_result.errors)}\n"
-            
-            for error in execution_result.errors:
-                query_content += f"Error: {error}\n"
-                
-            # Search for similar patterns
-            results = self.collections["failure_patterns"].query(
-                query_texts=[query_content],
-                n_results=5
-            )
-            
-            similar_failures = []
-            for i, doc in enumerate(results['documents'][0]):
-                similar_failures.append({
-                    "content": doc,
-                    "metadata": results['metadatas'][0][i],
-                    "distance": results['distances'][0][i] if 'distances' in results else 0.0
-                })
-                
-            return similar_failures
-            
-        except Exception as e:
-            self.logger.error(f"Failed to find similar failures: {e}", exc_info=True)
-            return []
-            
-    async def store_conversation(self, conversation: Any):
-        """Store conversation in vector database."""
-        try:
-            if not self.client:
-                self.logger.warning("Vector store not available, skipping conversation storage")
-                return
-                
-            # Create document content from conversation
-            content = f"Conversation: {conversation.session_id}\n"
-            content += f"Messages: {conversation.get_message_count()}\n"
-            content += f"Duration: {(conversation.updated_at - conversation.created_at).total_seconds()}s\n"
-            
-            # Add recent messages
-            for message in conversation.messages[-5:]:  # Last 5 messages
-                content += f"{message.message_type.value.upper()}: {message.content[:100]}...\n"
-                
-            # Store in collection
             self.collections["conversations"].add(
                 documents=[content],
                 metadatas=[{
-                    "session_id": conversation.session_id,
-                    "message_count": conversation.get_message_count(),
-                    "duration": (conversation.updated_at - conversation.created_at).total_seconds(),
-                    "created_at": conversation.created_at.isoformat(),
-                    "updated_at": conversation.updated_at.isoformat()
+                    "conversation_id": conversation_id,
+                    "created_at": datetime.utcnow().isoformat(),
+                    "user_id": conversation_data.get("user_id", "unknown")
                 }],
-                ids=[f"conv_{conversation.session_id}_{datetime.utcnow().timestamp()}"]
+                ids=[f"conv_{conversation_id}"]
             )
             
-            self.logger.info(f"Stored conversation for session {conversation.session_id}")
+            self.logger.info(f"Conversation stored: {conversation_id}")
+            return True
             
         except Exception as e:
             self.logger.error(f"Failed to store conversation: {e}", exc_info=True)
+            return False
             
-    async def get_conversation_history(self) -> List[Any]:
-        """Get conversation history from vector database."""
+    async def store_task_template(self, template_name: str, template_data: Dict[str, Any]) -> bool:
+        """Store task template."""
         try:
-            if not self.client:
-                return []
+            if "task_templates" not in self.collections:
+                self.logger.error("task_templates collection not available")
+                return False
                 
-            # Get all conversations
-            results = self.collections["conversations"].get()
+            content = json.dumps(template_data, default=str)
             
-            conversations = []
-            for i, doc in enumerate(results['documents']):
-                conversations.append({
-                    "content": doc,
-                    "metadata": results['metadatas'][i],
-                    "id": results['ids'][i]
-                })
-                
-            return conversations
-            
-        except Exception as e:
-            self.logger.error(f"Failed to get conversation history: {e}", exc_info=True)
-            return []
-            
-    async def find_similar_plans(self, workflow_request: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Find similar workflow plans."""
-        try:
-            if not self.client:
-                return []
-                
-            # Create query content
-            query_content = f"Workflow Query: {workflow_request.get('name', 'Unknown')}\n"
-            query_content += f"Domain: {workflow_request.get('domain', 'general')}\n"
-            query_content += f"Description: {workflow_request.get('description', '')}\n"
-            
-            # Search for similar plans
-            results = self.collections["workflow_plans"].query(
-                query_texts=[query_content],
-                n_results=3
-            )
-            
-            similar_plans = []
-            for i, doc in enumerate(results['documents'][0]):
-                similar_plans.append({
-                    "content": doc,
-                    "metadata": results['metadatas'][0][i],
-                    "distance": results['distances'][0][i] if 'distances' in results else 0.0
-                })
-                
-            return similar_plans
-            
-        except Exception as e:
-            self.logger.error(f"Failed to find similar plans: {e}", exc_info=True)
-            return []
-            
-    async def store_task_template(self, template: Dict[str, Any]):
-        """Store reusable task template."""
-        try:
-            if not self.client:
-                self.logger.warning("Vector store not available, skipping template storage")
-                return
-                
-            # Create document content
-            content = f"Task Template: {template.get('name', 'Unknown')}\n"
-            content += f"Type: {template.get('type', 'general')}\n"
-            content += f"Description: {template.get('description', '')}\n"
-            content += f"Parameters: {json.dumps(template.get('parameters', {}))}\n"
-            
-            # Store in collection
             self.collections["task_templates"].add(
                 documents=[content],
                 metadatas=[{
-                    "name": template.get('name', 'Unknown'),
-                    "type": template.get('type', 'general'),
-                    "usage_count": template.get('usage_count', 0),
-                    "success_rate": template.get('success_rate', 0.0),
-                    "created_at": datetime.utcnow().isoformat()
+                    "template_name": template_name,
+                    "created_at": datetime.utcnow().isoformat(),
+                    "template_type": template_data.get("type", "generic")
                 }],
-                ids=[f"template_{template.get('name', 'unknown').replace(' ', '_')}"]
+                ids=[f"template_{template_name}"]
             )
             
-            self.logger.info(f"Stored task template: {template.get('name', 'Unknown')}")
+            self.logger.info(f"Task template stored: {template_name}")
+            return True
             
         except Exception as e:
             self.logger.error(f"Failed to store task template: {e}", exc_info=True)
+            return False
             
-    async def find_task_templates(self, task_type: str, domain: str = "general") -> List[Dict[str, Any]]:
-        """Find relevant task templates."""
+    async def store_failure_pattern(self, failure_type: str, failure_data: Dict[str, Any]) -> bool:
+        """Store failure pattern for learning."""
         try:
-            if not self.client:
-                return []
+            if "failure_patterns" not in self.collections:
+                self.logger.error("failure_patterns collection not available")
+                return False
                 
-            # Create query content
-            query_content = f"Task Template Query\n"
-            query_content += f"Type: {task_type}\n"
-            query_content += f"Domain: {domain}\n"
+            content = json.dumps(failure_data, default=str)
+            failure_id = f"failure_{failure_type}_{datetime.utcnow().timestamp()}"
             
-            # Search for templates
-            results = self.collections["task_templates"].query(
-                query_texts=[query_content],
-                n_results=5
+            self.collections["failure_patterns"].add(
+                documents=[content],
+                metadatas=[{
+                    "failure_type": failure_type,
+                    "created_at": datetime.utcnow().isoformat(),
+                    "severity": failure_data.get("severity", "medium")
+                }],
+                ids=[failure_id]
             )
             
-            templates = []
-            for i, doc in enumerate(results['documents'][0]):
-                templates.append({
-                    "content": doc,
-                    "metadata": results['metadatas'][0][i],
-                    "distance": results['distances'][0][i] if 'distances' in results else 0.0
-                })
-                
-            return templates
+            self.logger.info(f"Failure pattern stored: {failure_type}")
+            return True
             
         except Exception as e:
-            self.logger.error(f"Failed to find task templates: {e}", exc_info=True)
+            self.logger.error(f"Failed to store failure pattern: {e}", exc_info=True)
+            return False
+            
+    async def search_plans(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+        """Search for workflow plans."""
+        try:
+            if "workflow_plans" not in self.collections:
+                return []
+                
+            results = self.collections["workflow_plans"].query(
+                query_texts=[query],
+                n_results=n_results
+            )
+            
+            return self._format_search_results(results)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to search plans: {e}", exc_info=True)
             return []
             
-    async def get_statistics(self) -> Dict[str, Any]:
+    async def search_patterns(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+        """Search for execution patterns."""
+        try:
+            if "execution_patterns" not in self.collections:
+                return []
+                
+            results = self.collections["execution_patterns"].query(
+                query_texts=[query],
+                n_results=n_results
+            )
+            
+            return self._format_search_results(results)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to search patterns: {e}", exc_info=True)
+            return []
+            
+    async def search_conversations(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+        """Search conversation history."""
+        try:
+            if "conversations" not in self.collections:
+                return []
+                
+            results = self.collections["conversations"].query(
+                query_texts=[query],
+                n_results=n_results
+            )
+            
+            return self._format_search_results(results)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to search conversations: {e}", exc_info=True)
+            return []
+            
+    def _format_search_results(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Format search results for consistent output."""
+        formatted_results = []
+        
+        try:
+            documents = results.get("documents", [[]])
+            metadatas = results.get("metadatas", [[]])
+            ids = results.get("ids", [[]])
+            
+            for i in range(len(documents[0])):
+                try:
+                    doc_data = json.loads(documents[0][i]) if documents[0][i] else {}
+                    formatted_results.append({
+                        "id": ids[0][i] if ids and ids[0] else None,
+                        "content": doc_data,
+                        "metadata": metadatas[0][i] if metadatas and metadatas[0] else {},
+                        "score": results.get("distances", [[]])[0][i] if results.get("distances") else None
+                    })
+                except Exception as e:
+                    self.logger.warning(f"Failed to format result {i}: {e}")
+                    continue
+                    
+        except Exception as e:
+            self.logger.error(f"Failed to format search results: {e}")
+            
+        return formatted_results
+        
+    async def get_statistics(self) -> Dict[str, int]:
         """Get vector store statistics."""
         try:
-            if not self.client:
-                return {"error": "Vector store not available"}
-                
             stats = {}
+            
             for collection_name, collection in self.collections.items():
                 try:
-                    count = collection.count()
-                    stats[collection_name] = count
+                    if hasattr(collection, 'count'):
+                        stats[collection_name] = collection.count()
+                    else:
+                        stats[collection_name] = 0
                 except Exception as e:
-                    stats[collection_name] = f"Error: {e}"
+                    self.logger.warning(f"Failed to get count for {collection_name}: {e}")
+                    stats[collection_name] = 0
                     
             return stats
             
         except Exception as e:
             self.logger.error(f"Failed to get statistics: {e}", exc_info=True)
-            return {"error": str(e)}
+            return {}
             
-    async def shutdown(self):
-        """Shutdown vector store."""
+    async def cleanup(self):
+        """Cleanup vector store resources."""
         try:
             if self.client:
-                # ChromaDB handles cleanup automatically
-                self.client = None
-                self.collections = {}
-                
-            self.logger.info("Vector store shutdown complete")
+                # ChromaDB cleanup if needed
+                pass
+            self.logger.info("Vector store cleanup completed")
             
         except Exception as e:
-            self.logger.error(f"Error during vector store shutdown: {e}", exc_info=True)
+            self.logger.error(f"Failed to cleanup vector store: {e}", exc_info=True)
+
+
+class MockCollection:
+    """Mock collection for when ChromaDB is not available."""
+    
+    def __init__(self, name: str):
+        self.name = name
+        self.documents = []
+        self.metadatas = []
+        self.ids = []
+        
+    def add(self, documents: List[str], metadatas: List[Dict[str, Any]], ids: List[str]):
+        """Mock add method."""
+        for doc, metadata, doc_id in zip(documents, metadatas, ids):
+            self.documents.append(doc)
+            self.metadatas.append(metadata)
+            self.ids.append(doc_id)
+            
+    def query(self, query_texts: List[str], n_results: int = 5):
+        """Mock query method."""
+        # Return mock results
+        return {
+            "documents": [self.documents[:n_results]],
+            "metadatas": [self.metadatas[:n_results]],
+            "ids": [self.ids[:n_results]],
+            "distances": [[0.1] * min(n_results, len(self.documents))]
+        }
+        
+    def count(self) -> int:
+        """Mock count method."""
+        return len(self.documents)
