@@ -7,6 +7,9 @@ import AutomationDashboard from '../src/components/automation-dashboard';
 // Backend configuration
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
+// Theme configuration
+type Theme = 'light' | 'dark' | 'auto';
+
 interface Message {
   id: string;
   type: 'user' | 'ai';
@@ -33,6 +36,9 @@ interface Message {
     domain: string;
     relevance: number;
     source: string;
+    confidence?: number;
+    content_type?: string;
+    timestamp?: string;
   }>;
   files?: Array<{
     name: string;
@@ -42,6 +48,7 @@ interface Message {
   }>;
   isExpanded?: boolean;
   chatId?: string;
+  agentType?: 'planner' | 'executor' | 'conversational' | 'search' | 'dom_analysis';
 }
 
 interface ChatSession {
@@ -101,6 +108,16 @@ export default function Home() {
   const [agents, setAgents] = useState<AutomationAgent[]>([]);
   const [liveAutomationStream, setLiveAutomationStream] = useState<any>(null);
   const automationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Enhanced agentic features
+  const [theme, setTheme] = useState<Theme>('auto');
+  const [currentAgent, setCurrentAgent] = useState<string>('conversational');
+  const [agentStatus, setAgentStatus] = useState<'thinking' | 'processing' | 'idle'>('idle');
+  const [showAgentSelector, setShowAgentSelector] = useState(false);
+  const [agentAnimations, setAgentAnimations] = useState<{[key: string]: boolean}>({});
+  const [showFloatingAgents, setShowFloatingAgents] = useState(false);
+  const [agentThoughts, setAgentThoughts] = useState<string[]>([]);
+  const [showThoughtBubble, setShowThoughtBubble] = useState(false);
 
   // Initialize default chat session
   useEffect(() => {
@@ -161,6 +178,67 @@ export default function Home() {
     ]);
   }, []);
 
+  // Theme management
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+    
+    // Apply theme
+    applyTheme(theme);
+  }, [theme]);
+
+  const applyTheme = (selectedTheme: Theme) => {
+    const root = document.documentElement;
+    
+    if (selectedTheme === 'auto') {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.toggle('dark', prefersDark);
+    } else {
+      root.classList.toggle('dark', selectedTheme === 'dark');
+    }
+    
+    localStorage.setItem('theme', selectedTheme);
+  };
+
+  const toggleTheme = () => {
+    const themes: Theme[] = ['light', 'dark', 'auto'];
+    const currentIndex = themes.indexOf(theme);
+    const nextTheme = themes[(currentIndex + 1) % themes.length];
+    setTheme(nextTheme);
+  };
+
+  // Agentic AI functions
+  const switchAgent = (agentType: string) => {
+    setCurrentAgent(agentType);
+    setAgentStatus('thinking');
+    
+    // Add agent switch animation
+    setAgentAnimations(prev => ({ ...prev, [agentType]: true }));
+    
+    setTimeout(() => {
+      setAgentStatus('idle');
+      setAgentAnimations(prev => ({ ...prev, [agentType]: false }));
+    }, 2000);
+  };
+
+  const startAgentThinking = (thoughts: string[]) => {
+    setAgentThoughts(thoughts);
+    setShowThoughtBubble(true);
+    setAgentStatus('thinking');
+    
+    setTimeout(() => {
+      setShowThoughtBubble(false);
+      setAgentStatus('processing');
+    }, 3000);
+  };
+
+  const showFloatingAgentAnimation = () => {
+    setShowFloatingAgents(true);
+    setTimeout(() => setShowFloatingAgents(false), 5000);
+  };
+
   // Get current chat messages
   const currentChat = chatSessions.find(chat => chat.id === currentChatId);
   const messages = currentChat?.messages || [];
@@ -188,6 +266,13 @@ export default function Home() {
   };
 
   const handleSendMessage = async (message: string) => {
+    // Start agentic thinking animation
+    startAgentThinking([
+      "Analyzing user request...",
+      "Determining best approach...",
+      "Preparing response..."
+    ]);
+
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -609,52 +694,124 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+            agentStatus === 'thinking' ? 'animate-agent-thinking bg-gradient-to-r from-blue-400 to-purple-500' : 
+            agentStatus === 'processing' ? 'animate-pulse-slow bg-gradient-to-r from-green-400 to-blue-500' :
+            'bg-gradient-to-r from-blue-500 to-purple-600'
+          }`}>
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors">
               Autonomous Automation Platform
             </h1>
-            <p className="text-sm text-gray-500">
-              AI-powered workflow automation
+            <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">
+              AI-powered workflow automation • {currentAgent.charAt(0).toUpperCase() + currentAgent.slice(1)} Agent Active
             </p>
           </div>
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Agent Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowAgentSelector(!showAgentSelector)}
+              className={`p-2 rounded-lg transition-all duration-300 ${
+                showAgentSelector 
+                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' 
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+              title="Switch Agent"
+            >
+              <div className="w-5 h-5 flex items-center justify-center">
+                <span className="text-xs font-bold">{currentAgent.charAt(0).toUpperCase()}</span>
+              </div>
+            </button>
+            
+            {showAgentSelector && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                {['planner', 'executor', 'conversational', 'search', 'dom_analysis'].map(agent => (
+                  <button
+                    key={agent}
+                    onClick={() => {
+                      switchAgent(agent);
+                      setShowAgentSelector(false);
+                    }}
+                    className={`w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                      currentAgent === agent ? 'bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${
+                        agent === 'planner' ? 'bg-purple-500' :
+                        agent === 'executor' ? 'bg-green-500' :
+                        agent === 'conversational' ? 'bg-blue-500' :
+                        agent === 'search' ? 'bg-orange-500' :
+                        'bg-red-500'
+                      }`}></div>
+                      <span className="capitalize">{agent} Agent</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => setShowSearchResults(!showSearchResults)}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              showSearchResults 
+                ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
             title="Toggle Search Results"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
+          
           <button
             onClick={() => setShowDashboard(!showDashboard)}
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              showDashboard 
+                ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
             title="Toggle Dashboard"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </button>
-          <div className="w-px h-6 bg-gray-300"></div>
+          
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+          
+          {/* Theme Toggle */}
           <button
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Theme Settings"
+            onClick={toggleTheme}
+            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-300"
+            title={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'auto' : 'light'} mode`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
+            {theme === 'light' ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            ) : theme === 'dark' ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
@@ -662,11 +819,11 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Chat Sessions Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
-          <div className="p-4 border-b border-gray-200">
+        <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-sm">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={createNewChat}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-all duration-300 animate-glow"
             >
               + New Chat
             </button>
@@ -677,15 +834,15 @@ export default function Home() {
               <div
                 key={chat.id}
                 onClick={() => switchChat(chat.id)}
-                className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ${
                   chat.id === currentChatId 
-                    ? 'bg-blue-100 text-blue-900' 
-                    : 'hover:bg-gray-100 text-gray-900'
+                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 animate-glow' 
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100'
                 }`}
               >
                 <div className="font-medium truncate">{chat.title}</div>
                 <div className={`text-sm truncate ${
-                  chat.id === currentChatId ? 'text-blue-700' : 'text-gray-500'
+                  chat.id === currentChatId ? 'text-blue-700 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400'
                 }`}>
                   {chat.messages.length} messages
                 </div>
@@ -695,7 +852,7 @@ export default function Home() {
         </div>
 
         {/* Main Chat Interface */}
-        <div className="flex-1 flex flex-col bg-gray-50">
+        <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
           <SimpleChatInterface
             messages={messages}
             isTyping={isTyping}
@@ -709,18 +866,39 @@ export default function Home() {
 
         {/* Search Results Panel */}
         {showSearchResults && (
-          <div className="w-80 bg-white border-l border-gray-200 flex flex-col shadow-sm">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="font-semibold text-gray-900">Search Results</h3>
+          <div className="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col shadow-sm">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Search Results</h3>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
               {searchResults.map((result, index) => (
-                <div key={index} className="mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <h4 className="font-medium text-blue-600 hover:underline cursor-pointer">
-                    {result.title}
-                  </h4>
-                  <p className="text-sm text-gray-700 mt-1">{result.snippet}</p>
-                  <div className="text-xs text-gray-500 mt-2">{result.url}</div>
+                <div key={index} className="search-result mb-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                      {result.title}
+                    </h4>
+                    {result.source && (
+                      <span className={`search-result-source source-${result.source}`}>
+                        {result.source}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{result.snippet}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{result.url}</div>
+                    {result.confidence && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Confidence: {Math.round(result.confidence * 100)}%
+                      </div>
+                    )}
+                  </div>
+                  {result.content_type && (
+                    <div className="mt-2">
+                      <span className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full">
+                        {result.content_type}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -765,6 +943,77 @@ export default function Home() {
           ))}
         </div>
       )}
+
+      {/* Floating Agents Animation */}
+      {showFloatingAgents && (
+        <div className="fixed inset-0 pointer-events-none z-40">
+          {['planner', 'executor', 'conversational', 'search', 'dom_analysis'].map((agent, index) => (
+            <div
+              key={agent}
+              className={`absolute animate-fade-in-up`}
+              style={{
+                left: `${20 + (index * 15)}%`,
+                top: `${30 + (index * 10)}%`,
+                animationDelay: `${index * 0.2}s`
+              }}
+            >
+              <div className={`agent-icon ${
+                agent === 'planner' ? 'agent-planner' :
+                agent === 'executor' ? 'agent-executor' :
+                agent === 'conversational' ? 'agent-conversational' :
+                agent === 'search' ? 'agent-search' :
+                'agent-dom'
+              } animate-agent-thinking`}>
+                {agent.charAt(0).toUpperCase()}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Thought Bubble */}
+      {showThoughtBubble && (
+        <div className="fixed top-20 right-4 z-50 animate-slide-in-right">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Thinking...</span>
+            </div>
+            <div className="space-y-1">
+              {agentThoughts.map((thought, index) => (
+                <div
+                  key={index}
+                  className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 0.3}s` }}
+                >
+                  {thought}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Agent Status Indicator */}
+      <div className="fixed bottom-4 left-4 z-50">
+        <div className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+          agentStatus === 'thinking' 
+            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 animate-pulse-slow' :
+          agentStatus === 'processing'
+            ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 animate-pulse-slow' :
+            'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+        }`}>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${
+              agentStatus === 'thinking' ? 'bg-blue-500 animate-pulse' :
+              agentStatus === 'processing' ? 'bg-green-500 animate-pulse' :
+              'bg-gray-500'
+            }`}></div>
+            <span className="capitalize">{currentAgent} Agent</span>
+            <span className="capitalize">• {agentStatus}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
