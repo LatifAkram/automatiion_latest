@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import SimpleChatInterface from '../src/components/simple-chat-interface';
 import AutomationDashboard from '../src/components/automation-dashboard';
 
+// Backend configuration
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
 interface Message {
   id: string;
   type: 'user' | 'ai';
@@ -220,7 +223,7 @@ export default function Home() {
                              message.toLowerCase().includes('look up');
 
       // Send message to backend
-      const response = await fetch('/api/chat', {
+      const response = await fetch(`${BACKEND_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,43 +316,86 @@ export default function Home() {
 
   const executeSearch = async (message: string, messageId: string) => {
     try {
-      // Execute web search
-      const searchResponse = await fetch('/search/web', {
+      // Start search animation
+      startSearchAnimation(messageId);
+      
+      // Execute enhanced web search
+      const searchResponse = await fetch(`${BACKEND_URL}/search/web`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: message, max_results: 10 })
+        body: JSON.stringify({ 
+          query: message, 
+          max_results: 15,
+          providers: ["google", "bing", "duckduckgo", "github", "stack_overflow", "reddit", "youtube", "news"]
+        })
       });
 
       if (searchResponse.ok) {
         const searchData = await searchResponse.json();
         const results = searchData.results || [];
         
+        // Stop search animation
+        stopSearchAnimation();
+        
         setSearchResults(results);
         setShowSearchResults(true);
 
-        // Update message with search results
+        // Update message with enhanced search results
         updateMessageInChat(currentChatId, messageId, {
-          automation: { type: 'search', status: 'completed', progress: 100 },
+          automation: { type: 'enhanced_search', status: 'completed', progress: 100 },
           sources: results.map((result: any, index: number) => ({
             title: result.title || `Result ${index + 1}`,
             url: result.url || '#',
             snippet: result.snippet || result.description || '',
             domain: result.domain || 'unknown',
             relevance: result.relevance || 0.8,
-            source: result.source || 'web_search'
+            source: result.source || 'web_search',
+            confidence: result.confidence || 0.8,
+            content_type: result.content_type || 'webpage',
+            timestamp: result.timestamp || new Date().toISOString()
           }))
         });
 
         setActiveAutomation(null);
       } else {
-        throw new Error('Search failed');
+        throw new Error('Enhanced search failed');
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('Enhanced search error:', error);
+      stopSearchAnimation();
       updateMessageInChat(currentChatId, messageId, {
-        automation: { type: 'search', status: 'failed', progress: 0 }
+        automation: { type: 'enhanced_search', status: 'failed', progress: 0 }
       });
       setActiveAutomation(null);
+    }
+  };
+
+  const startSearchAnimation = (messageId: string) => {
+    let progress = 0;
+    const animationInterval = setInterval(() => {
+      progress += Math.random() * 20;
+      if (progress > 85) progress = 85;
+      
+      updateMessageInChat(currentChatId, messageId, {
+        automation: { 
+          type: 'enhanced_search', 
+          status: 'running', 
+          progress: Math.floor(progress)
+        }
+      });
+    }, 800);
+    
+    // Store animation interval for cleanup
+    if (automationIntervalRef.current) {
+      clearInterval(automationIntervalRef.current);
+    }
+    automationIntervalRef.current = animationInterval;
+  };
+
+  const stopSearchAnimation = () => {
+    if (automationIntervalRef.current) {
+      clearInterval(automationIntervalRef.current);
+      automationIntervalRef.current = null;
     }
   };
 
@@ -365,7 +411,7 @@ export default function Home() {
 
       if (message.toLowerCase().includes('book') && message.toLowerCase().includes('flight')) {
         // Ticket booking automation
-        const bookingResponse = await fetch('/automation/ticket-booking', {
+        const bookingResponse = await fetch(`${BACKEND_URL}/automation/ticket-booking`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -410,15 +456,13 @@ export default function Home() {
         ];
       }
 
-      // Execute automation
-      const automationResponse = await fetch('/automation/execute', {
+      // Execute intelligent automation
+      const automationResponse = await fetch(`${BACKEND_URL}/automation/intelligent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: automationType,
-          url,
-          actions,
-          options: { headless: true }
+          instructions: message,
+          url: url || 'https://www.google.com'
         })
       });
 
