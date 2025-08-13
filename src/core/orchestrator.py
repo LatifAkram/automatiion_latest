@@ -19,11 +19,10 @@ from .database import DatabaseManager
 from .vector_store import VectorStore
 from .audit import AuditLogger
 
-from ..agents.planner import PlannerAgent
-from ..agents.executor import ExecutionAgent
-from ..agents.conversational import ConversationalAgent
+from ..agents.ai_planner_agent import AIPlannerAgent
+from ..agents.ai_dom_analysis_agent import AIDOMAnalysisAgent
+from ..agents.ai_conversational_agent import AIConversationalAgent
 from ..agents.search import SearchAgent
-from ..agents.dom_extractor import DOMExtractionAgent
 from ..agents.advanced_automation_capabilities import AdvancedAutomationCapabilities
 from ..agents.intelligent_automation import IntelligentAutomationAgent
 from ..agents.parallel_executor import ParallelExecutor
@@ -67,12 +66,11 @@ class MultiAgentOrchestrator:
             media_path = 'data/media'
         self.media_capture = MediaCapture(media_path)
         
-        # Initialize agents (will be fully initialized in _initialize_agents)
-        self.planner_agent = None
-        self.execution_agents = []
-        self.conversational_agent = None
+        # Initialize AI agents (AI-1, AI-2, AI-3)
+        self.ai_planner_agent = None  # AI-1: Brain/Planner
+        self.ai_dom_analysis_agent = None  # AI-2: DOM Analysis
+        self.ai_conversational_agent = None  # AI-3: Conversational/Reasoning
         self.search_agent = None
-        self.dom_extractor_agent = None
         
         # Initialize other components
         self.conversational_ai = ConversationalAI(config, self.ai_provider)
@@ -114,38 +112,31 @@ class MultiAgentOrchestrator:
         self.logger.info("Multi-Agent Orchestrator initialized successfully")
         
     async def _initialize_agents(self):
-        """Initialize all AI agents."""
-        # Initialize Planner Agent (AI-1: Brain)
-        self.planner_agent = PlannerAgent(
-            config=self.config.ai,
+        """Initialize all AI agents (AI-1, AI-2, AI-3)."""
+        # Initialize AI-1: Planner Agent (Brain)
+        self.ai_planner_agent = AIPlannerAgent(
+            config=self.config,
+            ai_provider=self.ai_provider,
             vector_store=self.vector_store,
             audit_logger=self.audit_logger
         )
-        await self.planner_agent.initialize()
+        await self.ai_planner_agent.initialize()
         
-        # Initialize Execution Agents (AI-2: Automation)
-        for i in range(self.config.automation.max_parallel_agents):
-            # Create media capture and selector drift detector instances
-            media_capture = MediaCapture(self.config.database.media_path)
-            await media_capture.initialize()
-            
-            selector_drift_detector = SelectorDriftDetector(self.config.automation)
-            await selector_drift_detector.initialize()
-            
-            execution_agent = ExecutionAgent(
-                config=self.config.automation,
-                media_capture=media_capture,
-                selector_drift_detector=selector_drift_detector,
-                audit_logger=self.audit_logger
-            )
-            await execution_agent.initialize()
-            self.execution_agents.append(execution_agent)
-        
-        # Initialize Conversational Agent (AI-3: Reasoning & Context)
-        self.conversational_agent = ConversationalAI(
+        # Initialize AI-2: DOM Analysis Agent
+        self.ai_dom_analysis_agent = AIDOMAnalysisAgent(
             config=self.config,
-            ai_provider=self.ai_provider
+            ai_provider=self.ai_provider,
+            media_capture=self.media_capture
         )
+        await self.ai_dom_analysis_agent.initialize()
+        
+        # Initialize AI-3: Conversational Agent (Reasoning & Context)
+        self.ai_conversational_agent = AIConversationalAgent(
+            config=self.config,
+            ai_provider=self.ai_provider,
+            media_capture=self.media_capture
+        )
+        await self.ai_conversational_agent.initialize()
         
         # Initialize Search Agent
         self.search_agent = SearchAgent(
