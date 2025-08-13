@@ -145,6 +145,10 @@ class AIDOMAnalyzer:
                 "visible_elements": [e for e in page_content.get("elements", []) if e.get("isVisible", False)]
             }
             
+            # Get actual HTML content for analysis
+            html_content = page_content.get("html", "")
+            visible_elements = context['visible_elements'][:50]  # Limit to first 50 visible elements
+            
             # AI prompt for element analysis
             prompt = f"""
             Analyze this web page for automation purposes:
@@ -154,6 +158,12 @@ class AIDOMAnalyzer:
             Domain: {context['domain']}
             Total Elements: {context['elements_count']}
             Visible Elements: {len(context['visible_elements'])}
+            
+            ACTUAL HTML CONTENT (first 2000 characters):
+            {html_content[:2000]}
+            
+            VISIBLE ELEMENTS DATA (first 50):
+            {json.dumps(visible_elements[:10], indent=2)}
             
             Please analyze the page and identify:
             1. Login/authentication elements (username, password, login button)
@@ -167,6 +177,9 @@ class AIDOMAnalyzer:
             - Best selector strategy (ID, class, XPath, text-based)
             - Confidence score (0-1)
             - Alternative selectors as fallbacks
+            
+            IMPORTANT: Use the actual HTML content and element data provided above.
+            Do not provide generic responses - analyze the specific page content.
             
             Return as JSON with structure:
             {{
@@ -191,7 +204,8 @@ class AIDOMAnalyzer:
             except json.JSONDecodeError as e:
                 self.logger.warning(f"AI response not valid JSON, using fallback analysis: {e}")
                 self.logger.warning(f"Raw response: {ai_response[:200]}...")
-                return self._fallback_element_analysis(page_content, instructions)
+                # Try to create a basic structure from the response
+                return self._create_basic_analysis_from_response(ai_response, page_content, instructions)
                 
         except Exception as e:
             self.logger.error(f"AI element analysis failed: {e}")
@@ -550,3 +564,65 @@ class AIDOMAnalyzer:
         """Check if element is an interactive element."""
         tag_name = element.get("tagName", "").lower()
         return tag_name in ["button", "a", "input"] and element.get("isVisible", False)
+
+    def _create_basic_analysis_from_response(self, ai_response: str, page_content: Dict[str, Any], instructions: str) -> Dict[str, Any]:
+        """Create basic analysis structure from AI response when JSON parsing fails."""
+        try:
+            # Extract any useful information from the AI response
+            response_lower = ai_response.lower()
+            
+            # Look for common patterns in the response
+            has_login = any(keyword in response_lower for keyword in ["login", "signin", "username", "password"])
+            has_form = any(keyword in response_lower for keyword in ["form", "input", "field", "submit"])
+            has_navigation = any(keyword in response_lower for keyword in ["nav", "menu", "link", "button"])
+            has_search = any(keyword in response_lower for keyword in ["search", "query", "find"])
+            
+            # Create basic structure
+            basic_analysis = {
+                "login_elements": [],
+                "form_elements": [],
+                "navigation_elements": [],
+                "content_elements": [],
+                "interactive_elements": [],
+                "recommended_actions": []
+            }
+            
+            # Add recommendations based on response content
+            if has_login:
+                basic_analysis["recommended_actions"].append({
+                    "action": "find_login_elements",
+                    "description": "Look for login form elements",
+                    "confidence": 0.7
+                })
+            
+            if has_form:
+                basic_analysis["recommended_actions"].append({
+                    "action": "find_form_elements", 
+                    "description": "Look for form input fields",
+                    "confidence": 0.8
+                })
+            
+            if has_navigation:
+                basic_analysis["recommended_actions"].append({
+                    "action": "find_navigation",
+                    "description": "Look for navigation elements",
+                    "confidence": 0.6
+                })
+            
+            if has_search:
+                basic_analysis["recommended_actions"].append({
+                    "action": "find_search",
+                    "description": "Look for search functionality",
+                    "confidence": 0.9
+                })
+            
+            # Fallback to basic element analysis
+            fallback_analysis = self._fallback_element_analysis(page_content, instructions)
+            basic_analysis.update(fallback_analysis)
+            
+            self.logger.info(f"Created basic analysis from AI response with {len(basic_analysis['recommended_actions'])} recommendations")
+            return basic_analysis
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create basic analysis from response: {e}")
+            return self._fallback_element_analysis(page_content, instructions)
