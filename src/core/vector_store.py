@@ -403,6 +403,83 @@ class VectorStore:
         except Exception as e:
             self.logger.error(f"Failed to shutdown vector store: {e}", exc_info=True)
 
+    async def add_document(self, content: str, metadata: Dict[str, Any]) -> bool:
+        """Add a document to the appropriate collection based on metadata."""
+        try:
+            # Determine which collection to use based on metadata
+            document_type = metadata.get("document_type", "execution_patterns")
+            
+            if document_type == "execution_result":
+                collection_name = "execution_patterns"
+            elif document_type == "pattern":
+                collection_name = "execution_patterns"
+            elif document_type == "healing_success":
+                collection_name = "execution_patterns"
+            elif document_type == "healing_failure":
+                collection_name = "failure_patterns"
+            else:
+                collection_name = "execution_patterns"  # Default
+            
+            if collection_name not in self.collections:
+                self.logger.error(f"{collection_name} collection not available")
+                return False
+            
+            # Generate unique ID
+            doc_id = f"doc_{document_type}_{datetime.utcnow().timestamp()}"
+            
+            # Add to collection
+            self.collections[collection_name].add(
+                documents=[content],
+                metadatas=[metadata],
+                ids=[doc_id]
+            )
+            
+            self.logger.info(f"Document added to {collection_name}: {doc_id}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Failed to add document: {e}", exc_info=True)
+            return False
+
+    async def search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+        """Generic search across all collections."""
+        try:
+            all_results = []
+            
+            # Search in execution_patterns collection
+            if "execution_patterns" in self.collections:
+                results = self.collections["execution_patterns"].query(
+                    query_texts=[query],
+                    n_results=limit
+                )
+                all_results.extend(self._format_search_results(results))
+            
+            # Search in failure_patterns collection
+            if "failure_patterns" in self.collections:
+                results = self.collections["failure_patterns"].query(
+                    query_texts=[query],
+                    n_results=limit
+                )
+                all_results.extend(self._format_search_results(results))
+            
+            # Search in workflow_plans collection
+            if "workflow_plans" in self.collections:
+                results = self.collections["workflow_plans"].query(
+                    query_texts=[query],
+                    n_results=limit
+                )
+                all_results.extend(self._format_search_results(results))
+            
+            # Sort by relevance (lower distance = higher relevance)
+            all_results.sort(key=lambda x: x.get("score", 1.0) if x.get("score") is not None else 1.0)
+            
+            # Return top results
+            return all_results[:limit]
+            
+        except Exception as e:
+            self.logger.error(f"Failed to search: {e}", exc_info=True)
+            return []
+
 
 class MockCollection:
     """Mock collection for when ChromaDB is not available."""
