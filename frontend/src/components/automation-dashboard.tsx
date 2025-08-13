@@ -4,13 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Cpu,
-  Memory,
   HardDrive,
   Network,
   Activity,
   Play,
   Pause,
-  Stop,
   Settings,
   BarChart3,
   Clock,
@@ -201,7 +199,7 @@ export default function AutomationDashboard({
               <p className="text-sm opacity-90">Memory Usage</p>
               <p className="text-2xl font-bold">{metrics.memoryUsage.toFixed(1)}%</p>
             </div>
-            <Memory className="w-8 h-8 opacity-80" />
+            <HardDrive className="w-8 h-8 opacity-80" />
           </div>
         </motion.div>
       </div>

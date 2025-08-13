@@ -1,25 +1,22 @@
-INFO:     Will watch for changes in these directories: ['/workspace']
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [42460] using WatchFiles
-INFO:     Started server process [42464]
+INFO:     Started server process [58583]
 INFO:     Waiting for application startup.
 Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
 Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
 Failed to load conversation history: 'VectorStore' object has no attribute 'get_conversation_history'
 INFO:     Application startup complete.
-INFO:     127.0.0.1:51142 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60514 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53498 - "GET /health HTTP/1.1" 200 OK
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:41732 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40878 - "GET /health HTTP/1.1" 200 OK
 ERROR:root:Failed to get system info: 'DatabaseConfig' object has no attribute 'sqlite_path'
 Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 468, in get_system_info
+  File "/workspace/src/api/server.py", line 526, in get_system_info
     "path": cfg.database.sqlite_path
             ^^^^^^^^^^^^^^^^^^^^^^^^
   File "/workspace/venv/lib/python3.13/site-packages/pydantic/main.py", line 991, in __getattr__
     raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
 AttributeError: 'DatabaseConfig' object has no attribute 'sqlite_path'
-INFO:     127.0.0.1:53498 - "GET /system/info HTTP/1.1" 500 Internal Server Error
-INFO:     127.0.0.1:53498 - "POST /workflows HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40878 - "GET /system/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40878 - "POST /workflows HTTP/1.1" 200 OK
 ERROR:src.core.orchestrator:Workflow execution failed: 'DatabaseManager' object has no attribute 'update_workflow_status'
 Traceback (most recent call last):
   File "/workspace/src/core/orchestrator.py", line 192, in _execute_workflow_async
@@ -29,7 +26,7 @@ Traceback (most recent call last):
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
 ERROR:asyncio:Task exception was never retrieved
-future: <Task finished name='Task-14' coro=<MultiAgentOrchestrator._execute_workflow_async() done, defined at /workspace/src/core/orchestrator.py:188> exception=AttributeError("'DatabaseManager' object has no attribute 'update_workflow_status'")>
+future: <Task finished name='Task-13' coro=<MultiAgentOrchestrator._execute_workflow_async() done, defined at /workspace/src/core/orchestrator.py:188> exception=AttributeError("'DatabaseManager' object has no attribute 'update_workflow_status'")>
 Traceback (most recent call last):
   File "/workspace/src/core/orchestrator.py", line 192, in _execute_workflow_async
     await self._update_workflow_status(workflow_id, WorkflowStatus.PLANNING)
@@ -47,16 +44,7 @@ Traceback (most recent call last):
     await self.database.update_workflow_status(workflow_id, status)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
-ERROR:root:Failed to get workflow status: 'DatabaseManager' object has no attribute 'get_latest_execution_result'
-Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 171, in get_workflow_status
-    status = await orch.get_workflow_status(workflow_id)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/workspace/src/core/orchestrator.py", line 419, in get_workflow_status
-    execution_result = await self.database.get_latest_execution_result(workflow_id)
-                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'DatabaseManager' object has no attribute 'get_latest_execution_result'. Did you mean: 'save_execution_result'?
-INFO:     127.0.0.1:53498 - "GET /workflows/3aef872b-cca4-4999-a6d8-d5c554f500de HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:40878 - "GET /workflows/4527d6cd-c469-4c31-9606-f79c1b65be25 HTTP/1.1" 200 OK
 WARNING:src.core.ai_provider:All AI providers failed, using fallback response
 ERROR:src.agents.conversational:Chat failed: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
 Traceback (most recent call last):
@@ -64,34 +52,29 @@ Traceback (most recent call last):
     await self.vector_store.store_conversation(conversation)
           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
 TypeError: VectorStore.store_conversation() missing 1 required positional argument: 'conversation_data'
-INFO:     127.0.0.1:53498 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40878 - "POST /chat HTTP/1.1" 200 OK
 WARNING:src.agents.search:Google Search API not configured
 WARNING:src.agents.search:Bing Search API not configured
 WARNING:src.agents.search:GitHub token not configured
-INFO:     127.0.0.1:53498 - "POST /search HTTP/1.1" 200 OK
-ERROR:root:Automation execution failed: 'ExecutionAgent' object has no attribute 'execute_automation'
-Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 330, in execute_automation
-    result = await agent.execute_automation({
-                   ^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'ExecutionAgent' object has no attribute 'execute_automation'
-INFO:     127.0.0.1:53498 - "POST /automation/execute HTTP/1.1" 500 Internal Server Error
-INFO:     127.0.0.1:53498 - "POST /export HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40878 - "POST /search HTTP/1.1" 200 OK
+WARNING:root:Agent execution failed, using fallback: 'ExecutionAgent' object has no attribute 'execute_automation'
+INFO:     127.0.0.1:40878 - "POST /automation/execute HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40878 - "POST /export HTTP/1.1" 200 OK
 ERROR:root:Failed to get system info: 'DatabaseConfig' object has no attribute 'sqlite_path'
 Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 468, in get_system_info
+  File "/workspace/src/api/server.py", line 526, in get_system_info
     "path": cfg.database.sqlite_path
             ^^^^^^^^^^^^^^^^^^^^^^^^
   File "/workspace/venv/lib/python3.13/site-packages/pydantic/main.py", line 991, in __getattr__
     raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
 AttributeError: 'DatabaseConfig' object has no attribute 'sqlite_path'
-INFO:     127.0.0.1:53498 - "GET /system/info HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:40878 - "GET /system/info HTTP/1.1" 200 OK
 ERROR:root:Failed to get system info: 'DatabaseConfig' object has no attribute 'sqlite_path'
 Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 468, in get_system_info
+  File "/workspace/src/api/server.py", line 526, in get_system_info
     "path": cfg.database.sqlite_path
             ^^^^^^^^^^^^^^^^^^^^^^^^
   File "/workspace/venv/lib/python3.13/site-packages/pydantic/main.py", line 991, in __getattr__
     raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
 AttributeError: 'DatabaseConfig' object has no attribute 'sqlite_path'
-INFO:     127.0.0.1:53498 - "GET /system/info HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:40878 - "GET /system/info HTTP/1.1" 200 OK
