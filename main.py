@@ -46,13 +46,16 @@ async def main():
         
         # Start the API server
         logger.info("Starting API server...")
-        # Don't call start_api_server here as it conflicts with asyncio
-        # The server will be started separately
+        await start_api_server(orchestrator)
         
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")
+        if 'orchestrator' in locals():
+            await orchestrator.shutdown()
     except Exception as e:
         logger.error(f"Fatal error: {e}", exc_info=True)
+        if 'orchestrator' in locals():
+            await orchestrator.shutdown()
         sys.exit(1)
 
 
