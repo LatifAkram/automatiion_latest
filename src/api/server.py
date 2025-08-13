@@ -693,10 +693,80 @@ async def intelligent_automation(
             }
         }
         
+        # Generate reports if requested
+        generate_report = request.get("generate_report", False)
+        report_formats = request.get("report_formats", ["docx", "excel", "pdf"])
+        
+        if generate_report and enhanced_result.get("status") in ["completed", "failed"]:
+            try:
+                generated_reports = await orch.generate_automation_report(
+                    enhanced_result, report_formats
+                )
+                enhanced_result["generated_reports"] = generated_reports
+                enhanced_result["available_report_formats"] = orch.get_available_report_formats()
+            except Exception as report_error:
+                logging.warning(f"Report generation failed: {report_error}")
+                enhanced_result["report_generation_error"] = str(report_error)
+        
         return {
             "automation_id": f"intelligent_{int(time.time())}",
             "status": "completed",
             "result": enhanced_result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@app.post("/reports/generate")
+async def generate_report(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Generate comprehensive automation report in multiple formats."""
+    try:
+        automation_result = request.get("automation_result", {})
+        formats = request.get("formats", ["docx", "excel", "pdf"])
+        
+        if not automation_result:
+            return {
+                "status": "failed",
+                "error": "Automation result is required",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
+        # Generate reports
+        generated_files = await orch.generate_automation_report(automation_result, formats)
+        
+        return {
+            "status": "completed",
+            "generated_reports": generated_files,
+            "available_formats": orch.get_available_report_formats(),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Report generation failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": f"Report generation failed: {str(e)}",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@app.get("/reports/formats")
+async def get_available_report_formats(
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Get available report formats."""
+    try:
+        formats = orch.get_available_report_formats()
+        return {
+            "status": "completed",
+            "available_formats": formats,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logging.error(f"Failed to get report formats: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": f"Failed to get report formats: {str(e)}",
             "timestamp": datetime.utcnow().isoformat()
         }
         
