@@ -10,9 +10,11 @@ This package contains utility functions and classes:
 from .media_capture import MediaCapture
 from .selector_drift import SelectorDriftDetector
 from .logger import setup_logging
+from .report_generator import ReportGenerator
 
 __all__ = [
     "MediaCapture",
     "SelectorDriftDetector",
-    "setup_logging"
+    "setup_logging",
+    "ReportGenerator"
 ]
