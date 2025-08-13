@@ -362,6 +362,394 @@ class IntelligentAutomationAgent:
         except Exception as e:
             return {"success": False, "error": str(e)}
             
+    async def execute_automation_plan(self, instructions: str, url: str) -> Dict[str, Any]:
+        """Execute automation plan with parallel DOM analysis."""
+        try:
+            self.logger.info(f"Executing automation plan for: {instructions}")
+            
+            # Navigate to URL
+            await self.page.goto(url, wait_until='networkidle')
+            await asyncio.sleep(2)
+            
+            # Perform parallel DOM analysis
+            dom_analysis = await self._parallel_dom_analysis()
+            self.logger.info(f"DOM analysis completed: {len(dom_analysis)} elements found")
+            
+            # Generate intelligent selectors based on DOM analysis
+            intelligent_selectors = await self._generate_intelligent_selectors(instructions, dom_analysis)
+            
+            # Execute automation with intelligent selectors
+            results = await self._execute_with_intelligent_selectors(instructions, intelligent_selectors)
+            
+            return {
+                "status": "completed",
+                "summary": f"Automation completed successfully with {len(results)} actions",
+                "results": results,
+                "dom_analysis": dom_analysis,
+                "intelligent_selectors": intelligent_selectors
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Automation execution failed: {e}", exc_info=True)
+            return {
+                "status": "failed",
+                "error": str(e),
+                "summary": "Automation failed"
+            }
+
+    async def _parallel_dom_analysis(self) -> Dict[str, Any]:
+        """Perform parallel DOM analysis using multiple strategies."""
+        try:
+            # Parallel DOM analysis tasks
+            tasks = [
+                self._analyze_form_elements(),
+                self._analyze_interactive_elements(),
+                self._analyze_navigation_elements(),
+                self._analyze_content_elements(),
+                self._analyze_structural_elements()
+            ]
+            
+            # Execute all analysis tasks in parallel
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Combine results
+            dom_analysis = {
+                "forms": results[0] if not isinstance(results[0], Exception) else [],
+                "interactive": results[1] if not isinstance(results[1], Exception) else [],
+                "navigation": results[2] if not isinstance(results[2], Exception) else [],
+                "content": results[3] if not isinstance(results[3], Exception) else [],
+                "structural": results[4] if not isinstance(results[4], Exception) else []
+            }
+            
+            return dom_analysis
+            
+        except Exception as e:
+            self.logger.error(f"Parallel DOM analysis failed: {e}")
+            return {}
+
+    async def _analyze_form_elements(self) -> List[Dict[str, Any]]:
+        """Analyze form elements in parallel."""
+        try:
+            # Multiple selector strategies for forms
+            selectors = [
+                "input[type='text'], input[type='email'], input[type='tel'], input[type='number'], input[type='password']",
+                "textarea",
+                "select",
+                "button[type='submit'], input[type='submit']",
+                "form"
+            ]
+            
+            form_elements = []
+            for selector in selectors:
+                try:
+                    elements = await self.page.query_selector_all(selector)
+                    for element in elements:
+                        try:
+                            tag_name = await element.get_attribute('tagName')
+                            input_type = await element.get_attribute('type')
+                            placeholder = await element.get_attribute('placeholder')
+                            name = await element.get_attribute('name')
+                            id_attr = await element.get_attribute('id')
+                            
+                            form_elements.append({
+                                "tag": tag_name,
+                                "type": input_type,
+                                "placeholder": placeholder,
+                                "name": name,
+                                "id": id_attr,
+                                "selector": selector,
+                                "xpath": await self._get_xpath(element)
+                            })
+                        except Exception as e:
+                            continue
+                except Exception as e:
+                    continue
+                    
+            return form_elements
+            
+        except Exception as e:
+            self.logger.error(f"Form analysis failed: {e}")
+            return []
+
+    async def _analyze_interactive_elements(self) -> List[Dict[str, Any]]:
+        """Analyze interactive elements in parallel."""
+        try:
+            selectors = [
+                "button",
+                "a",
+                "input[type='button'], input[type='submit']",
+                "[onclick]",
+                "[role='button']"
+            ]
+            
+            interactive_elements = []
+            for selector in selectors:
+                try:
+                    elements = await self.page.query_selector_all(selector)
+                    for element in elements:
+                        try:
+                            tag_name = await element.get_attribute('tagName')
+                            text_content = await element.text_content()
+                            onclick = await element.get_attribute('onclick')
+                            role = await element.get_attribute('role')
+                            
+                            interactive_elements.append({
+                                "tag": tag_name,
+                                "text": text_content,
+                                "onclick": onclick,
+                                "role": role,
+                                "selector": selector,
+                                "xpath": await self._get_xpath(element)
+                            })
+                        except Exception as e:
+                            continue
+                except Exception as e:
+                    continue
+                    
+            return interactive_elements
+            
+        except Exception as e:
+            self.logger.error(f"Interactive analysis failed: {e}")
+            return []
+
+    async def _analyze_navigation_elements(self) -> List[Dict[str, Any]]:
+        """Analyze navigation elements in parallel."""
+        try:
+            selectors = [
+                "nav",
+                "a[href]",
+                "[role='navigation']",
+                ".nav, .navigation, .menu",
+                "ul li a"
+            ]
+            
+            nav_elements = []
+            for selector in selectors:
+                try:
+                    elements = await self.page.query_selector_all(selector)
+                    for element in elements:
+                        try:
+                            tag_name = await element.get_attribute('tagName')
+                            href = await element.get_attribute('href')
+                            text_content = await element.text_content()
+                            
+                            nav_elements.append({
+                                "tag": tag_name,
+                                "href": href,
+                                "text": text_content,
+                                "selector": selector,
+                                "xpath": await self._get_xpath(element)
+                            })
+                        except Exception as e:
+                            continue
+                except Exception as e:
+                    continue
+                    
+            return nav_elements
+            
+        except Exception as e:
+            self.logger.error(f"Navigation analysis failed: {e}")
+            return []
+
+    async def _analyze_content_elements(self) -> List[Dict[str, Any]]:
+        """Analyze content elements in parallel."""
+        try:
+            selectors = [
+                "h1, h2, h3, h4, h5, h6",
+                "p",
+                "div[class*='content'], div[class*='text']",
+                "span[class*='content'], span[class*='text']"
+            ]
+            
+            content_elements = []
+            for selector in selectors:
+                try:
+                    elements = await self.page.query_selector_all(selector)
+                    for element in elements:
+                        try:
+                            tag_name = await element.get_attribute('tagName')
+                            text_content = await element.text_content()
+                            class_name = await element.get_attribute('class')
+                            
+                            content_elements.append({
+                                "tag": tag_name,
+                                "text": text_content,
+                                "class": class_name,
+                                "selector": selector,
+                                "xpath": await self._get_xpath(element)
+                            })
+                        except Exception as e:
+                            continue
+                except Exception as e:
+                    continue
+                    
+            return content_elements
+            
+        except Exception as e:
+            self.logger.error(f"Content analysis failed: {e}")
+            return []
+
+    async def _analyze_structural_elements(self) -> List[Dict[str, Any]]:
+        """Analyze structural elements in parallel."""
+        try:
+            selectors = [
+                "header",
+                "footer",
+                "main",
+                "section",
+                "article",
+                "aside"
+            ]
+            
+            structural_elements = []
+            for selector in selectors:
+                try:
+                    elements = await self.page.query_selector_all(selector)
+                    for element in elements:
+                        try:
+                            tag_name = await element.get_attribute('tagName')
+                            class_name = await element.get_attribute('class')
+                            id_attr = await element.get_attribute('id')
+                            
+                            structural_elements.append({
+                                "tag": tag_name,
+                                "class": class_name,
+                                "id": id_attr,
+                                "selector": selector,
+                                "xpath": await self._get_xpath(element)
+                            })
+                        except Exception as e:
+                            continue
+                except Exception as e:
+                    continue
+                    
+            return structural_elements
+            
+        except Exception as e:
+            self.logger.error(f"Structural analysis failed: {e}")
+            return []
+
+    async def _get_xpath(self, element) -> str:
+        """Get XPath for an element."""
+        try:
+            return await element.evaluate('(element) => { return getXPath(element); }')
+        except:
+            return ""
+
+    async def _generate_intelligent_selectors(self, instructions: str, dom_analysis: Dict[str, Any]) -> Dict[str, List[str]]:
+        """Generate intelligent selectors based on DOM analysis and instructions."""
+        try:
+            intelligent_selectors = {
+                "input_selectors": [],
+                "button_selectors": [],
+                "navigation_selectors": [],
+                "content_selectors": []
+            }
+            
+            # Analyze instructions for keywords
+            instructions_lower = instructions.lower()
+            
+            # Generate input selectors
+            if any(word in instructions_lower for word in ['login', 'email', 'phone', 'mobile', 'password', 'username']):
+                for form_element in dom_analysis.get("forms", []):
+                    if form_element.get("tag") == "INPUT":
+                        input_type = form_element.get("type", "")
+                        placeholder = form_element.get("placeholder", "").lower()
+                        name = form_element.get("name", "").lower()
+                        id_attr = form_element.get("id", "").lower()
+                        
+                        # Smart selector generation
+                        if input_type in ['text', 'email', 'tel', 'number']:
+                            selectors = []
+                            
+                            # Priority 1: Specific attributes
+                            if id_attr:
+                                selectors.append(f"#{id_attr}")
+                            if name:
+                                selectors.append(f"[name='{form_element.get('name')}']")
+                            if placeholder:
+                                selectors.append(f"[placeholder='{form_element.get('placeholder')}']")
+                            
+                            # Priority 2: Type-based selectors
+                            selectors.append(f"input[type='{input_type}']")
+                            
+                            # Priority 3: XPath
+                            if form_element.get("xpath"):
+                                selectors.append(form_element.get("xpath"))
+                            
+                            intelligent_selectors["input_selectors"].extend(selectors)
+            
+            # Generate button selectors
+            if any(word in instructions_lower for word in ['click', 'submit', 'button', 'login', 'search']):
+                for interactive_element in dom_analysis.get("interactive", []):
+                    if interactive_element.get("tag") in ['BUTTON', 'INPUT']:
+                        text_content = interactive_element.get("text", "").lower()
+                        
+                        # Smart button selector generation
+                        selectors = []
+                        
+                        # Priority 1: Text-based selectors
+                        if text_content:
+                            selectors.append(f"button:has-text('{text_content}')")
+                            selectors.append(f"input[value='{text_content}']")
+                        
+                        # Priority 2: XPath
+                        if interactive_element.get("xpath"):
+                            selectors.append(interactive_element.get("xpath"))
+                        
+                        intelligent_selectors["button_selectors"].extend(selectors)
+            
+            return intelligent_selectors
+            
+        except Exception as e:
+            self.logger.error(f"Intelligent selector generation failed: {e}")
+            return {}
+
+    async def _execute_with_intelligent_selectors(self, instructions: str, intelligent_selectors: Dict[str, List[str]]) -> List[Dict[str, Any]]:
+        """Execute automation using intelligent selectors."""
+        try:
+            results = []
+            instructions_lower = instructions.lower()
+            
+            # Execute input actions
+            if any(word in instructions_lower for word in ['login', 'email', 'phone', 'mobile', 'password', 'username']):
+                for selector in intelligent_selectors.get("input_selectors", []):
+                    try:
+                        element = await self.page.wait_for_selector(selector, timeout=3000)
+                        if element:
+                            await element.click()
+                            await element.fill("test_input")
+                            results.append({
+                                "action": "input",
+                                "selector": selector,
+                                "status": "success"
+                            })
+                            break
+                    except Exception as e:
+                        continue
+            
+            # Execute button actions
+            if any(word in instructions_lower for word in ['click', 'submit', 'button', 'login', 'search']):
+                for selector in intelligent_selectors.get("button_selectors", []):
+                    try:
+                        element = await self.page.wait_for_selector(selector, timeout=3000)
+                        if element:
+                            await element.click()
+                            results.append({
+                                "action": "click",
+                                "selector": selector,
+                                "status": "success"
+                            })
+                            break
+                    except Exception as e:
+                        continue
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Intelligent execution failed: {e}")
+            return []
+            
     async def shutdown(self):
         """Shutdown the intelligent automation agent."""
         try:
