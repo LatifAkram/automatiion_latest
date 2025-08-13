@@ -585,3 +585,8 @@ class SearchAgent:
         if self.session:
             await self.session.close()
             self.logger.info("Search agent closed")
+    
+    async def shutdown(self):
+        """Shutdown search agent."""
+        await self.close()
+        self.logger.info("Search agent shutdown complete")
