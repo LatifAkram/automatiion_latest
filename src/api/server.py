@@ -451,7 +451,7 @@ async def execute_ticket_booking(
         from_location = request.get("from", "Delhi")
         to_location = request.get("to", "Mumbai")
         date = request.get("date", "Friday")
-        time = request.get("time", "6 AM IST")
+        departure_time = request.get("time", "6 AM IST")
         passengers = request.get("passengers", 1)
         budget = request.get("budget", "₹10,000")
         
@@ -462,7 +462,7 @@ async def execute_ticket_booking(
                     "from": from_location,
                     "to": to_location,
                     "date": date,
-                    "time": time,
+                    "time": departure_time,
                     "passengers": passengers,
                     "budget": budget
                 })
