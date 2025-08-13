@@ -24,13 +24,18 @@ from ..agents.executor import ExecutionAgent
 from ..agents.conversational import ConversationalAgent
 from ..agents.search import SearchAgent
 from ..agents.dom_extractor import DOMExtractionAgent
+from ..agents.advanced_automation_capabilities import AdvancedAutomationCapabilities
+from ..agents.intelligent_automation import IntelligentAutomationAgent
+from ..agents.parallel_executor import ParallelExecutor
+from ..agents.sector_specialists import SectorManager
+from ..agents.conversational_ai import ConversationalAI
+from ..utils.media_capture import MediaCapture
+from ..utils.selector_drift import SelectorDriftDetector
+from ..utils.code_generator import CodeGenerator
 
 from ..models.workflow import Workflow, WorkflowStep, WorkflowStatus
 from ..models.task import Task, TaskStatus, TaskType
 from ..models.execution import ExecutionResult, ExecutionLog
-
-from ..utils.media_capture import MediaCapture
-from ..utils.selector_drift import SelectorDriftDetector
 
 
 class MultiAgentOrchestrator:
@@ -51,12 +56,25 @@ class MultiAgentOrchestrator:
         from ..core.ai_provider import AIProvider
         self.ai_provider = AIProvider(config.ai)
         
-        # AI Agents
-        self.planner_agent: Optional[PlannerAgent] = None
-        self.execution_agents: List[ExecutionAgent] = []
-        self.conversational_agent: Optional[ConversationalAgent] = None
-        self.search_agent: Optional[SearchAgent] = None
-        self.dom_extractor_agent: Optional[DOMExtractionAgent] = None
+        # Initialize advanced automation capabilities
+        self.advanced_capabilities = AdvancedAutomationCapabilities()
+        
+        # Initialize agents
+        self.planner_agent = PlannerAgent(config.ai, self.vector_store, self.audit_logger)
+        self.execution_agent = ExecutionAgent(config.automation, self.media_capture, SelectorDriftDetector(config.automation), self.audit_logger)
+        self.conversational_ai = ConversationalAI(config, self.ai_provider)
+        self.parallel_executor = ParallelExecutor(config, self.ai_provider)
+        self.sector_manager = SectorManager(config, self.ai_provider)
+        self.code_generator = CodeGenerator(config, self.ai_provider)
+        self.intelligent_automation_agent = IntelligentAutomationAgent(config, self.ai_provider)
+        self.search_agent = SearchAgent(config, self.ai_provider)
+        
+        # Initialize media capture
+        if hasattr(config, 'database') and hasattr(config.database, 'media_path'):
+            media_path = config.database.media_path
+        else:
+            media_path = 'data/media'
+        self.media_capture = MediaCapture(media_path)
         
         # Workflow management
         self.active_workflows: Dict[str, Workflow] = {}
@@ -449,6 +467,167 @@ class MultiAgentOrchestrator:
         )
         
         return response
+
+    async def analyze_automation_requirements(self, user_request: str) -> Dict[str, Any]:
+        """Analyze user request using advanced automation capabilities"""
+        try:
+            # Use the advanced capabilities to analyze requirements
+            analysis = await self.advanced_capabilities.analyze_automation_requirements(user_request)
+            
+            # Get detailed capability information
+            capabilities_info = []
+            for capability_name in analysis.get("required_capabilities", []):
+                capability = await self.advanced_capabilities.get_capability(capability_name)
+                if capability:
+                    capabilities_info.append({
+                        "name": capability.name,
+                        "description": capability.description,
+                        "category": capability.category.value,
+                        "complexity": capability.complexity,
+                        "examples": capability.examples,
+                        "selectors": capability.selectors,
+                        "validation_rules": capability.validation_rules
+                    })
+            
+            analysis["capabilities_info"] = capabilities_info
+            
+            # Log the analysis
+            self.logger.info(f"Automation requirements analyzed: {analysis}")
+            
+            return analysis
+        except Exception as e:
+            self.logger.error(f"Failed to analyze automation requirements: {e}")
+            return {
+                "required_capabilities": ["click_operations", "type_operations"],
+                "complexity_level": "simple",
+                "estimated_duration": 300,
+                "risk_level": "low",
+                "compliance_requirements": [],
+                "technical_requirements": [],
+                "capabilities_info": []
+            }
+
+    async def generate_comprehensive_automation_plan(self, user_request: str) -> Dict[str, Any]:
+        """Generate comprehensive automation plan using advanced capabilities"""
+        try:
+            # Generate plan using advanced capabilities
+            plan = await self.advanced_capabilities.generate_automation_plan(user_request)
+            
+            # Validate the plan
+            validation = await self.advanced_capabilities.validate_automation_plan(plan)
+            plan["validation"] = validation
+            
+            # Add orchestrator-specific enhancements
+            plan["orchestrator_info"] = {
+                "agents_required": self._determine_required_agents(plan),
+                "parallel_execution": self._can_execute_parallel(plan),
+                "estimated_resources": self._estimate_resources(plan),
+                "fallback_strategies": self._generate_fallback_strategies(plan)
+            }
+            
+            self.logger.info(f"Comprehensive automation plan generated: {plan}")
+            return plan
+        except Exception as e:
+            self.logger.error(f"Failed to generate comprehensive automation plan: {e}")
+            return {
+                "analysis": {
+                    "required_capabilities": ["click_operations", "type_operations"],
+                    "complexity_level": "simple",
+                    "estimated_duration": 300,
+                    "risk_level": "low"
+                },
+                "steps": [],
+                "capabilities_used": [],
+                "estimated_completion_time": 300,
+                "risk_assessment": "low",
+                "compliance_checklist": [],
+                "validation": {"is_feasible": True, "warnings": [], "risks": [], "recommendations": []},
+                "orchestrator_info": {
+                    "agents_required": ["executor"],
+                    "parallel_execution": False,
+                    "estimated_resources": {"cpu": 10, "memory": 20},
+                    "fallback_strategies": ["manual_intervention"]
+                }
+            }
+
+    def _determine_required_agents(self, plan: Dict[str, Any]) -> List[str]:
+        """Determine which agents are required for the automation plan"""
+        required_agents = []
+        
+        capabilities = plan.get("capabilities_used", [])
+        for capability in capabilities:
+            if hasattr(capability, 'category'):
+                category = capability.category.value
+                if category == "data_extraction":
+                    required_agents.extend(["search", "dom_analysis"])
+                elif category == "file_operations":
+                    required_agents.extend(["executor"])
+                elif category == "form_handling":
+                    required_agents.extend(["executor", "intelligent_automation"])
+                elif category == "api_integration":
+                    required_agents.extend(["executor", "parallel_executor"])
+                elif category in ["ecommerce", "banking", "healthcare", "education", "government"]:
+                    required_agents.extend(["sector_manager", "executor"])
+        
+        # Always include planner and conversational agents
+        required_agents.extend(["planner", "conversational"])
+        
+        # Remove duplicates
+        return list(set(required_agents))
+
+    def _can_execute_parallel(self, plan: Dict[str, Any]) -> bool:
+        """Determine if the plan can be executed in parallel"""
+        capabilities = plan.get("capabilities_used", [])
+        return len(capabilities) > 1 and plan.get("analysis", {}).get("complexity_level") != "simple"
+
+    def _estimate_resources(self, plan: Dict[str, Any]) -> Dict[str, Any]:
+        """Estimate resource requirements for the automation"""
+        complexity = plan.get("analysis", {}).get("complexity_level", "simple")
+        duration = plan.get("estimated_completion_time", 300)
+        
+        base_resources = {
+            "simple": {"cpu": 10, "memory": 20, "network": 5},
+            "medium": {"cpu": 25, "memory": 40, "network": 15},
+            "complex": {"cpu": 50, "memory": 80, "network": 30}
+        }
+        
+        resources = base_resources.get(complexity, base_resources["simple"])
+        
+        # Scale based on duration
+        if duration > 1800:  # More than 30 minutes
+            resources = {k: v * 1.5 for k, v in resources.items()}
+        elif duration > 3600:  # More than 1 hour
+            resources = {k: v * 2 for k, v in resources.items()}
+        
+        return resources
+
+    def _generate_fallback_strategies(self, plan: Dict[str, Any]) -> List[str]:
+        """Generate fallback strategies for the automation plan"""
+        strategies = []
+        
+        complexity = plan.get("analysis", {}).get("complexity_level", "simple")
+        risk_level = plan.get("analysis", {}).get("risk_level", "low")
+        
+        if complexity == "complex":
+            strategies.append("manual_intervention")
+            strategies.append("partial_automation")
+        
+        if risk_level == "high":
+            strategies.append("step_by_step_execution")
+            strategies.append("human_approval_required")
+        
+        capabilities = plan.get("capabilities_used", [])
+        for capability in capabilities:
+            if hasattr(capability, 'category'):
+                category = capability.category.value
+                if category == "banking":
+                    strategies.append("security_validation")
+                elif category == "healthcare":
+                    strategies.append("hipaa_compliance_check")
+                elif category == "government":
+                    strategies.append("compliance_verification")
+        
+        return strategies
         
     async def shutdown(self):
         """Shutdown the orchestrator and all agents."""
