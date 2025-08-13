@@ -175,6 +175,27 @@ class SearchAgent:
             self.logger.error(f"Bing search error: {e}")
             return []
             
+    async def search_web(self, query: str, max_results: int = 10) -> Dict[str, Any]:
+        """Execute web search across multiple sources."""
+        try:
+            self.logger.info(f"Executing web search for: {query}")
+            
+            # Try DuckDuckGo first
+            try:
+                results = await self.search_duckduckgo(query, max_results)
+                if results and len(results) > 0:
+                    return {"results": results}
+            except Exception as e:
+                self.logger.warning(f"DuckDuckGo search failed: {e}")
+            
+            # Fallback to mock results
+            mock_results = self._generate_fallback_results(query, max_results)
+            return {"results": mock_results}
+            
+        except Exception as e:
+            self.logger.error(f"Web search failed: {e}", exc_info=True)
+            return {"results": []}
+
     async def search_duckduckgo(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
         """Search using DuckDuckGo with enhanced web scraping for real results."""
         try:

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SimpleChatInterface from '../src/components/simple-chat-interface';
 import AutomationDashboard from '../src/components/automation-dashboard';
 
@@ -12,7 +12,7 @@ interface Message {
   status?: 'sending' | 'sent' | 'error';
   automation?: {
     type: string;
-    status: 'running' | 'completed' | 'failed';
+    status: 'running' | 'completed' | 'failed' | 'paused' | 'handoff_required';
     progress: number;
     automationId?: string;
     screenshots?: Array<{
@@ -20,6 +20,8 @@ interface Message {
       timestamp: string;
       action: string;
     }>;
+    handoffReason?: string;
+    takeoverData?: any;
   };
   sources?: Array<{
     title: string;
@@ -36,6 +38,16 @@ interface Message {
     url: string;
   }>;
   isExpanded?: boolean;
+  chatId?: string;
+}
+
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  lastActivity: Date;
+  isActive: boolean;
 }
 
 interface AutomationMetrics {
@@ -64,10 +76,14 @@ interface AutomationAgent {
 }
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string>('default');
   const [isTyping, setIsTyping] = useState(false);
   const [activeAutomation, setActiveAutomation] = useState<string | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [handoffRequests, setHandoffRequests] = useState<any[]>([]);
   const [automationMetrics, setAutomationMetrics] = useState<AutomationMetrics>({
     executionTime: 0,
     memoryUsage: 0,
@@ -80,6 +96,21 @@ export default function Home() {
     errorRate: 0
   });
   const [agents, setAgents] = useState<AutomationAgent[]>([]);
+  const [liveAutomationStream, setLiveAutomationStream] = useState<any>(null);
+  const automationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize default chat session
+  useEffect(() => {
+    const defaultSession: ChatSession = {
+      id: 'default',
+      title: 'Main Chat',
+      messages: [],
+      createdAt: new Date(),
+      lastActivity: new Date(),
+      isActive: true
+    };
+    setChatSessions([defaultSession]);
+  }, []);
 
   // Initialize agents
   useEffect(() => {
@@ -127,15 +158,52 @@ export default function Home() {
     ]);
   }, []);
 
+  // Get current chat messages
+  const currentChat = chatSessions.find(chat => chat.id === currentChatId);
+  const messages = currentChat?.messages || [];
+
+  const createNewChat = () => {
+    const newChatId = `chat_${Date.now()}`;
+    const newSession: ChatSession = {
+      id: newChatId,
+      title: `Chat ${chatSessions.length + 1}`,
+      messages: [],
+      createdAt: new Date(),
+      lastActivity: new Date(),
+      isActive: true
+    };
+    setChatSessions(prev => [...prev, newSession]);
+    setCurrentChatId(newChatId);
+  };
+
+  const switchChat = (chatId: string) => {
+    setCurrentChatId(chatId);
+    setChatSessions(prev => prev.map(chat => ({
+      ...chat,
+      isActive: chat.id === chatId
+    })));
+  };
+
   const handleSendMessage = async (message: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       content: message,
       timestamp: new Date(),
+      chatId: currentChatId
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    // Add message to current chat
+    setChatSessions(prev => prev.map(chat => 
+      chat.id === currentChatId 
+        ? {
+            ...chat,
+            messages: [...chat.messages, userMessage],
+            lastActivity: new Date()
+          }
+        : chat
+    ));
+
     setIsTyping(true);
 
     try {
@@ -147,6 +215,10 @@ export default function Home() {
                                  message.toLowerCase().includes('fill') ||
                                  message.toLowerCase().includes('monitor');
 
+      const isSearchRequest = message.toLowerCase().includes('search') ||
+                             message.toLowerCase().includes('find') ||
+                             message.toLowerCase().includes('look up');
+
       // Send message to backend
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -155,7 +227,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           message,
-          session_id: 'default_session',
+          session_id: currentChatId,
           context: {
             domain: 'general',
             user_preferences: {
@@ -174,6 +246,7 @@ export default function Home() {
           type: 'ai',
           content: data.response || 'I understand your request. Let me help you with that.',
           timestamp: new Date(),
+          chatId: currentChatId,
           automation: {
             type: isAutomationRequest ? 'workflow_creation' : 'chat_response',
             status: 'running',
@@ -181,23 +254,30 @@ export default function Home() {
           }
         };
 
-        setMessages(prev => [...prev, aiMessage]);
+        // Add AI message to current chat
+        setChatSessions(prev => prev.map(chat => 
+          chat.id === currentChatId 
+            ? {
+                ...chat,
+                messages: [...chat.messages, aiMessage],
+                lastActivity: new Date()
+              }
+            : chat
+        ));
+
         setActiveAutomation(aiMessage.id);
 
-        // If it's an automation request, execute it
-        if (isAutomationRequest) {
+        // Handle different types of requests
+        if (isSearchRequest) {
+          await executeSearch(message, aiMessage.id);
+        } else if (isAutomationRequest) {
           await executeAutomation(message, aiMessage.id);
         } else {
           // Simulate chat response completion
           setTimeout(() => {
-            setMessages(prev => prev.map(msg => 
-              msg.id === aiMessage.id 
-                ? { 
-                    ...msg, 
-                    automation: { ...msg.automation!, status: 'completed', progress: 100 }
-                  }
-                : msg
-            ));
+            updateMessageInChat(currentChatId, aiMessage.id, {
+              automation: { type: 'chat_response', status: 'completed', progress: 100 }
+            });
             setActiveAutomation(null);
           }, 2000);
         }
@@ -213,17 +293,71 @@ export default function Home() {
         type: 'ai',
         content: 'I apologize, but I encountered an error processing your request. Please try again.',
         timestamp: new Date(),
+        chatId: currentChatId,
         status: 'error'
       };
 
-      setMessages(prev => [...prev, errorMessage]);
+      setChatSessions(prev => prev.map(chat => 
+        chat.id === currentChatId 
+          ? {
+              ...chat,
+              messages: [...chat.messages, errorMessage],
+              lastActivity: new Date()
+            }
+          : chat
+      ));
     } finally {
       setIsTyping(false);
     }
   };
 
+  const executeSearch = async (message: string, messageId: string) => {
+    try {
+      // Execute web search
+      const searchResponse = await fetch('/search/web', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: message, max_results: 10 })
+      });
+
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        const results = searchData.results || [];
+        
+        setSearchResults(results);
+        setShowSearchResults(true);
+
+        // Update message with search results
+        updateMessageInChat(currentChatId, messageId, {
+          automation: { type: 'search', status: 'completed', progress: 100 },
+          sources: results.map((result: any, index: number) => ({
+            title: result.title || `Result ${index + 1}`,
+            url: result.url || '#',
+            snippet: result.snippet || result.description || '',
+            domain: result.domain || 'unknown',
+            relevance: result.relevance || 0.8,
+            source: result.source || 'web_search'
+          }))
+        });
+
+        setActiveAutomation(null);
+      } else {
+        throw new Error('Search failed');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      updateMessageInChat(currentChatId, messageId, {
+        automation: { type: 'search', status: 'failed', progress: 0 }
+      });
+      setActiveAutomation(null);
+    }
+  };
+
   const executeAutomation = async (message: string, messageId: string) => {
     try {
+      // Start live automation stream
+      startLiveAutomationStream(messageId);
+
       // Determine automation type based on message
       let automationType = 'web_automation';
       let url = '';
@@ -246,7 +380,16 @@ export default function Home() {
 
         if (bookingResponse.ok) {
           const bookingData = await bookingResponse.json();
-          updateAutomationProgress(messageId, 100, 'completed', bookingData.result);
+          updateMessageInChat(currentChatId, messageId, {
+            automation: { 
+              type: 'ticket_booking', 
+              status: 'completed', 
+              progress: 100,
+              automationId: bookingData.booking_id,
+              screenshots: bookingData.result?.screenshots
+            }
+          });
+          stopLiveAutomationStream();
           return;
         }
       } else if (message.toLowerCase().includes('search')) {
@@ -281,36 +424,65 @@ export default function Home() {
 
       if (automationResponse.ok) {
         const automationData = await automationResponse.json();
-        updateAutomationProgress(messageId, 100, 'completed', automationData.result);
+        updateMessageInChat(currentChatId, messageId, {
+          automation: { 
+            type: 'web_automation', 
+            status: 'completed', 
+            progress: 100,
+            automationId: automationData.automation_id,
+            screenshots: automationData.result?.screenshots
+          }
+        });
       } else {
         throw new Error('Automation execution failed');
       }
 
+      stopLiveAutomationStream();
     } catch (error) {
       console.error('Automation error:', error);
-      updateAutomationProgress(messageId, 0, 'failed');
+      updateMessageInChat(currentChatId, messageId, {
+        automation: { type: 'web_automation', status: 'failed', progress: 0 }
+      });
+      stopLiveAutomationStream();
     }
   };
 
-  const updateAutomationProgress = (messageId: string, progress: number, status: 'running' | 'completed' | 'failed', result?: any) => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId 
-        ? { 
-            ...msg, 
-            automation: { 
-              ...msg.automation!, 
-              progress, 
-              status,
-              automationId: result?.automation_id,
-              screenshots: result?.screenshots
-            }
-          }
-        : msg
-    ));
+  const startLiveAutomationStream = (messageId: string) => {
+    let progress = 0;
+    automationIntervalRef.current = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress > 90) progress = 90;
+      
+      updateMessageInChat(currentChatId, messageId, {
+        automation: { 
+          type: 'web_automation', 
+          status: 'running', 
+          progress: Math.floor(progress)
+        }
+      });
+    }, 1000);
+  };
 
-    if (status === 'completed' || status === 'failed') {
-      setActiveAutomation(null);
+  const stopLiveAutomationStream = () => {
+    if (automationIntervalRef.current) {
+      clearInterval(automationIntervalRef.current);
+      automationIntervalRef.current = null;
     }
+  };
+
+  const updateMessageInChat = (chatId: string, messageId: string, updates: Partial<Message>) => {
+    setChatSessions(prev => prev.map(chat => 
+      chat.id === chatId 
+        ? {
+            ...chat,
+            messages: chat.messages.map(msg => 
+              msg.id === messageId 
+                ? { ...msg, ...updates }
+                : msg
+            )
+          }
+        : chat
+    ));
   };
 
   const handleAutomationControl = (action: string, messageId: string) => {
@@ -318,8 +490,55 @@ export default function Home() {
     
     if (action === 'play') {
       setActiveAutomation(messageId);
+      startLiveAutomationStream(messageId);
     } else if (action === 'pause') {
       setActiveAutomation(null);
+      stopLiveAutomationStream();
+      updateMessageInChat(currentChatId, messageId, {
+        automation: { type: 'web_automation', status: 'paused', progress: 50 }
+      });
+    } else if (action === 'handoff') {
+      // Request human intervention
+      const handoffRequest = {
+        id: `handoff_${Date.now()}`,
+        messageId,
+        reason: 'Requires human input',
+        timestamp: new Date(),
+        data: { currentStep: 'form_filling', issue: 'captcha_detected' }
+      };
+      setHandoffRequests(prev => [...prev, handoffRequest]);
+      
+      updateMessageInChat(currentChatId, messageId, {
+        automation: { 
+          type: 'web_automation', 
+          status: 'handoff_required', 
+          progress: 75,
+          handoffReason: 'Human intervention required for CAPTCHA'
+        }
+      });
+    }
+  };
+
+  const handleTakeover = (handoffId: string, userInput: any) => {
+    // Handle human takeover
+    console.log('Human takeover:', handoffId, userInput);
+    
+    // Remove handoff request
+    setHandoffRequests(prev => prev.filter(req => req.id !== handoffId));
+    
+    // Resume automation
+    const handoffRequest = handoffRequests.find(req => req.id === handoffId);
+    if (handoffRequest) {
+      updateMessageInChat(currentChatId, handoffRequest.messageId, {
+        automation: { 
+          type: 'web_automation', 
+          status: 'running', 
+          progress: 80,
+          takeoverData: userInput
+        }
+      });
+      setActiveAutomation(handoffRequest.messageId);
+      startLiveAutomationStream(handoffRequest.messageId);
     }
   };
 
@@ -334,7 +553,6 @@ export default function Home() {
 
   const handleAgentControl = (agentId: string, action: 'start' | 'stop' | 'restart') => {
     console.log(`Agent control: ${action} for agent ${agentId}`);
-    // Update agent status
     setAgents(prev => prev.map(agent => 
       agent.id === agentId 
         ? { ...agent, status: action === 'start' ? 'active' : 'idle' }
@@ -347,42 +565,151 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex">
-      {/* Main Chat Interface */}
-      <div className={`flex-1 ${showDashboard ? 'w-2/3' : 'w-full'} transition-all duration-300`}>
-        <SimpleChatInterface
-          messages={messages}
-          isTyping={isTyping}
-          activeAutomation={activeAutomation}
-          onSendMessage={handleSendMessage}
-          onAutomationControl={handleAutomationControl}
-          onUserInput={handleUserInput}
-          onCopyToClipboard={handleCopyToClipboard}
-        />
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">
+              Autonomous Automation Platform
+            </h1>
+            <p className="text-sm text-gray-500">
+              AI-powered workflow automation
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowSearchResults(!showSearchResults)}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+            title="Toggle Search Results"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setShowDashboard(!showDashboard)}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+            title="Toggle Dashboard"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Automation Dashboard */}
-      {showDashboard && (
-        <div className="w-1/3 border-l border-gray-200">
-          <AutomationDashboard
-            metrics={automationMetrics}
-            agents={agents}
-            onAgentControl={handleAgentControl}
-            onViewDetails={handleViewDetails}
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Chat Sessions Sidebar */}
+        <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
+          <div className="p-4 border-b border-gray-200">
+            <button
+              onClick={createNewChat}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              + New Chat
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-2">
+            {chatSessions.map(chat => (
+              <div
+                key={chat.id}
+                onClick={() => switchChat(chat.id)}
+                className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  chat.id === currentChatId 
+                    ? 'bg-blue-100 text-blue-900' 
+                    : 'hover:bg-gray-100'
+                }`}
+              >
+                <div className="font-medium truncate">{chat.title}</div>
+                <div className="text-sm text-gray-500 truncate">
+                  {chat.messages.length} messages
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Chat Interface */}
+        <div className="flex-1 flex flex-col">
+          <SimpleChatInterface
+            messages={messages}
+            isTyping={isTyping}
+            activeAutomation={activeAutomation}
+            onSendMessage={handleSendMessage}
+            onAutomationControl={handleAutomationControl}
+            onUserInput={handleUserInput}
+            onCopyToClipboard={handleCopyToClipboard}
           />
         </div>
-      )}
 
-      {/* Toggle Dashboard Button */}
-      <button
-        onClick={() => setShowDashboard(!showDashboard)}
-        className="fixed top-4 right-4 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-        title={showDashboard ? 'Hide Dashboard' : 'Show Dashboard'}
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      </button>
+        {/* Search Results Panel */}
+        {showSearchResults && (
+          <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+            <div className="p-4 border-b border-gray-200">
+              <h3 className="font-semibold text-gray-900">Search Results</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {searchResults.map((result, index) => (
+                <div key={index} className="mb-4 p-3 border border-gray-200 rounded-lg">
+                  <h4 className="font-medium text-blue-600 hover:underline cursor-pointer">
+                    {result.title}
+                  </h4>
+                  <p className="text-sm text-gray-600 mt-1">{result.snippet}</p>
+                  <div className="text-xs text-gray-500 mt-2">{result.url}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Automation Dashboard */}
+        {showDashboard && (
+          <div className="w-80 bg-white border-l border-gray-200">
+            <AutomationDashboard
+              metrics={automationMetrics}
+              agents={agents}
+              onAgentControl={handleAgentControl}
+              onViewDetails={handleViewDetails}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Handoff Requests */}
+      {handoffRequests.length > 0 && (
+        <div className="fixed bottom-4 right-4 z-50">
+          {handoffRequests.map(request => (
+            <div key={request.id} className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-2 max-w-sm">
+              <h4 className="font-medium text-yellow-800">Human Intervention Required</h4>
+              <p className="text-sm text-yellow-700 mt-1">{request.reason}</p>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => handleTakeover(request.id, { action: 'continue' })}
+                  className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                >
+                  Take Over
+                </button>
+                <button
+                  onClick={() => setHandoffRequests(prev => prev.filter(req => req.id !== request.id))}
+                  className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

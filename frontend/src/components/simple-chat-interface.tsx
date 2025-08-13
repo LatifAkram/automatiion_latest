@@ -143,27 +143,71 @@ export default function SimpleChatInterface({
             <div className="flex items-center gap-2 mb-2">
               <Zap className="w-4 h-4 text-orange-500" />
               <span className="text-xs font-medium">Automation: {message.automation.type}</span>
+              {message.automation.status === 'handoff_required' && (
+                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Handoff Required</span>
+              )}
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  message.automation.status === 'completed' ? 'bg-green-500' :
+                  message.automation.status === 'failed' ? 'bg-red-500' :
+                  message.automation.status === 'paused' ? 'bg-yellow-500' :
+                  message.automation.status === 'handoff_required' ? 'bg-orange-500' :
+                  'bg-blue-500'
+                }`}
                 style={{ width: `${message.automation.progress}%` }}
               />
             </div>
             <div className="flex gap-2 mt-2">
-              <button 
-                onClick={() => onAutomationControl('play', message.id)}
-                className="p-1 rounded bg-green-100 hover:bg-green-200"
-              >
-                <Play className="w-3 h-3 text-green-600" />
-              </button>
-              <button 
-                onClick={() => onAutomationControl('pause', message.id)}
-                className="p-1 rounded bg-yellow-100 hover:bg-yellow-200"
-              >
-                <Pause className="w-3 h-3 text-yellow-600" />
-              </button>
+              {message.automation.status === 'running' && (
+                <>
+                  <button 
+                    onClick={() => onAutomationControl('pause', message.id)}
+                    className="p-1 rounded bg-yellow-100 hover:bg-yellow-200"
+                    title="Pause Automation"
+                  >
+                    <Pause className="w-3 h-3 text-yellow-600" />
+                  </button>
+                  <button 
+                    onClick={() => onAutomationControl('handoff', message.id)}
+                    className="p-1 rounded bg-orange-100 hover:bg-orange-200"
+                    title="Request Human Intervention"
+                  >
+                    <Hand className="w-3 h-3 text-orange-600" />
+                  </button>
+                </>
+              )}
+              {message.automation.status === 'paused' && (
+                <button 
+                  onClick={() => onAutomationControl('play', message.id)}
+                  className="p-1 rounded bg-green-100 hover:bg-green-200"
+                  title="Resume Automation"
+                >
+                  <Play className="w-3 h-3 text-green-600" />
+                </button>
+              )}
+              {message.automation.status === 'handoff_required' && (
+                <div className="text-xs text-orange-700">
+                  {message.automation.handoffReason}
+                </div>
+              )}
             </div>
+            {message.automation.screenshots && message.automation.screenshots.length > 0 && (
+              <div className="mt-3">
+                <h4 className="text-xs font-medium mb-2">Screenshots:</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {message.automation.screenshots.map((screenshot, index) => (
+                    <div key={index} className="text-xs text-gray-600">
+                      <div className="bg-gray-200 h-16 rounded flex items-center justify-center">
+                        <Image className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <div className="mt-1 truncate">{screenshot.action}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
         
