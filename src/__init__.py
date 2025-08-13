@@ -22,7 +22,7 @@ __description__ = "Autonomous Multi-Agent Automation Platform"
 # Core exports
 from .core.orchestrator import MultiAgentOrchestrator
 from .core.config import Config
-from .core.database import Database
+from .core.database import DatabaseManager
 from .core.vector_store import VectorStore
 from .core.ai_provider import AIProvider
 from .core.audit import AuditLogger
@@ -49,7 +49,7 @@ __all__ = [
     # Core
     "MultiAgentOrchestrator",
     "Config", 
-    "Database",
+    "DatabaseManager",
     "VectorStore",
     "AIProvider",
     "AuditLogger",

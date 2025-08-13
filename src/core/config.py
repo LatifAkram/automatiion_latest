@@ -6,7 +6,7 @@ Handles environment variables, AI model settings, and system configuration.
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
-from pydantic import BaseSettings, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -93,6 +93,22 @@ class AutomationConfig(BaseSettings):
     capture_video: bool = Field(default=True, env="CAPTURE_VIDEO")
     video_quality: str = Field(default="medium", env="VIDEO_QUALITY")
     
+    # Browser Configuration
+    browser_args: List[str] = Field(default_factory=lambda: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--disable-gpu"
+    ])
+    viewport_width: int = Field(default=1920, env="VIEWPORT_WIDTH")
+    viewport_height: int = Field(default=1080, env="VIEWPORT_HEIGHT")
+    user_agent: str = Field(default="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36", env="USER_AGENT")
+    locale: str = Field(default="en-US", env="LOCALE")
+    timezone: str = Field(default="UTC", env="TIMEZONE")
+    
     class Config:
         env_file = ".env"
 
@@ -142,6 +158,9 @@ class Config(BaseSettings):
     # Environment
     environment: str = Field(default="development", env="ENVIRONMENT")
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
+    
+    # Paths
+    data_path: str = Field(default="data", env="DATA_PATH")
     
     # Sub-configurations
     ai: AIConfig = AIConfig()
