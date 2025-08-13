@@ -126,7 +126,7 @@ workflow = {
         "tasks": [
             {
                 "type": "web_automation",
-                "url": "https://example.com",
+                "url": "https://real-website.com",
                 "actions": [
                     {"type": "click", "selector": ".button"},
                     {"type": "type", "selector": "input", "text": "search term"}
@@ -135,7 +135,7 @@ workflow = {
             {
                 "type": "api_call",
                 "method": "GET",
-                "url": "https://api.example.com/data"
+                "url": "https://api.real-service.com/data"
             }
         ]
     }

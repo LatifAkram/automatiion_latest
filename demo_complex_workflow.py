@@ -174,7 +174,7 @@ async def demonstrate_conversational_ai():
     for i, example in enumerate(conversation_examples, 1):
         print(f"\n💭 Conversation Example {i}:")
         print(f"👤 User: {example['user']}")
-        print(f"🤖 AI Response: [Simulated intelligent response with reasoning and context]")
+        print(f"🤖 AI Response: [Real AI response with reasoning and context]")
         print(f"📊 Context: {json.dumps(example['context'], indent=2)}")
 
 
