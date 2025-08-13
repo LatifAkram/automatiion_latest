@@ -67,6 +67,7 @@ interface SimpleChatInterfaceProps {
   onAutomationControl: (action: string, messageId: string) => void;
   onUserInput: (messageId: string, data: any) => void;
   onCopyToClipboard: (text: string) => void;
+  onTruncateOperation: () => void;
   messages: Message[];
   isTyping: boolean;
   activeAutomation: string | null;
@@ -77,6 +78,7 @@ export default function SimpleChatInterface({
   onAutomationControl,
   onUserInput,
   onCopyToClipboard,
+  onTruncateOperation,
   messages,
   isTyping,
   activeAutomation
@@ -310,14 +312,23 @@ export default function SimpleChatInterface({
                 <Bot className="w-4 h-4 text-blue-600" />
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-              <div className="flex items-center gap-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">AI is thinking...</span>
                 </div>
-                <span className="text-sm text-gray-500 dark:text-gray-400">AI is thinking...</span>
+                <button
+                  onClick={onTruncateOperation}
+                  className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+                  title="Stop AI operation"
+                >
+                  Stop
+                </button>
               </div>
             </div>
           </motion.div>

@@ -259,7 +259,7 @@ export default function LiveAutomationDisplay({
                   <div className="space-y-3">
                     {steps.map((step, index) => (
                       <motion.div
-                        key={step.id}
+                        key={`${step.id}_${index}`}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
@@ -311,7 +311,7 @@ export default function LiveAutomationDisplay({
                   <div className="grid grid-cols-2 gap-3">
                     {steps.filter(step => step.screenshot).map((step, index) => (
                       <motion.div
-                        key={step.id}
+                        key={`screenshot_${step.id}_${index}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}

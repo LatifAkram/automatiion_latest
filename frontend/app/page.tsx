@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SimpleChatInterface from '../src/components/simple-chat-interface';
 import AutomationDashboard from '../src/components/automation-dashboard';
 import LiveAutomationDisplay from '../src/components/live-automation-display';
+import AIThinkingDisplay from '../src/components/ai-thinking-display';
 
 // Backend configuration
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
@@ -127,6 +128,12 @@ export default function Home() {
   const [automationId, setAutomationId] = useState<string>('');
   const [browserUrl, setBrowserUrl] = useState<string>('');
   const [isAutomationRunning, setIsAutomationRunning] = useState(false);
+  
+  // AI Thinking Display State
+  const [showAIThinking, setShowAIThinking] = useState(false);
+  const [aiThoughts, setAiThoughts] = useState<any[]>([]);
+  const [currentOperation, setCurrentOperation] = useState<string>('');
+  const [isAIThinkingPaused, setIsAIThinkingPaused] = useState(false);
 
   // Initialize default chat session
   useEffect(() => {
@@ -280,6 +287,18 @@ export default function Home() {
     })));
   };
 
+  const deleteChat = (chatId: string) => {
+    setChatSessions(prev => prev.filter(chat => chat.id !== chatId));
+    if (currentChatId === chatId) {
+      const remainingChats = chatSessions.filter(chat => chat.id !== chatId);
+      if (remainingChats.length > 0) {
+        setCurrentChatId(remainingChats[0].id);
+      } else {
+        createNewChat();
+      }
+    }
+  };
+
   const handleSendMessage = async (message: string) => {
     // Start agentic thinking animation
     startAgentThinking([
@@ -287,6 +306,31 @@ export default function Home() {
       "Determining best approach...",
       "Preparing response..."
     ]);
+    
+    // Show AI thinking display
+    setShowAIThinking(true);
+    setCurrentOperation('Analyzing user request...');
+    setAiThoughts([]);
+    
+    // Add initial thoughts
+    const initialThoughts = [
+      {
+        id: 'thought_1',
+        type: 'analysis' as const,
+        content: 'Analyzing the user request to understand the intent and requirements...',
+        timestamp: new Date(),
+        status: 'thinking' as const
+      },
+      {
+        id: 'thought_2',
+        type: 'planning' as const,
+        content: 'Determining the best approach and required resources...',
+        timestamp: new Date(),
+        status: 'thinking' as const
+      }
+    ];
+    
+    setAiThoughts(initialThoughts);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -780,6 +824,13 @@ export default function Home() {
     console.log('Copied to clipboard:', text);
   };
 
+  const handleTruncateOperation = () => {
+    setIsTyping(false);
+    setActiveAutomation(null);
+    // Cancel any ongoing operations
+    console.log('Operation truncated by user');
+  };
+
   const handleAgentControl = (agentId: string, action: 'start' | 'stop' | 'restart') => {
     console.log(`Agent control: ${action} for agent ${agentId}`);
     setAgents(prev => prev.map(agent => 
@@ -933,18 +984,31 @@ export default function Home() {
             {chatSessions.map(chat => (
               <div
                 key={chat.id}
-                onClick={() => switchChat(chat.id)}
-                className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ${
+                className={`p-3 rounded-lg transition-all duration-300 group ${
                   chat.id === currentChatId 
                     ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 animate-glow' 
                     : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100'
                 }`}
               >
-                <div className="font-medium truncate">{chat.title}</div>
-                <div className={`text-sm truncate ${
-                  chat.id === currentChatId ? 'text-blue-700 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400'
-                }`}>
-                  {chat.messages.length} messages
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 cursor-pointer" onClick={() => switchChat(chat.id)}>
+                    <div className="font-medium truncate">{chat.title}</div>
+                    <div className={`text-sm truncate ${
+                      chat.id === currentChatId ? 'text-blue-700 dark:text-blue-300' : 'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {chat.messages.length} messages
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteChat(chat.id);
+                    }}
+                    className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                    title="Delete chat"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -961,6 +1025,7 @@ export default function Home() {
             onAutomationControl={handleAutomationControl}
             onUserInput={handleUserInput}
             onCopyToClipboard={handleCopyToClipboard}
+            onTruncateOperation={handleTruncateOperation}
           />
         </div>
 
@@ -1115,38 +1180,49 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Live Automation Display */}
-      <LiveAutomationDisplay
-        isVisible={showLiveAutomation}
-        onClose={() => setShowLiveAutomation(false)}
-        automationId={automationId}
-        currentStep={currentAutomationStep}
-        steps={automationSteps}
-        browserUrl={browserUrl}
-        isRunning={isAutomationRunning}
-        onControl={(action) => {
-          if (action === 'stop') {
-            setIsAutomationRunning(false);
-            setShowLiveAutomation(false);
-          } else if (action === 'pause') {
-            setIsAutomationRunning(false);
-          } else if (action === 'play') {
-            setIsAutomationRunning(true);
-          }
-        }}
-        onTakeScreenshot={() => {
-          // Trigger screenshot capture
-          console.log('Taking screenshot...');
-        }}
-        onViewCode={() => {
-          // Show generated code
-          console.log('Viewing generated code...');
-        }}
-        onDownloadReport={() => {
-          // Download automation report
-          console.log('Downloading report...');
-        }}
-      />
+                          {/* Live Automation Display */}
+                    <LiveAutomationDisplay
+                      isVisible={showLiveAutomation}
+                      onClose={() => setShowLiveAutomation(false)}
+                      automationId={automationId}
+                      currentStep={currentAutomationStep}
+                      steps={automationSteps}
+                      browserUrl={browserUrl}
+                      isRunning={isAutomationRunning}
+                      onControl={(action) => {
+                        if (action === 'stop') {
+                          setIsAutomationRunning(false);
+                          setShowLiveAutomation(false);
+                        } else if (action === 'pause') {
+                          setIsAutomationRunning(false);
+                        } else if (action === 'play') {
+                          setIsAutomationRunning(true);
+                        }
+                      }}
+                      onTakeScreenshot={() => {
+                        // Trigger screenshot capture
+                        console.log('Taking screenshot...');
+                      }}
+                      onViewCode={() => {
+                        // Show generated code
+                        console.log('Viewing generated code...');
+                      }}
+                      onDownloadReport={() => {
+                        // Download automation report
+                        console.log('Downloading report...');
+                      }}
+                    />
+
+                    {/* AI Thinking Display */}
+                    <AIThinkingDisplay
+                      isVisible={showAIThinking}
+                      onClose={() => setShowAIThinking(false)}
+                      thoughts={aiThoughts}
+                      currentOperation={currentOperation}
+                      isPaused={isAIThinkingPaused}
+                      onPause={() => setIsAIThinkingPaused(true)}
+                      onResume={() => setIsAIThinkingPaused(false)}
+                    />
     </div>
   );
 }
