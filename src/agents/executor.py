@@ -68,44 +68,55 @@ class ExecutionAgent:
     async def _initialize_browser(self):
         """Initialize browser with configuration."""
         try:
+            # Get configuration with fallbacks
+            browser_type = getattr(self.config, 'browser_type', 'chromium')
+            headless = getattr(self.config, 'headless', True)
+            browser_args = getattr(self.config, 'browser_args', ["--no-sandbox", "--disable-dev-shm-usage"])
+            viewport_width = getattr(self.config, 'viewport_width', 1920)
+            viewport_height = getattr(self.config, 'viewport_height', 1080)
+            user_agent = getattr(self.config, 'user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+            locale = getattr(self.config, 'locale', 'en-US')
+            timezone = getattr(self.config, 'timezone', 'America/New_York')
+            
             # Launch browser based on configuration
-            if self.config.browser_type == "chromium":
+            if browser_type == "chromium":
                 self.browser = await self.playwright.chromium.launch(
-                    headless=self.config.headless,
-                    args=self.config.browser_args or []
+                    headless=headless,
+                    args=browser_args or []
                 )
-            elif self.config.browser_type == "firefox":
+            elif browser_type == "firefox":
                 self.browser = await self.playwright.firefox.launch(
-                    headless=self.config.headless,
-                    args=self.config.browser_args or []
+                    headless=headless,
+                    args=browser_args or []
                 )
-            elif self.config.browser_type == "webkit":
+            elif browser_type == "webkit":
                 self.browser = await self.playwright.webkit.launch(
-                    headless=self.config.headless,
-                    args=self.config.browser_args or []
+                    headless=headless,
+                    args=browser_args or []
                 )
             else:
                 # Default to Chromium
                 self.browser = await self.playwright.chromium.launch(
-                    headless=self.config.headless,
-                    args=self.config.browser_args or []
+                    headless=headless,
+                    args=browser_args or []
                 )
                 
             # Create browser context
             self.context = await self.browser.new_context(
-                viewport={'width': self.config.viewport_width, 'height': self.config.viewport_height},
-                user_agent=self.config.user_agent,
-                locale=self.config.locale,
-                timezone_id=self.config.timezone
+                viewport={'width': viewport_width, 'height': viewport_height},
+                user_agent=user_agent,
+                locale=locale,
+                timezone_id=timezone
             )
             
             # Create new page
             self.page = await self.context.new_page()
             
-            # Set default timeout
-            self.page.set_default_timeout(self.config.browser_timeout * 1000)
+            # Set default timeout with fallback
+            browser_timeout = getattr(self.config, 'browser_timeout', 30)
+            self.page.set_default_timeout(browser_timeout * 1000)
             
-            self.logger.info(f"Browser initialized: {self.config.browser_type}")
+            self.logger.info(f"Browser initialized: {browser_type}")
             
         except Exception as e:
             self.logger.error(f"Failed to initialize browser: {e}", exc_info=True)
