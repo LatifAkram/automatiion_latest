@@ -104,6 +104,7 @@ class AutomationConfig(BaseSettings):
     max_parallel_workflows: int = Field(default=5, env="MAX_PARALLEL_WORKFLOWS")
     max_parallel_agents: int = Field(default=3, env="MAX_PARALLEL_AGENTS")
     task_timeout: int = Field(default=300, env="TASK_TIMEOUT")
+    browser_timeout: int = Field(default=30, env="BROWSER_TIMEOUT")
     retry_attempts: int = Field(default=3, env="RETRY_ATTEMPTS")
     retry_delay: int = Field(default=5, env="RETRY_DELAY")
     

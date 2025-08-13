@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   FileSpreadsheet,
-  FilePdf,
+  FileText,
   FileWord,
   Download,
   Settings,
@@ -117,9 +117,9 @@ export default function ResultExporter({
   const getFormatIcon = (format: string) => {
     switch (format) {
       case 'excel': return <FileSpreadsheet className="w-5 h-5" />;
-      case 'pdf': return <FilePdf className="w-5 h-5" />;
+      case 'pdf': return <FileText className="w-5 h-5" />;
       case 'word': return <FileWord className="w-5 h-5" />;
-      default: return <FilePdf className="w-5 h-5" />;
+              default: return <FileText className="w-5 h-5" />;
     }
   };
 

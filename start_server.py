@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
 """
-Autonomous Multi-Agent Automation Platform
-==========================================
+Server Startup Script
+====================
 
-A comprehensive automation platform that executes ultra-complex workflows
-across all domains using AI-powered agents for planning, execution, and reasoning.
-
-Core Components:
-- AI-1: Planner Agent (Brain)
-- AI-2: Execution Agents (Automation)
-- AI-3: Conversational Agent (Reasoning & Context)
-- Vector DB for learning and self-healing
-- Enterprise compliance and governance
+Separate script to start the API server without event loop conflicts.
 """
 
 import asyncio
@@ -46,8 +38,7 @@ async def main():
         
         # Start the API server
         logger.info("Starting API server...")
-        # Don't call start_api_server here as it conflicts with asyncio
-        # The server will be started separately
+        start_api_server(orchestrator)
         
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")
