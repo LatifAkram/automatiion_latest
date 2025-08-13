@@ -171,8 +171,8 @@ class AIProvider:
                     if response.status != 200:
                         raise Exception(f"Local LLM returned status {response.status}")
                     
-                    # Store the session for future use
-                    self.local_llm_client = session
+                    # Test successful, mark as available
+                    self.local_llm_client = True
         except Exception as e:
             raise Exception(f"Local LLM connection failed: {e}")
             
@@ -307,8 +307,9 @@ class AIProvider:
                 async with session.post(
                     f"{self.config.local_llm_url}/v1/chat/completions",
                     json={
-                        "model": self.config.local_llm_model,
+                        "model": "deepseek-coder-v2-lite-instruct",
                         "messages": [
+                            {"role": "system", "content": "You are an expert automation assistant. Provide clear, helpful responses for automation tasks."},
                             {"role": "user", "content": prompt}
                         ],
                         "temperature": temperature,
