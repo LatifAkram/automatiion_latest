@@ -312,7 +312,7 @@ class ExecutionAgent:
                         "performance_metrics": {
                             "load_time": "2.3s",
                             "execution_time": execution_time,
-                            "success_rate": f"{len([r for r in results if r.get('success', False)]) / len(results) * 100:.1f}%"
+                            "success_rate": f"{len([r for r in results if r.get('success', False)]) / max(len(results), 1) * 100:.1f}%"
                         }
                     }
                 },
@@ -1075,7 +1075,7 @@ class ExecutionAgent:
                         "performance_metrics": {
                             "search_time": f"{execution_time:.2f}s",
                             "execution_time": execution_time,
-                            "success_rate": f"{len([r for r in results if r['status'] == 'success']) / len(results) * 100:.1f}%"
+                            "success_rate": f"{len([r for r in results if r['status'] == 'success']) / max(len(results), 1) * 100:.1f}%"
                         }
                     }
                 },
