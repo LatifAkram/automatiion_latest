@@ -17,6 +17,7 @@ from ..utils.selector_drift import SelectorDriftDetector
 from ..agents.ai_dom_analyzer import AIDOMAnalyzer
 from ..utils.advanced_learning import AdvancedLearningSystem
 from ..agents.parallel_sub_agents import ParallelSubAgentOrchestrator
+from ..agents.distributed_ai_system import DistributedAISystem
 
 
 class IntelligentAutomationAgent:
@@ -55,6 +56,9 @@ class IntelligentAutomationAgent:
         
         # Initialize parallel sub-agents orchestrator (will be fully initialized in initialize method)
         self.parallel_orchestrator = None
+        
+        # Initialize distributed AI system (will be fully initialized in initialize method)
+        self.distributed_ai_system = None
         
         # Browser context
         self.browser = None
@@ -100,6 +104,12 @@ class IntelligentAutomationAgent:
             
             # Initialize parallel sub-agents orchestrator
             self.parallel_orchestrator = ParallelSubAgentOrchestrator(
+                ai_provider=self.ai_provider,
+                vector_store=vector_store
+            )
+            
+            # Initialize distributed AI system
+            self.distributed_ai_system = DistributedAISystem(
                 ai_provider=self.ai_provider,
                 vector_store=vector_store
             )
@@ -1153,6 +1163,37 @@ class IntelligentAutomationAgent:
                 "success": False,
                 "error": str(e),
                 "parallel_execution": False
+            }
+
+    async def execute_distributed_automation(self, instructions: str, url: str) -> Dict[str, Any]:
+        """Execute automation using distributed AI agents for maximum speed."""
+        try:
+            self.logger.info("Starting distributed automation execution")
+            
+            # Use distributed AI system
+            result = await self.distributed_ai_system.execute_distributed_automation(
+                instructions=instructions,
+                url=url,
+                page=self.page
+            )
+            
+            # Capture final screenshot
+            final_screenshot = await self.media_capture.capture_screenshot(
+                self.page, "distributed_automation", "final_state"
+            )
+            
+            # Add screenshot to result
+            result["final_screenshot"] = final_screenshot
+            
+            self.logger.info("Distributed automation execution completed")
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Distributed automation execution failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "distributed_execution": False
             }
 
     async def _execute_step_with_auto_heal(self, step: Dict[str, Any], success_prediction: Dict[str, Any]) -> Dict[str, Any]:

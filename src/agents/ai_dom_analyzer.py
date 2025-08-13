@@ -183,16 +183,57 @@ class AIDOMAnalyzer:
             ai_response = await self.ai_provider.generate_response(prompt)
             
             try:
-                ai_analysis = json.loads(ai_response)
+                # Clean the response to extract JSON
+                cleaned_response = self._extract_json_from_response(ai_response)
+                ai_analysis = json.loads(cleaned_response)
                 self.logger.info(f"AI analysis completed: {len(ai_analysis)} categories")
                 return ai_analysis
-            except json.JSONDecodeError:
-                self.logger.warning("AI response not valid JSON, using fallback analysis")
+            except json.JSONDecodeError as e:
+                self.logger.warning(f"AI response not valid JSON, using fallback analysis: {e}")
+                self.logger.warning(f"Raw response: {ai_response[:200]}...")
                 return self._fallback_element_analysis(page_content, instructions)
                 
         except Exception as e:
             self.logger.error(f"AI element analysis failed: {e}")
             return self._fallback_element_analysis(page_content, instructions)
+
+    def _extract_json_from_response(self, response: str) -> str:
+        """Extract JSON from AI response that might contain extra text."""
+        try:
+            import re
+            
+            # First, try to extract from code blocks with json language
+            code_block_pattern = r'```json\s*(\{.*?\})\s*```'
+            code_match = re.search(code_block_pattern, response, re.DOTALL)
+            
+            if code_match:
+                return code_match.group(1)
+            
+            # Try to extract from code blocks without language specification
+            code_block_pattern2 = r'```\s*(\{.*?\})\s*```'
+            code_match2 = re.search(code_block_pattern2, response, re.DOTALL)
+            
+            if code_match2:
+                return code_match2.group(1)
+            
+            # Try to find JSON object with curly braces (from start to end)
+            json_pattern = r'^\s*\{.*\}\s*$'
+            if re.match(json_pattern, response, re.DOTALL):
+                return response.strip()
+            
+            # Try to find JSON object anywhere in the response
+            json_pattern2 = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+            json_match = re.search(json_pattern2, response, re.DOTALL)
+            
+            if json_match:
+                return json_match.group(0)
+            
+            # If still no JSON found, return the original response
+            return response
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to extract JSON from response: {e}")
+            return response
 
     async def _apply_learned_patterns(self, instructions: str, page_content: Dict[str, Any]) -> Dict[str, Any]:
         """Apply learned patterns from previous successful automations."""

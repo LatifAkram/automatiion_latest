@@ -1319,11 +1319,29 @@ export default function Home() {
                 setRealTimeCurrentStep(stepIndex + 2);
                 // Add screenshot for completed step
                 setRealTimeAutomationScreenshots(prev => [...prev, `/api/screenshots/step_${stepIndex + 1}.png`]);
+                
+                // Update AI thoughts for real-time feedback
+                setAiThoughts(prev => [...prev, {
+                  id: `thought_${Date.now()}`,
+                  type: 'execution' as const,
+                  content: `Completed step ${stepIndex + 1}: ${realTimeAutomationSteps[stepIndex]?.action || 'Unknown action'}`,
+                  timestamp: new Date(),
+                  status: 'completed' as const
+                }]);
               }}
-              onAutomationComplete={() => {
-                setRealTimeIsAutomationRunning(false);
-                setShowRealTimeBrowser(false);
-              }}
+                              onAutomationComplete={() => {
+                  setRealTimeIsAutomationRunning(false);
+                  setShowRealTimeBrowser(false);
+                  
+                  // Add completion thought
+                  setAiThoughts(prev => [...prev, {
+                    id: `thought_${Date.now()}`,
+                    type: 'completion' as const,
+                    content: '✅ Automation completed successfully! All steps executed.',
+                    timestamp: new Date(),
+                    status: 'completed' as const
+                  }]);
+                }}
             />
           </div>
         </div>
