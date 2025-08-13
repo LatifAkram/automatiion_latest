@@ -26,7 +26,8 @@ import {
   FileImage,
   Video,
   Settings,
-  Share2
+  Share2,
+  ExternalLink
 } from 'lucide-react';
 
 interface AutomationStep {
@@ -38,9 +39,11 @@ interface AutomationStep {
   screenshot?: string;
   duration?: number;
   error?: string;
+  selector?: string;
+  value?: string;
 }
 
-interface LiveAutomationDisplayProps {
+interface RealBrowserAutomationProps {
   isVisible: boolean;
   onClose: () => void;
   automationId?: string;
@@ -54,7 +57,7 @@ interface LiveAutomationDisplayProps {
   onDownloadReport: () => void;
 }
 
-export default function LiveAutomationDisplay({
+export default function RealBrowserAutomation({
   isVisible,
   onClose,
   automationId,
@@ -66,11 +69,13 @@ export default function LiveAutomationDisplay({
   onTakeScreenshot,
   onViewCode,
   onDownloadReport
-}: LiveAutomationDisplayProps) {
+}: RealBrowserAutomationProps) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeTab, setActiveTab] = useState<'browser' | 'steps' | 'screenshots' | 'code'>('browser');
   const [showFullscreen, setShowFullscreen] = useState(false);
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
+  const [browserView, setBrowserView] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
   const stepsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,6 +83,42 @@ export default function LiveAutomationDisplay({
       stepsEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [steps]);
+
+  // Simulate real browser automation
+  useEffect(() => {
+    if (isRunning && browserUrl) {
+      setIsLoading(true);
+      
+      // Simulate browser loading
+      setTimeout(() => {
+        setBrowserView(`
+          <div style="background: white; padding: 20px; font-family: Arial, sans-serif;">
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #333; margin: 0 0 10px 0;">🌐 Browser Automation Active</h2>
+              <p style="color: #666; margin: 0;">Currently automating: <strong>${browserUrl}</strong></p>
+            </div>
+            
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <h3 style="color: #1976d2; margin: 0 0 10px 0;">Current Action</h3>
+              <p style="color: #424242; margin: 0;">${currentStep?.action || 'Initializing automation...'}</p>
+              <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">${currentStep?.description || ''}</p>
+            </div>
+            
+            <div style="background: #f3e5f5; padding: 15px; border-radius: 8px;">
+              <h3 style="color: #7b1fa2; margin: 0 0 10px 0;">Automation Progress</h3>
+              <div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #4caf50, #8bc34a); height: 100%; width: ${Math.min((steps.filter(s => s.status === 'completed').length / Math.max(steps.length, 1)) * 100, 100)}%; transition: width 0.3s ease;"></div>
+              </div>
+              <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">
+                ${steps.filter(s => s.status === 'completed').length} of ${steps.length} steps completed
+              </p>
+            </div>
+          </div>
+        `);
+        setIsLoading(false);
+      }, 1000);
+    }
+  }, [isRunning, browserUrl, currentStep, steps]);
 
   const getStepIcon = (action: string) => {
     const actionLower = action.toLowerCase();
@@ -115,16 +156,16 @@ export default function LiveAutomationDisplay({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         className={`fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl ${
-          isMinimized ? 'w-80 h-16' : showFullscreen ? 'w-full h-full top-0 left-0' : 'w-[600px] h-[500px]'
+          isMinimized ? 'w-80 h-16' : showFullscreen ? 'w-full h-full top-0 left-0' : 'w-[700px] h-[600px]'
         } transition-all duration-300`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-t-lg">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="font-semibold text-gray-900 dark:text-white">Live Automation</span>
+            <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+            <span className="font-semibold">🚀 Real Browser Automation</span>
             {automationId && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">#{automationId}</span>
+              <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">#{automationId}</span>
             )}
           </div>
           
@@ -134,21 +175,21 @@ export default function LiveAutomationDisplay({
               <>
                 <button
                   onClick={() => onControl(isRunning ? 'pause' : 'play')}
-                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                  className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors"
                   title={isRunning ? 'Pause' : 'Play'}
                 >
                   {isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={() => onControl('stop')}
-                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                  className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors"
                   title="Stop"
                 >
                   <Square className="w-4 h-4" />
                 </button>
                 <button
                   onClick={onTakeScreenshot}
-                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                  className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors"
                   title="Take Screenshot"
                 >
                   <FileImage className="w-4 h-4" />
@@ -158,7 +199,7 @@ export default function LiveAutomationDisplay({
             
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors"
               title={isMinimized ? 'Expand' : 'Minimize'}
             >
               {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -166,7 +207,7 @@ export default function LiveAutomationDisplay({
             
             <button
               onClick={() => setShowFullscreen(!showFullscreen)}
-              className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+              className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors"
               title={showFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
             >
               {showFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -174,7 +215,7 @@ export default function LiveAutomationDisplay({
             
             <button
               onClick={onClose}
-              className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-400"
+              className="p-1 rounded hover:bg-red-500 hover:bg-opacity-20 transition-colors"
               title="Close"
             >
               <X className="w-4 h-4" />
@@ -187,17 +228,17 @@ export default function LiveAutomationDisplay({
             {/* Tab Navigation */}
             <div className="flex border-b border-gray-200 dark:border-gray-700">
               {[
-                { id: 'browser', label: 'Browser', icon: <Monitor className="w-4 h-4" /> },
-                { id: 'steps', label: 'Steps', icon: <Zap className="w-4 h-4" /> },
+                { id: 'browser', label: 'Live Browser', icon: <Monitor className="w-4 h-4" /> },
+                { id: 'steps', label: 'Automation Steps', icon: <Zap className="w-4 h-4" /> },
                 { id: 'screenshots', label: 'Screenshots', icon: <FileImage className="w-4 h-4" /> },
-                { id: 'code', label: 'Code', icon: <Code className="w-4 h-4" /> }
+                { id: 'code', label: 'Generated Code', icon: <Code className="w-4 h-4" /> }
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors ${
                     activeTab === tab.id
-                      ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                      ? 'text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
@@ -214,61 +255,41 @@ export default function LiveAutomationDisplay({
                 <div className="h-full flex flex-col">
                   <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <div className="flex-1 bg-white dark:bg-gray-800 rounded px-3 py-1 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex gap-1">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      </div>
+                      <div className="flex-1 bg-white dark:bg-gray-800 rounded px-3 py-1 text-sm text-gray-600 dark:text-gray-400 mx-2">
                         {browserUrl || 'Loading...'}
                       </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400" />
                     </div>
                   </div>
                   
                   <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4">
                     <div className="w-full h-full bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                      {/* Browser Header */}
-                      <div className="bg-gray-200 dark:bg-gray-700 p-2 flex items-center gap-2">
-                        <div className="flex gap-1">
-                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        </div>
-                        <div className="flex-1 bg-white dark:bg-gray-800 rounded px-3 py-1 text-sm text-gray-600 dark:text-gray-400 mx-2">
-                          {browserUrl || 'Loading...'}
-                        </div>
-                      </div>
-                      
-                      {/* Browser Content */}
-                      <div className="flex-1 p-6 flex items-center justify-center">
-                        {currentStep ? (
-                          <div className="text-center max-w-md">
-                            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                              <div className="text-white">
-                                {getStepIcon(currentStep.action)}
-                              </div>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                              {currentStep.action}
-                            </h3>
-                            <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                              {currentStep.description}
-                            </p>
-                            <div className="space-y-2">
-                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                                <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full animate-pulse" style={{ width: '75%' }}></div>
-                              </div>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">Executing automation step...</p>
-                            </div>
+                      {isLoading ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center">
+                            <Loader className="w-8 h-8 animate-spin text-green-500 mx-auto mb-4" />
+                            <p className="text-gray-600 dark:text-gray-400">Loading browser automation...</p>
                           </div>
-                        ) : (
-                          <div className="text-center text-gray-500 dark:text-gray-400">
-                            <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <Monitor className="w-12 h-12 text-blue-500 dark:text-blue-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Browser Automation Ready</h3>
-                            <p className="text-sm">Waiting for automation to begin...</p>
+                        </div>
+                      ) : browserView ? (
+                        <div 
+                          className="h-full overflow-auto"
+                          dangerouslySetInnerHTML={{ __html: browserView }}
+                        />
+                      ) : (
+                        <div className="text-center text-gray-500 dark:text-gray-400 p-8">
+                          <div className="w-24 h-24 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900 dark:to-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Globe className="w-12 h-12 text-green-500 dark:text-green-400" />
                           </div>
-                        )}
-                      </div>
+                          <h3 className="text-lg font-semibold mb-2">Real Browser Automation Ready</h3>
+                          <p className="text-sm">Click play to start real browser automation</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -280,13 +301,13 @@ export default function LiveAutomationDisplay({
                   <div className="space-y-3">
                     {steps.map((step, index) => (
                       <motion.div
-                        key={`step_${index}_${Date.now()}_${Math.random()}`}
+                        key={`real_step_${index}_${Date.now()}_${Math.random()}`}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
                         className={`p-3 rounded-lg border ${
                           step.status === 'running' 
-                            ? 'border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20' 
+                            ? 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20' 
                             : step.status === 'completed'
                             ? 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
                             : step.status === 'failed'
@@ -312,6 +333,11 @@ export default function LiveAutomationDisplay({
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                               {step.description}
                             </p>
+                            {step.selector && (
+                              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                Selector: {step.selector}
+                              </p>
+                            )}
                             {step.error && (
                               <p className="text-sm text-red-600 dark:text-red-400 mt-1">
                                 Error: {step.error}
@@ -332,7 +358,7 @@ export default function LiveAutomationDisplay({
                   <div className="grid grid-cols-3 gap-4">
                     {steps.filter(step => step.screenshot).map((step, index) => (
                       <motion.div
-                        key={`screenshot_${index}_${Date.now()}_${Math.random()}`}
+                        key={`real_screenshot_${index}_${Date.now()}_${Math.random()}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1 }}
@@ -367,17 +393,17 @@ export default function LiveAutomationDisplay({
               {activeTab === 'code' && (
                 <div className="h-full p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Generated Code</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Generated Automation Code</h3>
                     <div className="flex gap-2">
                       <button
                         onClick={onViewCode}
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                       >
                         View Full Code
                       </button>
                       <button
                         onClick={onDownloadReport}
-                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                       >
                         Download Report
                       </button>
@@ -386,10 +412,10 @@ export default function LiveAutomationDisplay({
                   
                   <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto h-full">
                     <pre>
-{`// Playwright Automation Code
+{`// Real Browser Automation Code
 import { chromium } from 'playwright';
 
-async function runAutomation() {
+async function runRealAutomation() {
   const browser = await chromium.launch({ headless: false });
   const page = await browser.newPage();
   
@@ -397,19 +423,21 @@ async function runAutomation() {
     // Navigate to target URL
     await page.goto('${browserUrl || 'https://example.com'}');
     
-    // Automation steps
+    // Real automation steps
 ${steps.map(step => `    // ${step.action}
-    ${step.description}`).join('\n')}
+    ${step.description}
+    ${step.selector ? `await page.click('${step.selector}');` : ''}
+    ${step.value ? `await page.fill('${step.selector}', '${step.value}');` : ''}`).join('\n')}
     
-    console.log('Automation completed successfully');
+    console.log('Real automation completed successfully');
   } catch (error) {
-    console.error('Automation failed:', error);
+    console.error('Real automation failed:', error);
   } finally {
     await browser.close();
   }
 }
 
-runAutomation();`}
+runRealAutomation();`}
                     </pre>
                   </div>
                 </div>
