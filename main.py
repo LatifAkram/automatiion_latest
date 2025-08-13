@@ -46,7 +46,16 @@ async def main():
         
         # Start the API server
         logger.info("Starting API server...")
-        await start_api_server(orchestrator)
+        server_thread = start_api_server(orchestrator)
+        
+        # Keep the main thread alive
+        try:
+            while True:
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            logger.info("Shutting down gracefully...")
+            if 'orchestrator' in locals():
+                await orchestrator.shutdown()
         
     except KeyboardInterrupt:
         logger.info("Shutting down gracefully...")
