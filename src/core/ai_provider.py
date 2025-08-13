@@ -155,12 +155,24 @@ class AIProvider:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    self.config.local_llm_url,
-                    json={"prompt": "test", "max_tokens": 10},
+                    f"{self.config.local_llm_url}/v1/chat/completions",
+                    json={
+                        "model": self.config.local_llm_model,
+                        "messages": [
+                            {"role": "system", "content": "You are a helpful AI assistant."},
+                            {"role": "user", "content": "test"}
+                        ],
+                        "temperature": 0.7,
+                        "max_tokens": 10,
+                        "stream": False
+                    },
                     timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     if response.status != 200:
                         raise Exception(f"Local LLM returned status {response.status}")
+                    
+                    # Store the session for future use
+                    self.local_llm_client = session
         except Exception as e:
             raise Exception(f"Local LLM connection failed: {e}")
             
@@ -293,12 +305,15 @@ class AIProvider:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    self.config.local_llm_url,
+                    f"{self.config.local_llm_url}/v1/chat/completions",
                     json={
-                        "prompt": prompt,
-                        "max_tokens": max_tokens,
+                        "model": self.config.local_llm_model,
+                        "messages": [
+                            {"role": "user", "content": prompt}
+                        ],
                         "temperature": temperature,
-                        "model": self.config.local_llm_model
+                        "max_tokens": max_tokens,
+                        "stream": False
                     },
                     timeout=aiohttp.ClientTimeout(total=30)
                 ) as response:
@@ -306,7 +321,7 @@ class AIProvider:
                         raise Exception(f"Local LLM returned status {response.status}")
                         
                     data = await response.json()
-                    return data.get("response", data.get("text", ""))
+                    return data.get("choices", [{}])[0].get("message", {}).get("content", "")
                     
         except Exception as e:
             raise Exception(f"Local LLM API error: {e}")
