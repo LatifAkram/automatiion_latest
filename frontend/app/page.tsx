@@ -186,11 +186,6 @@ export default function Home() {
     }
   }, []); // Only run once on mount
 
-  // Apply theme when theme changes
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme, applyTheme]);
-
   const applyTheme = React.useCallback((selectedTheme: Theme) => {
     const root = document.documentElement;
     
@@ -207,6 +202,11 @@ export default function Home() {
       localStorage.setItem('theme', selectedTheme);
     }
   }, []);
+
+  // Apply theme when theme changes
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme, applyTheme]);
 
   const toggleTheme = () => {
     const themes: Theme[] = ['light', 'dark', 'auto'];
