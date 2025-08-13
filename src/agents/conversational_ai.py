@@ -35,6 +35,15 @@ class ConversationalAI:
         self.automation_state = {}
         self.human_handoff_required = False
         
+    async def chat(self, message: str, context: Dict[str, Any] = None, performance_metrics: Dict[str, Any] = None) -> str:
+        """Chat method for API compatibility."""
+        try:
+            result = await self.process_user_input(message, context)
+            return result.get("message", "I'm sorry, I couldn't process your request.")
+        except Exception as e:
+            self.logger.error(f"Chat method error: {e}")
+            return "I encountered an error while processing your message. Please try again."
+    
     async def process_user_input(self, user_input: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Process user input and generate intelligent response."""
         try:
