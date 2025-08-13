@@ -558,6 +558,46 @@ async def execute_automation(
         }
 
 
+@app.post("/automation/ultra-complex")
+async def ultra_complex_automation(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Execute ultra-complex automation with multiple AI agents."""
+    try:
+        user_request = request.get("request", "")
+        
+        if not user_request:
+            return {
+                "automation_id": f"ultra_{int(time.time())}",
+                "status": "failed",
+                "error": "User request is required",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
+        # Execute ultra-complex automation using advanced orchestrator
+        from ..core.advanced_orchestrator import AdvancedOrchestrator
+        
+        advanced_orchestrator = AdvancedOrchestrator(orch.config, orch.ai_provider)
+        result = await advanced_orchestrator.execute_ultra_complex_automation(user_request)
+        
+        return {
+            "automation_id": f"ultra_{int(time.time())}",
+            "status": "completed",
+            "result": result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Ultra-complex automation failed: {e}", exc_info=True)
+        return {
+            "automation_id": f"ultra_{int(time.time())}",
+            "status": "failed",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
 @app.post("/automation/intelligent")
 async def intelligent_automation(
     request: dict,
