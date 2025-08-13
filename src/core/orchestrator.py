@@ -47,6 +47,10 @@ class MultiAgentOrchestrator:
         self.vector_store = VectorStore(config.database)
         self.audit_logger = AuditLogger(config)
         
+        # AI Provider
+        from ..core.ai_provider import AIProvider
+        self.ai_provider = AIProvider(config.ai)
+        
         # AI Agents
         self.planner_agent: Optional[PlannerAgent] = None
         self.execution_agents: List[ExecutionAgent] = []
@@ -71,6 +75,7 @@ class MultiAgentOrchestrator:
         await self.database.initialize()
         await self.vector_store.initialize()
         await self.audit_logger.initialize()
+        await self.ai_provider.initialize()
         
         # Initialize AI agents
         await self._initialize_agents()
@@ -466,8 +471,25 @@ class MultiAgentOrchestrator:
             await self.dom_extractor_agent.shutdown()
             
         # Close database connections
-        await self.database.shutdown()
+        await self.database.close()
         await self.vector_store.shutdown()
         await self.audit_logger.shutdown()
         
         self.logger.info("Multi-Agent Orchestrator shutdown complete")
+
+
+# Global orchestrator instance
+_orchestrator: Optional[MultiAgentOrchestrator] = None
+
+
+def get_orchestrator() -> MultiAgentOrchestrator:
+    """Get the global orchestrator instance."""
+    if _orchestrator is None:
+        raise RuntimeError("Orchestrator not initialized")
+    return _orchestrator
+
+
+def set_orchestrator(orchestrator: MultiAgentOrchestrator):
+    """Set the global orchestrator instance."""
+    global _orchestrator
+    _orchestrator = orchestrator

@@ -21,7 +21,12 @@ class SectorSpecialistAgent:
         self.config = config
         self.ai_provider = ai_provider
         self.sector_name = sector_name
-        self.media_capture = MediaCapture(config)
+        # Initialize media capture with correct path
+        if hasattr(config, 'database') and hasattr(config.database, 'media_path'):
+            media_path = config.database.media_path
+        else:
+            media_path = 'data/media'
+        self.media_capture = MediaCapture(media_path)
         self.logger = logging.getLogger(f"{__name__}.{sector_name}")
         
     async def analyze_sector_requirements(self, instructions: str, url: str) -> Dict[str, Any]:

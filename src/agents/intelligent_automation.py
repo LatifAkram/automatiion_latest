@@ -22,9 +22,27 @@ class IntelligentAutomationAgent:
     def __init__(self, config, ai_provider: AIProvider):
         self.config = config
         self.ai_provider = ai_provider
-        self.media_capture = MediaCapture(config)
-        self.selector_drift_detector = SelectorDriftDetector()
+        
+        # Debug: Print config type and attributes
         self.logger = logging.getLogger(__name__)
+        self.logger.info(f"Config type: {type(config)}")
+        self.logger.info(f"Config attributes: {dir(config)}")
+        
+        # Initialize media capture with correct path
+        if hasattr(config, 'database') and hasattr(config.database, 'media_path'):
+            media_path = config.database.media_path
+            self.logger.info(f"Using database media path: {media_path}")
+        else:
+            media_path = 'data/media'
+            self.logger.info(f"Using default media path: {media_path}")
+        
+        self.media_capture = MediaCapture(media_path)
+        # Initialize selector drift detector with automation config
+        if hasattr(config, 'automation'):
+            self.selector_drift_detector = SelectorDriftDetector(config.automation)
+        else:
+            # Fallback to a basic config
+            self.selector_drift_detector = SelectorDriftDetector(config)
         
         # Browser context
         self.browser = None
@@ -37,8 +55,10 @@ class IntelligentAutomationAgent:
             from playwright.async_api import async_playwright
             
             self.playwright = await async_playwright().start()
+            # Get headless setting from automation config
+            headless = getattr(self.config.automation, 'headless', True)
             self.browser = await self.playwright.chromium.launch(
-                headless=self.config.headless,
+                headless=headless,
                 args=['--no-sandbox', '--disable-dev-shm-usage']
             )
             self.context = await self.browser.new_context(

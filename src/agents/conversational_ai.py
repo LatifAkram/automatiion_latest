@@ -21,7 +21,12 @@ class ConversationalAI:
     def __init__(self, config, ai_provider: AIProvider):
         self.config = config
         self.ai_provider = ai_provider
-        self.media_capture = MediaCapture(config)
+        # Initialize media capture with correct path
+        if hasattr(config, 'database') and hasattr(config.database, 'media_path'):
+            media_path = config.database.media_path
+        else:
+            media_path = 'data/media'
+        self.media_capture = MediaCapture(media_path)
         self.logger = logging.getLogger(__name__)
         
         # Conversation context
