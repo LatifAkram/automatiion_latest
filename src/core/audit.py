@@ -64,6 +64,149 @@ class AuditLogger:
             self.logger.error(f"Failed to initialize audit logging: {e}", exc_info=True)
             raise
             
+    async def log_activity(self, user_id: str, action: str, details: str, category: str = "system"):
+        """Generic method to log any activity."""
+        try:
+            event_id = str(uuid.uuid4())
+            timestamp = datetime.utcnow()
+            
+            # Detect PII in details
+            pii_detected = self._detect_pii(details)
+            pii_masked = False
+            masked_details = details
+            
+            if pii_detected:
+                masked_details = self._mask_pii(details)
+                pii_masked = True
+                
+            cursor = self.connection.cursor()
+            cursor.execute("""
+                INSERT INTO audit_events 
+                (id, timestamp, category, event_type, user_id, details, pii_detected, pii_masked, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                event_id,
+                timestamp.isoformat(),
+                category,
+                action,
+                user_id,
+                masked_details,
+                pii_detected,
+                pii_masked,
+                timestamp.isoformat()
+            ))
+            self.connection.commit()
+            
+            self.logger.info(f"Logged activity: {action} for user {user_id}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to log activity: {e}", exc_info=True)
+            
+    def _detect_pii(self, text: str) -> bool:
+        """Detect PII in text using regex patterns."""
+        try:
+            import re
+            for pattern_name, pattern in self.pii_patterns.items():
+                if re.search(pattern, text, re.IGNORECASE):
+                    return True
+            return False
+        except Exception as e:
+            self.logger.warning(f"Failed to detect PII: {e}")
+            return False
+            
+    def _mask_pii(self, text: str) -> str:
+        """Mask PII in text."""
+        try:
+            import re
+            masked_text = text
+            
+            # Mask email addresses
+            masked_text = re.sub(
+                r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+                '[EMAIL_MASKED]',
+                masked_text
+            )
+            
+            # Mask phone numbers
+            masked_text = re.sub(
+                r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b',
+                '[PHONE_MASKED]',
+                masked_text
+            )
+            
+            # Mask SSN
+            masked_text = re.sub(
+                r'\b\d{3}-\d{2}-\d{4}\b',
+                '[SSN_MASKED]',
+                masked_text
+            )
+            
+            # Mask credit card numbers
+            masked_text = re.sub(
+                r'\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b',
+                '[CC_MASKED]',
+                masked_text
+            )
+            
+            # Mask IP addresses
+            masked_text = re.sub(
+                r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b',
+                '[IP_MASKED]',
+                masked_text
+            )
+            
+            return masked_text
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to mask PII: {e}")
+            return text
+            
+    async def get_statistics(self) -> Dict[str, Any]:
+        """Get audit statistics."""
+        try:
+            cursor = self.connection.cursor()
+            
+            # Get total events
+            cursor.execute("SELECT COUNT(*) FROM audit_events")
+            total_events = cursor.fetchone()[0]
+            
+            # Get events by category
+            cursor.execute("SELECT category, COUNT(*) FROM audit_events GROUP BY category")
+            category_counts = dict(cursor.fetchall())
+            
+            # Get PII events
+            cursor.execute("SELECT COUNT(*) FROM audit_events WHERE pii_detected = 1")
+            pii_events = cursor.fetchone()[0]
+            
+            # Get recent events (last 24 hours)
+            cursor.execute("""
+                SELECT COUNT(*) FROM audit_events 
+                WHERE timestamp >= datetime('now', '-1 day')
+            """)
+            recent_events_24h = cursor.fetchone()[0]
+            
+            # Get compliance levels
+            cursor.execute("SELECT compliance_level, COUNT(*) FROM audit_events GROUP BY compliance_level")
+            compliance_levels = dict(cursor.fetchall())
+            
+            return {
+                "total_events": total_events,
+                "category_counts": category_counts,
+                "pii_events": pii_events,
+                "recent_events_24h": recent_events_24h,
+                "compliance_levels": compliance_levels
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get audit statistics: {e}", exc_info=True)
+            return {
+                "total_events": 0,
+                "category_counts": {},
+                "pii_events": 0,
+                "recent_events_24h": 0,
+                "compliance_levels": {}
+            }
+            
     async def _initialize_database(self):
         """Initialize audit database with tables."""
         try:
@@ -831,49 +974,6 @@ class AuditLogger:
             
         except Exception as e:
             self.logger.error(f"Failed to generate compliance report: {e}", exc_info=True)
-            return {}
-            
-    async def get_audit_statistics(self) -> Dict[str, Any]:
-        """Get audit logging statistics."""
-        try:
-            cursor = self.connection.cursor()
-            
-            # Get total events
-            cursor.execute("SELECT COUNT(*) FROM audit_events")
-            total_events = cursor.fetchone()[0]
-            
-            # Get events by category
-            cursor.execute("""
-                SELECT category, COUNT(*) as count
-                FROM audit_events 
-                GROUP BY category
-            """)
-            category_counts = dict(cursor.fetchall())
-            
-            # Get PII events
-            cursor.execute("SELECT COUNT(*) FROM audit_events WHERE pii_detected = 1")
-            pii_events = cursor.fetchone()[0]
-            
-            # Get recent events (last 24 hours)
-            cursor.execute("""
-                SELECT COUNT(*) FROM audit_events 
-                WHERE timestamp >= datetime('now', '-1 day')
-            """)
-            recent_events = cursor.fetchone()[0]
-            
-            return {
-                "total_events": total_events,
-                "category_counts": category_counts,
-                "pii_events": pii_events,
-                "recent_events_24h": recent_events,
-                "compliance_levels": {
-                    "standard": total_events - pii_events,
-                    "high": pii_events
-                }
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Failed to get audit statistics: {e}", exc_info=True)
             return {}
             
     async def shutdown(self):

@@ -128,6 +128,11 @@ class MultiAgentOrchestrator:
         )
         await self.dom_extractor_agent.initialize()
         
+    @property
+    def dom_extractor(self):
+        """Get the DOM extractor agent."""
+        return self.dom_extractor_agent
+        
     async def _load_existing_workflows(self):
         """Load existing workflows from database."""
         workflows = await self.database.get_active_workflows()
