@@ -32,6 +32,7 @@ from ..agents.conversational_ai import ConversationalAI
 from ..utils.media_capture import MediaCapture
 from ..utils.selector_drift import SelectorDriftDetector
 from ..utils.code_generator import CodeGenerator
+from ..utils.report_generator import ReportGenerator
 
 from ..models.workflow import Workflow, WorkflowStep, WorkflowStatus
 from ..models.task import Task, TaskStatus, TaskType
@@ -79,6 +80,7 @@ class MultiAgentOrchestrator:
         self.sector_manager = SectorManager(config, self.ai_provider)
         self.code_generator = CodeGenerator(config, self.ai_provider)
         self.intelligent_automation_agent = IntelligentAutomationAgent(config, self.ai_provider)
+        self.report_generator = ReportGenerator(config)
         
         # Workflow management
         self.active_workflows: Dict[str, Workflow] = {}
@@ -105,6 +107,9 @@ class MultiAgentOrchestrator:
         # Load existing workflows and metrics
         await self._load_existing_workflows()
         await self._load_performance_metrics()
+        
+        # Initialize report generator
+        self.logger.info(f"Report generator initialized. Available formats: {self.report_generator.get_available_formats()}")
         
         self.logger.info("Multi-Agent Orchestrator initialized successfully")
         
@@ -200,6 +205,43 @@ class MultiAgentOrchestrator:
                 
                 self.logger.info(f"Started workflow execution: {workflow_id}")
                 return workflow_id
+    
+    async def generate_automation_report(
+        self, 
+        automation_result: Dict[str, Any], 
+        formats: List[str] = ["docx", "excel", "pdf"]
+    ) -> Dict[str, str]:
+        """
+        Generate comprehensive automation report in multiple formats.
+        
+        Args:
+            automation_result: Complete automation execution result
+            formats: List of output formats ("docx", "excel", "pdf")
+            
+        Returns:
+            Dictionary with file paths for each generated format
+        """
+        try:
+            self.logger.info(f"Generating automation report in formats: {formats}")
+            
+            # Generate reports using the report generator
+            generated_files = await self.report_generator.generate_comprehensive_report(
+                automation_result, formats
+            )
+            
+            # Log the generated files
+            for format_type, file_path in generated_files.items():
+                self.logger.info(f"Generated {format_type.upper()} report: {file_path}")
+            
+            return generated_files
+            
+        except Exception as e:
+            self.logger.error(f"Failed to generate automation report: {e}", exc_info=True)
+            return {}
+    
+    def get_available_report_formats(self) -> List[str]:
+        """Get list of available report formats."""
+        return self.report_generator.get_available_formats()
                 
             except Exception as e:
                 self.logger.error(f"Failed to start workflow: {e}", exc_info=True)
