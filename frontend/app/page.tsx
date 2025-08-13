@@ -313,38 +313,53 @@ export default function Home() {
                              message.toLowerCase().includes('find') ||
                              message.toLowerCase().includes('look up');
 
-      // Send message to backend
-      const response = await fetch(`${BACKEND_URL}/api/chat`, {
+      // Send message to backend - use intelligent automation for automation requests
+      const endpoint = isAutomationRequest ? '/automation/intelligent' : '/api/chat';
+      const requestBody = isAutomationRequest 
+        ? {
+            instructions: message,
+            url: message.includes('https://') ? message.match(/https?:\/\/[^\s]+/)?.[0] || 'https://www.google.com' : 'https://www.google.com'
+          }
+        : {
+            message,
+            session_id: currentChatId,
+            context: {
+              domain: 'general',
+              user_preferences: {
+                automation_type: isAutomationRequest ? 'automation' : 'general',
+                complexity: 'medium'
+              }
+            }
+          };
+
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message,
-          session_id: currentChatId,
-          context: {
-            domain: 'general',
-            user_preferences: {
-              automation_type: isAutomationRequest ? 'automation' : 'general',
-              complexity: 'medium'
-            }
-          }
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
         const data = await response.json();
         
+        // Handle automation response differently
+        const content = isAutomationRequest 
+          ? `🚀 **Live Automation Started!**\n\n${data.result?.summary || data.message || 'Automation is now running in the background. Check the automation panel for real-time updates and screenshots.'}`
+          : data.response || 'I understand your request. Let me help you with that.';
+        
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           type: 'ai',
-          content: data.response || 'I understand your request. Let me help you with that.',
+          content: content,
           timestamp: new Date(),
           chatId: currentChatId,
           automation: {
-            type: isAutomationRequest ? 'workflow_creation' : 'chat_response',
-            status: 'running',
-            progress: 0
+            type: isAutomationRequest ? 'intelligent_automation' : 'chat_response',
+            status: isAutomationRequest ? (data.status || 'running') : 'running',
+            progress: isAutomationRequest ? (data.result?.progress || 0) : 0,
+            automationId: isAutomationRequest ? data.automation_id : undefined,
+            screenshots: isAutomationRequest ? data.result?.screenshots : undefined
           }
         };
 
@@ -365,7 +380,19 @@ export default function Home() {
         if (isSearchRequest) {
           await executeSearch(message, aiMessage.id);
         } else if (isAutomationRequest) {
-          await executeAutomation(message, aiMessage.id);
+          // Intelligent automation is already running, just update status
+          setTimeout(() => {
+            updateMessageInChat(currentChatId, aiMessage.id, {
+              automation: { 
+                type: 'intelligent_automation', 
+                status: 'completed', 
+                progress: 100,
+                automationId: data.automation_id,
+                screenshots: data.result?.screenshots
+              }
+            });
+            setActiveAutomation(null);
+          }, 3000);
         } else {
           // Simulate chat response completion
           setTimeout(() => {
