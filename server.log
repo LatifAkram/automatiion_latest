@@ -87,3 +87,4 @@ Traceback (most recent call last):
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
 INFO:     127.0.0.1:33426 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37076 - "GET /health HTTP/1.1" 200 OK
