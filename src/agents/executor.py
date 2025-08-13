@@ -398,6 +398,8 @@ class ExecutionAgent:
                 return await self._take_screenshot(action)
             elif action_type == "extract":
                 return await self._extract_data(action)
+            elif action_type == "execute_script":
+                return await self._execute_script(action)
             else:
                 return {"success": False, "error": f"Unknown action type: {action_type}"}
                 
@@ -596,6 +598,25 @@ class ExecutionAgent:
                 "success": True,
                 "extracted_data": extracted_data,
                 "selectors_used": selectors
+            }
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+            
+    async def _execute_script(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute JavaScript code."""
+        try:
+            script = action.get("script")
+            if not script:
+                return {"success": False, "error": "No script provided"}
+                
+            # Execute the script
+            result = await self.page.evaluate(script)
+            
+            return {
+                "success": True,
+                "script": script,
+                "result": result
             }
             
         except Exception as e:
