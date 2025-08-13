@@ -1,19 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    appDir: true,
+    // Remove deprecated appDir option
   },
   images: {
-    domains: ['localhost', '127.0.0.1'],
-  },
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
+    domains: ['localhost'],
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*',
+        destination: 'http://localhost:8000/:path*',
       },
     ];
   },
