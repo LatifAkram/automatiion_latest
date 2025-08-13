@@ -14,6 +14,8 @@ from datetime import datetime
 from ..core.ai_provider import AIProvider
 from ..utils.media_capture import MediaCapture
 from ..utils.selector_drift import SelectorDriftDetector
+from ..agents.ai_dom_analyzer import AIDOMAnalyzer
+from ..utils.advanced_learning import AdvancedLearningSystem
 
 
 class IntelligentAutomationAgent:
@@ -44,6 +46,12 @@ class IntelligentAutomationAgent:
             # Fallback to a basic config
             self.selector_drift_detector = SelectorDriftDetector(config)
         
+        # Initialize AI DOM analyzer (will be fully initialized in initialize method)
+        self.ai_dom_analyzer = None
+        
+        # Initialize advanced learning system (will be fully initialized in initialize method)
+        self.advanced_learning = None
+        
         # Browser context
         self.browser = None
         self.context = None
@@ -66,6 +74,25 @@ class IntelligentAutomationAgent:
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             )
             self.page = await self.context.new_page()
+            
+            # Initialize AI DOM analyzer with required dependencies
+            from ..core.vector_store import VectorStore
+            vector_store = VectorStore(self.config.database)
+            await vector_store.initialize()
+            
+            self.ai_dom_analyzer = AIDOMAnalyzer(
+                config=self.config,
+                ai_provider=self.ai_provider,
+                vector_store=vector_store,
+                selector_drift_detector=self.selector_drift_detector
+            )
+            
+            # Initialize advanced learning system
+            self.advanced_learning = AdvancedLearningSystem(
+                config=self.config,
+                ai_provider=self.ai_provider,
+                vector_store=vector_store
+            )
             
             self.logger.info("Intelligent automation agent initialized successfully")
             
@@ -90,11 +117,25 @@ class IntelligentAutomationAgent:
             # Step 1: Navigate to the website
             await self.page.goto(url, wait_until="networkidle")
             
-            # Step 2: Analyze the page and generate automation plan
-            automation_plan = await self._generate_automation_plan(instructions, url)
+            # Step 2: AI-powered DOM analysis and automation plan generation
+            ai_dom_analysis = await self.ai_dom_analyzer.analyze_dom_with_ai(self.page, instructions)
+            automation_plan = await self._generate_automation_plan_with_ai(instructions, url, ai_dom_analysis)
             
-            # Step 3: Execute the automation plan
-            results = await self._execute_automation_plan(automation_plan)
+            # Step 3: Predict success and optimize plan
+            success_prediction = await self.advanced_learning.predict_automation_success({
+                "domain": url.split("//")[1].split("/")[0] if "//" in url else url,
+                "automation_type": "web_automation",
+                "complexity": "medium",
+                "selectors": automation_plan.get("steps", []),
+                "ai_confidence": automation_plan.get("ai_analysis", {}).get("confidence_score", 0.5)
+            })
+            
+            # Optimize plan using learned patterns
+            optimization_result = await self.advanced_learning.optimize_automation_plan(automation_plan)
+            optimized_plan = optimization_result.get("optimized_plan", automation_plan)
+            
+            # Step 4: Execute the optimized automation plan
+            results = await self._execute_automation_plan_with_learning(optimized_plan, success_prediction)
             
             # Step 4: Capture final state
             final_screenshot = await self.media_capture.capture_screenshot(
@@ -194,7 +235,188 @@ class IntelligentAutomationAgent:
                 }
             ])
             
-        return plan
+                    return plan
+            
+    async def _generate_automation_plan_with_ai(self, instructions: str, url: str, ai_dom_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate automation plan using AI-powered DOM analysis."""
+        try:
+            # Extract intelligent selectors from AI analysis
+            intelligent_selectors = ai_dom_analysis.get("intelligent_selectors", {})
+            ai_analysis = ai_dom_analysis.get("ai_analysis", {})
+            learned_patterns = ai_dom_analysis.get("learned_patterns", {})
+            
+            # Use AI to generate plan with intelligent selectors
+            prompt = f"""
+            Generate a detailed automation plan using AI-analyzed DOM elements:
+            
+            Instructions: {instructions}
+            URL: {url}
+            
+            AI DOM Analysis Results:
+            - Login Elements: {len(ai_analysis.get('login_elements', []))}
+            - Form Elements: {len(ai_analysis.get('form_elements', []))}
+            - Navigation Elements: {len(ai_analysis.get('navigation_elements', []))}
+            - Interactive Elements: {len(ai_analysis.get('interactive_elements', []))}
+            
+            Intelligent Selectors Available:
+            - Input Selectors: {intelligent_selectors.get('input_selectors', [])}
+            - Button Selectors: {intelligent_selectors.get('button_selectors', [])}
+            - Navigation Selectors: {intelligent_selectors.get('navigation_selectors', [])}
+            
+            Learned Patterns Applied:
+            - Successful Selectors: {len(learned_patterns.get('successful_selectors', []))}
+            - Domain-Specific Patterns: {len(learned_patterns.get('domain_specific', []))}
+            
+            Create an intelligent automation plan that:
+            1. Uses the best available selectors from AI analysis
+            2. Incorporates learned patterns for better success
+            3. Includes fallback strategies for each step
+            4. Provides comprehensive error handling
+            5. Uses advanced learning and auto-heal capabilities
+            
+            Return as JSON with structure:
+            {{
+                "steps": [
+                    {{
+                        "step": 1,
+                        "action": "navigate",
+                        "description": "Navigate to the website",
+                        "url": "{url}",
+                        "expected_result": "Page loaded successfully",
+                        "ai_confidence": 0.95
+                    }},
+                    {{
+                        "step": 2,
+                        "action": "click",
+                        "description": "Click login button using AI-identified selector",
+                        "primary_selector": "best_selector_from_ai",
+                        "fallback_selectors": ["alternative1", "alternative2"],
+                        "ai_confidence": 0.88,
+                        "learned_pattern": "successful_pattern_from_vector_store"
+                    }}
+                ],
+                "ai_analysis": {{
+                    "total_elements_analyzed": "count",
+                    "confidence_score": "overall_confidence",
+                    "learning_applied": "yes/no"
+                }},
+                "validation": [
+                    {{
+                        "type": "ai_validated_element",
+                        "selector": "ai_generated_selector",
+                        "description": "AI-validated element presence"
+                    }}
+                ],
+                "error_handling": [
+                    {{
+                        "condition": "selector_failure",
+                        "action": "auto_heal_with_ai",
+                        "fallback_strategy": "use_learned_patterns"
+                    }}
+                ],
+                "learning_opportunities": [
+                    {{
+                        "pattern": "new_pattern_to_learn",
+                        "context": "when_to_apply"
+                    }}
+                ]
+            }}
+            """
+            
+            response = await self.ai_provider.generate_response(prompt)
+            
+            try:
+                import json
+                plan = json.loads(response)
+                self.logger.info(f"Generated AI-powered automation plan with {len(plan.get('steps', []))} steps")
+                return plan
+            except json.JSONDecodeError:
+                self.logger.warning("Failed to parse AI response as JSON, using fallback plan")
+                return await self._generate_fallback_plan_with_ai(instructions, url, ai_dom_analysis)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to generate AI automation plan: {e}")
+            return await self._generate_fallback_plan_with_ai(instructions, url, ai_dom_analysis)
+
+    async def _generate_fallback_plan_with_ai(self, instructions: str, url: str, ai_dom_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate fallback automation plan using AI analysis data."""
+        try:
+            intelligent_selectors = ai_dom_analysis.get("intelligent_selectors", {})
+            
+            # Create basic plan using available selectors
+            steps = []
+            
+            # Add navigation step
+            steps.append({
+                "step": 1,
+                "action": "navigate",
+                "description": f"Navigate to {url}",
+                "url": url,
+                "expected_result": "Page loaded successfully",
+                "ai_confidence": 0.9
+            })
+            
+            # Add steps based on available selectors
+            step_number = 2
+            
+            # Input actions
+            for selector in intelligent_selectors.get("input_selectors", [])[:3]:  # Limit to 3 inputs
+                steps.append({
+                    "step": step_number,
+                    "action": "input",
+                    "description": f"Fill input field using selector: {selector}",
+                    "primary_selector": selector,
+                    "fallback_selectors": intelligent_selectors.get("input_selectors", [])[1:],
+                    "ai_confidence": 0.8,
+                    "learned_pattern": "input_field_pattern"
+                })
+                step_number += 1
+            
+            # Button actions
+            for selector in intelligent_selectors.get("button_selectors", [])[:2]:  # Limit to 2 buttons
+                steps.append({
+                    "step": step_number,
+                    "action": "click",
+                    "description": f"Click button using selector: {selector}",
+                    "primary_selector": selector,
+                    "fallback_selectors": intelligent_selectors.get("button_selectors", [])[1:],
+                    "ai_confidence": 0.85,
+                    "learned_pattern": "button_click_pattern"
+                })
+                step_number += 1
+            
+            return {
+                "steps": steps,
+                "ai_analysis": {
+                    "total_elements_analyzed": len(ai_dom_analysis.get("page_structure", {}).get("elements", [])),
+                    "confidence_score": 0.75,
+                    "learning_applied": "yes"
+                },
+                "validation": [
+                    {
+                        "type": "element_present",
+                        "selector": "body",
+                        "description": "Verify page loaded"
+                    }
+                ],
+                "error_handling": [
+                    {
+                        "condition": "selector_failure",
+                        "action": "try_fallback_selectors",
+                        "fallback_strategy": "use_learned_patterns"
+                    }
+                ],
+                "learning_opportunities": [
+                    {
+                        "pattern": "new_selector_pattern",
+                        "context": "when_selector_fails"
+                    }
+                ]
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to generate fallback AI plan: {e}")
+            return await self._generate_fallback_plan(instructions)
         
     async def _extract_page_context(self) -> str:
         """Extract relevant page context for AI analysis."""
@@ -749,6 +971,252 @@ class IntelligentAutomationAgent:
         except Exception as e:
             self.logger.error(f"Intelligent execution failed: {e}")
             return []
+
+    async def _execute_automation_plan_with_learning(self, automation_plan: Dict[str, Any], success_prediction: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute automation plan with advanced learning and auto-heal capabilities."""
+        try:
+            self.logger.info("Executing automation plan with advanced learning")
+            
+            start_time = datetime.utcnow()
+            steps = automation_plan.get("steps", [])
+            completed_steps = []
+            errors = []
+            selectors_used = []
+            
+            # Execute each step with learning and auto-heal
+            for i, step in enumerate(steps):
+                try:
+                    self.logger.info(f"Executing step {i+1}/{len(steps)}: {step.get('action', 'unknown')}")
+                    
+                    # Execute step with auto-heal
+                    step_result = await self._execute_step_with_auto_heal(step, success_prediction)
+                    
+                    if step_result["success"]:
+                        completed_steps.append(step_result)
+                        selectors_used.extend(step_result.get("selectors_used", []))
+                        
+                        # Capture screenshot after successful step
+                        screenshot = await self.media_capture.capture_screenshot(
+                            self.page, f"step_{i+1}_{step.get('action', 'unknown')}", "automation_progress"
+                        )
+                        step_result["screenshot"] = screenshot
+                        
+                    else:
+                        errors.append({
+                            "step": i+1,
+                            "action": step.get("action"),
+                            "error": step_result.get("error"),
+                            "selector": step.get("primary_selector")
+                        })
+                        
+                        # Try auto-heal for failed step
+                        healed_result = await self._auto_heal_failed_step(step, step_result)
+                        if healed_result["success"]:
+                            completed_steps.append(healed_result)
+                            selectors_used.extend(healed_result.get("selectors_used", []))
+                            self.logger.info(f"Step {i+1} healed successfully")
+                        else:
+                            self.logger.error(f"Step {i+1} failed even after auto-heal")
+                    
+                    # Small delay between steps
+                    await asyncio.sleep(1)
+                    
+                except Exception as e:
+                    self.logger.error(f"Step {i+1} execution failed: {e}")
+                    errors.append({
+                        "step": i+1,
+                        "action": step.get("action"),
+                        "error": str(e),
+                        "selector": step.get("primary_selector")
+                    })
+            
+            # Calculate execution metrics
+            end_time = datetime.utcnow()
+            execution_time = (end_time - start_time).total_seconds()
+            success = len(errors) == 0
+            
+            # Prepare execution result for learning
+            execution_result = {
+                "success": success,
+                "execution_time": execution_time,
+                "completed_steps": completed_steps,
+                "all_steps": steps,
+                "errors": errors,
+                "selectors_used": selectors_used,
+                "domain": automation_plan.get("domain", ""),
+                "automation_type": "web_automation",
+                "ai_confidence": success_prediction.get("success_probability", 0.5)
+            }
+            
+            # Learn from execution
+            learning_result = await self.advanced_learning.learn_from_execution(execution_result)
+            
+            return {
+                "success": success,
+                "execution_time": execution_time,
+                "completed_steps": len(completed_steps),
+                "total_steps": len(steps),
+                "errors": errors,
+                "screenshots": [step.get("screenshot") for step in completed_steps if step.get("screenshot")],
+                "learning_applied": learning_result.get("learning_applied", False),
+                "performance_improvement": learning_result.get("performance_improvement", 0),
+                "suggestions": learning_result.get("suggestions", []),
+                "success_prediction": success_prediction
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Automation execution with learning failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "execution_time": 0,
+                "completed_steps": 0,
+                "total_steps": 0
+            }
+
+    async def _execute_step_with_auto_heal(self, step: Dict[str, Any], success_prediction: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a single step with auto-heal capabilities."""
+        try:
+            action = step.get("action", "")
+            primary_selector = step.get("primary_selector", "")
+            fallback_selectors = step.get("fallback_selectors", [])
+            
+            # Try primary selector first
+            if primary_selector:
+                try:
+                    result = await self._execute_action(action, primary_selector, step)
+                    if result["success"]:
+                        return {
+                            "success": True,
+                            "action": action,
+                            "selector_used": primary_selector,
+                            "selectors_used": [primary_selector],
+                            "result": result
+                        }
+                except Exception as e:
+                    self.logger.warning(f"Primary selector failed: {e}")
+            
+            # Try fallback selectors
+            for fallback_selector in fallback_selectors:
+                try:
+                    result = await self._execute_action(action, fallback_selector, step)
+                    if result["success"]:
+                        return {
+                            "success": True,
+                            "action": action,
+                            "selector_used": fallback_selector,
+                            "selectors_used": [primary_selector, fallback_selector],
+                            "result": result
+                        }
+                except Exception as e:
+                    self.logger.warning(f"Fallback selector failed: {e}")
+            
+            # All selectors failed
+            return {
+                "success": False,
+                "action": action,
+                "error": "All selectors failed",
+                "selectors_used": [primary_selector] + fallback_selectors
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "action": step.get("action"),
+                "error": str(e),
+                "selectors_used": []
+            }
+
+    async def _auto_heal_failed_step(self, step: Dict[str, Any], step_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Auto-heal a failed step using advanced learning."""
+        try:
+            failed_selector = step_result.get("selector_used", step.get("primary_selector", ""))
+            
+            # Context for auto-heal
+            context = {
+                "domain": step.get("domain", ""),
+                "element_type": step.get("action", ""),
+                "page_context": "automation_execution",
+                "step_number": step.get("step", 0)
+            }
+            
+            # Try auto-healing the selector
+            healed_selector = await self.advanced_learning.auto_heal_selector(failed_selector, context)
+            
+            if healed_selector:
+                # Try executing with healed selector
+                result = await self._execute_action(step.get("action", ""), healed_selector, step)
+                if result["success"]:
+                    return {
+                        "success": True,
+                        "action": step.get("action"),
+                        "selector_used": healed_selector,
+                        "selectors_used": [failed_selector, healed_selector],
+                        "healed": True,
+                        "result": result
+                    }
+            
+            return {
+                "success": False,
+                "action": step.get("action"),
+                "error": "Auto-heal failed",
+                "selectors_used": [failed_selector]
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "action": step.get("action"),
+                "error": f"Auto-heal error: {str(e)}",
+                "selectors_used": []
+            }
+
+    async def _execute_action(self, action: str, selector: str, step: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a specific action with a selector."""
+        try:
+            if action == "click":
+                element = await self.page.wait_for_selector(selector, timeout=5000)
+                if element:
+                    await element.click()
+                    return {"success": True, "action": "click"}
+                else:
+                    return {"success": False, "error": "Element not found"}
+                    
+            elif action == "type":
+                element = await self.page.wait_for_selector(selector, timeout=5000)
+                if element:
+                    text = step.get("text", "test_input")
+                    await element.fill(text)
+                    return {"success": True, "action": "type", "text": text}
+                else:
+                    return {"success": False, "error": "Element not found"}
+                    
+            elif action == "input":
+                element = await self.page.wait_for_selector(selector, timeout=5000)
+                if element:
+                    text = step.get("text", "test_input")
+                    await element.fill(text)
+                    return {"success": True, "action": "input", "text": text}
+                else:
+                    return {"success": False, "error": "Element not found"}
+                    
+            elif action == "wait":
+                await asyncio.sleep(step.get("timeout", 2))
+                return {"success": True, "action": "wait"}
+                
+            elif action == "navigate":
+                url = step.get("url", "")
+                if url:
+                    await self.page.goto(url, wait_until="networkidle")
+                    return {"success": True, "action": "navigate", "url": url}
+                else:
+                    return {"success": False, "error": "No URL provided"}
+                    
+            else:
+                return {"success": False, "error": f"Unknown action: {action}"}
+                
+        except Exception as e:
+            return {"success": False, "error": str(e)}
             
     async def shutdown(self):
         """Shutdown the intelligent automation agent."""
