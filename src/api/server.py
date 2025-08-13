@@ -440,5 +440,5 @@ def start_api_server(orch: MultiAgentOrchestrator):
         app,
         host=config.host,
         port=config.port,
-        log_level=config.log_level.lower()
+        log_level="info"
     )
