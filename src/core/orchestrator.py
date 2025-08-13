@@ -146,6 +146,20 @@ class MultiAgentOrchestrator:
         )
         await self.search_agent.initialize()
         
+        # Initialize Execution Agent
+        from ..agents.executor import ExecutionAgent
+        from ..utils.selector_drift_detector import SelectorDriftDetector
+        
+        self.execution_agents = []
+        execution_agent = ExecutionAgent(
+            config=self.config.automation,
+            media_capture=self.media_capture,
+            selector_drift_detector=SelectorDriftDetector(self.config.automation),
+            audit_logger=self.audit_logger
+        )
+        await execution_agent.initialize()
+        self.execution_agents.append(execution_agent)
+        
 
         
     @property
