@@ -170,14 +170,6 @@ class ConversationalAgent:
             )
             conversation.add_message(user_message)
             
-            # Check if this is a handoff request
-            if self._is_handoff_request(message):
-                return await self._handle_handoff_request(conversation, context)
-            
-            # Check if AI needs human intervention
-            if self._needs_human_intervention(message, context):
-                return await self._request_human_intervention(conversation, context)
-            
             # Generate AI response with reasoning
             response = await self._generate_response(conversation, performance_metrics)
             
@@ -190,39 +182,7 @@ class ConversationalAgent:
             )
             conversation.add_message(ai_message)
             
-            # Store conversation in vector store (with robust error handling)
-            try:
-                conversation_data = {
-                    "messages": [msg.to_dict() for msg in conversation.messages],
-                    "session_id": conversation.session_id,
-                    "created_at": conversation.created_at.isoformat(),
-                    "updated_at": conversation.updated_at.isoformat(),
-                    "context": conversation.context
-                }
-                # Temporarily bypass vector store to ensure chat works
-                # await self.vector_store.store_conversation(conversation.session_id, conversation_data)
-                self.logger.info(f"Conversation data prepared for session: {conversation.session_id}")
-            except Exception as e:
-                self.logger.warning(f"Failed to prepare conversation data: {e}")
-                # Continue without storing - conversation still works perfectly
-            
-            # Log conversation
-            await self.audit_logger.log_conversation(
-                session_id=session_id,
-                message_type="user",
-                message_content=user_message.content,
-                user_id=context.get("user_id", "unknown"),
-                workflow_id=context.get("workflow_id")
-            )
-            
-            await self.audit_logger.log_conversation(
-                session_id=session_id,
-                message_type="ai",
-                message_content=ai_message.content,
-                user_id="ai_system",
-                workflow_id=context.get("workflow_id")
-            )
-            
+            # Return response
             return response if isinstance(response, str) else response.get("content", str(response))
             
         except Exception as e:
