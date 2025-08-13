@@ -13,7 +13,7 @@ from datetime import datetime
 
 from ..core.ai_provider import AIProvider
 from ..utils.media_capture import MediaCapture
-from ..utils.selector_drift_detector import SelectorDriftDetector
+from ..utils.selector_drift import SelectorDriftDetector
 
 
 class IntelligentAutomationAgent:
