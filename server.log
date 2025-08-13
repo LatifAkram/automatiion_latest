@@ -148,3 +148,39 @@ AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_statu
 WARNING:src.agents.search:Failed to parse JSON response: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=AI+automation+trends+2024+machine+learning&format=json&no_html=1&skip_disambig=1'
 INFO:     127.0.0.1:48622 - "POST /search HTTP/1.1" 200 OK
 INFO:     127.0.0.1:47396 - "POST /export HTTP/1.1" 200 OK
+ERROR:src.agents.executor:Real automation execution failed: Page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.makemytrip.com/flights/
+Call log:
+  - navigating to "https://www.makemytrip.com/flights/", waiting until "networkidle"
+Traceback (most recent call last):
+  File "/workspace/src/agents/executor.py", line 239, in execute_automation
+    actions = automation_request.get("actions", [])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/venv/lib/python3.13/site-packages/playwright/async_api/_generated.py", line 8992, in goto
+    await self._impl_obj.goto(
+        url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+    )
+  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_page.py", line 556, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_frame.py", line 153, in goto
+    await self._channel.send(
+        "goto", self._navigation_timeout, locals_to_params(locals())
+    )
+  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/workspace/venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 558, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.makemytrip.com/flights/
+Call log:
+  - navigating to "https://www.makemytrip.com/flights/", waiting until "networkidle"
+
+INFO:     127.0.0.1:59072 - "POST /automation/execute HTTP/1.1" 200 OK
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+INFO:     127.0.0.1:59086 - "POST /automation/execute HTTP/1.1" 200 OK
