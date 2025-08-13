@@ -1092,3 +1092,356 @@ def start_api_server(orch: MultiAgentOrchestrator):
     server_thread.start()
     
     return server_thread
+
+# Frontend Integration Endpoints
+@app.post("/api/automation/start")
+async def start_automation(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Start automation with frontend integration."""
+    try:
+        user_request = request.get("request", "")
+        automation_type = request.get("type", "ultra_complex")
+        
+        if not user_request:
+            return {
+                "status": "failed",
+                "error": "User request is required",
+                "session_id": f"session_{int(time.time())}"
+            }
+        
+        # Start automation based on type
+        if automation_type == "ultra_complex":
+            from ..core.advanced_orchestrator import AdvancedOrchestrator
+            advanced_orchestrator = AdvancedOrchestrator(orch.config, orch.ai_provider)
+            result = await advanced_orchestrator.execute_ultra_complex_automation(user_request)
+        else:
+            result = await orch.execution_agent.execute_intelligent_automation(user_request, "")
+        
+        return {
+            "status": "started",
+            "session_id": f"session_{int(time.time())}",
+            "result": result,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Automation start failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": f"session_{int(time.time())}",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.post("/api/automation/chat")
+async def automation_chat(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Handle conversational AI chat."""
+    try:
+        user_input = request.get("message", "")
+        session_id = request.get("session_id", "")
+        context = request.get("context", {})
+        
+        if not user_input:
+            return {
+                "status": "failed",
+                "error": "Message is required",
+                "session_id": session_id
+            }
+        
+        # Use conversational AI
+        from ..agents.conversational_ai import ConversationalAI
+        conversational_ai = ConversationalAI(orch.config, orch.ai_provider)
+        response = await conversational_ai.process_user_input(user_input, context)
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "response": response,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Chat failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.get("/api/automation/status/{session_id}")
+async def get_automation_status(
+    session_id: str,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Get automation status for frontend."""
+    try:
+        # Get status from orchestrator
+        from ..core.advanced_orchestrator import AdvancedOrchestrator
+        advanced_orchestrator = AdvancedOrchestrator(orch.config, orch.ai_provider)
+        status = await advanced_orchestrator.get_automation_status()
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "automation_status": status,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Status check failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.post("/api/automation/handoff")
+async def handle_human_handoff(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Handle human handoff during automation."""
+    try:
+        user_input = request.get("message", "")
+        session_id = request.get("session_id", "")
+        
+        from ..core.advanced_orchestrator import AdvancedOrchestrator
+        advanced_orchestrator = AdvancedOrchestrator(orch.config, orch.ai_provider)
+        response = await advanced_orchestrator.handle_human_handoff(user_input)
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "response": response,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Handoff failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.post("/api/automation/resume")
+async def resume_automation(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Resume automation after human handoff."""
+    try:
+        session_id = request.get("session_id", "")
+        
+        from ..core.advanced_orchestrator import AdvancedOrchestrator
+        advanced_orchestrator = AdvancedOrchestrator(orch.config, orch.ai_provider)
+        response = await advanced_orchestrator.resume_automation()
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "response": response,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Resume failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.get("/api/automation/media/{session_id}")
+async def get_automation_media(
+    session_id: str,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Get automation media (screenshots, videos) for frontend."""
+    try:
+        # Get media files for the session
+        import os
+        from pathlib import Path
+        
+        media_dir = Path("data/media")
+        session_media = {
+            "screenshots": [],
+            "videos": [],
+            "logs": []
+        }
+        
+        if media_dir.exists():
+            # Get screenshots
+            screenshot_dir = media_dir / "screenshots"
+            if screenshot_dir.exists():
+                for file in screenshot_dir.glob(f"*{session_id}*"):
+                    session_media["screenshots"].append({
+                        "filename": file.name,
+                        "path": str(file),
+                        "size": file.stat().st_size,
+                        "timestamp": datetime.fromtimestamp(file.stat().st_mtime).isoformat()
+                    })
+            
+            # Get videos
+            video_dir = media_dir / "videos"
+            if video_dir.exists():
+                for file in video_dir.glob(f"*{session_id}*"):
+                    session_media["videos"].append({
+                        "filename": file.name,
+                        "path": str(file),
+                        "size": file.stat().st_size,
+                        "timestamp": datetime.fromtimestamp(file.stat().st_mtime).isoformat()
+                    })
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "media": session_media,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Media retrieval failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.get("/api/automation/code/{session_id}")
+async def get_automation_code(
+    session_id: str,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Get generated automation code for frontend."""
+    try:
+        # Get generated code for the session
+        from ..utils.code_generator import CodeGenerator
+        
+        code_generator = CodeGenerator(orch.config, orch.ai_provider)
+        
+        # Mock execution result for demo
+        execution_result = {
+            "result": {
+                "url": "https://example.com",
+                "automation_details": {
+                    "actions": [
+                        {"type": "navigate", "url": "https://example.com"},
+                        {"type": "click", "selector": "//button[text()='Login']"},
+                        {"type": "type", "selector": "//input[@name='username']", "text": "user@example.com"}
+                    ]
+                }
+            }
+        }
+        
+        generated_code = await code_generator.generate_automation_code(execution_result)
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "generated_code": generated_code,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Code generation failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.get("/api/automation/report/{session_id}")
+async def get_automation_report(
+    session_id: str,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Get detailed automation report for frontend."""
+    try:
+        # Get detailed report for the session
+        from ..utils.code_generator import CodeGenerator
+        
+        code_generator = CodeGenerator(orch.config, orch.ai_provider)
+        
+        # Mock execution result for demo
+        execution_result = {
+            "status": "completed",
+            "result": {
+                "url": "https://example.com",
+                "automation_details": {
+                    "actions": [
+                        {"type": "navigate", "url": "https://example.com"},
+                        {"type": "click", "selector": "//button[text()='Login']"},
+                        {"type": "type", "selector": "//input[@name='username']", "text": "user@example.com"}
+                    ]
+                }
+            }
+        }
+        
+        test_report = await code_generator.generate_test_report(execution_result)
+        documentation = await code_generator.generate_documentation(execution_result)
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "test_report": test_report,
+            "documentation": documentation,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Report generation failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+
+@app.post("/api/automation/clear")
+async def clear_automation_session(
+    request: dict,
+    orch: MultiAgentOrchestrator = Depends(get_orchestrator)
+):
+    """Clear automation session and conversation history."""
+    try:
+        session_id = request.get("session_id", "")
+        
+        from ..agents.conversational_ai import ConversationalAI
+        conversational_ai = ConversationalAI(orch.config, orch.ai_provider)
+        response = await conversational_ai.clear_conversation()
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "response": response,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logging.error(f"Session clear failed: {e}", exc_info=True)
+        return {
+            "status": "failed",
+            "error": str(e),
+            "session_id": session_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
