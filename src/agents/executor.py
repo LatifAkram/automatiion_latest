@@ -975,11 +975,13 @@ class ExecutionAgent:
         """Execute intelligent automation based on natural language instructions."""
         try:
             from .intelligent_automation import IntelligentAutomationAgent
-            from ..core.ai_provider import AIProvider
             
-            # Initialize intelligent automation agent
-            ai_provider = AIProvider(self.config)
-            intelligent_agent = IntelligentAutomationAgent(self.config, ai_provider)
+            # Create a dummy AI provider for now
+            class DummyAIProvider:
+                async def generate_response(self, prompt):
+                    return "Fallback response"
+            
+            intelligent_agent = IntelligentAutomationAgent(self.config, DummyAIProvider())
             await intelligent_agent.initialize()
             
             # Execute the automation

@@ -105,43 +105,9 @@ class IntelligentAutomationAgent:
     async def _generate_automation_plan(self, instructions: str, url: str) -> List[Dict[str, Any]]:
         """Generate automation plan from natural language instructions."""
         try:
-            # Get page content for context
-            page_content = await self._extract_page_context()
-            
-            # Generate automation plan using AI
-            prompt = f"""
-            Given these natural language instructions: "{instructions}"
-            For this website: {url}
-            
-            Page context:
-            - Title: {await self.page.title()}
-            - URL: {self.page.url}
-            - Available elements: {page_content}
-            
-            Generate a detailed automation plan with specific actions. Each action should include:
-            1. action_type: navigate, click, type, wait, execute_script, etc.
-            2. selector: XPath or CSS selector to find the element
-            3. description: what this action does
-            4. fallback_selectors: alternative selectors if the main one fails
-            5. validation: how to verify the action succeeded
-            
-            Return the plan as a JSON array of action objects.
-            """
-            
-            response = await self.ai_provider.generate_response(prompt)
-            
-            # Parse the response and extract the automation plan
-            import json
-            import re
-            
-            # Try to extract JSON from the response
-            json_match = re.search(r'\[.*\]', response, re.DOTALL)
-            if json_match:
-                plan = json.loads(json_match.group())
-            else:
-                # Fallback: generate a basic plan
-                plan = await self._generate_fallback_plan(instructions)
-                
+            # For now, use fallback plan generation
+            # TODO: Implement AI-powered plan generation when AI provider is stable
+            plan = await self._generate_fallback_plan(instructions)
             return plan
             
         except Exception as e:
