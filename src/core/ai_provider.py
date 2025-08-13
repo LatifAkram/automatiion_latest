@@ -118,10 +118,23 @@ class AIProvider:
             try:
                 import google.generativeai as genai
                 genai.configure(api_key=self.config.google_api_key)
-                self.google_client = genai.GenerativeModel('gemini-pro')
+                # Try Gemini 2.0 Flash Exp first, fallback to gemini-pro if not available
+                try:
+                    self.google_client = genai.GenerativeModel(self.config.google_model)
+                    # Test the model
+                    test_response = await asyncio.to_thread(
+                        self.google_client.generate_content,
+                        "test",
+                        generation_config=genai.types.GenerationConfig(max_output_tokens=10)
+                    )
+                    self.logger.info(f"Google Gemini {self.config.google_model} client initialized successfully")
+                except Exception as model_error:
+                    self.logger.warning(f"Gemini 2.0 Flash Exp not available, falling back to gemini-pro: {model_error}")
+                    self.google_client = genai.GenerativeModel('gemini-pro')
+                    self.logger.info("Google Gemini Pro client initialized as fallback")
+                
                 self.providers["google"]["available"] = True
                 self.providers["google"]["client"] = self.google_client
-                self.logger.info("Google client initialized")
             except Exception as e:
                 self.logger.warning(f"Failed to initialize Google: {e}")
                 
@@ -152,20 +165,34 @@ class AIProvider:
             raise Exception(f"Local LLM connection failed: {e}")
             
     async def generate_response(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7) -> str:
-        """Generate a response using available AI providers."""
+        """Generate a response using available AI providers with intelligent fallback."""
         try:
-            # Try available providers in order
+            # Try available providers in order with fallback
+            providers_to_try = []
+            
             if self.openai_client:
-                return await self._call_openai(prompt, max_tokens, temperature)
-            elif self.anthropic_client:
-                return await self._call_anthropic(prompt, max_tokens, temperature)
-            elif self.google_client:
-                return await self._call_google(prompt, max_tokens, temperature)
-            elif self.local_llm_client:
-                return await self._call_local_llm(prompt, max_tokens, temperature)
-            else:
-                # Fallback to simple response generation
-                return self._generate_fallback_response(prompt)
+                providers_to_try.append(("OpenAI", self._call_openai))
+            if self.anthropic_client:
+                providers_to_try.append(("Anthropic", self._call_anthropic))
+            if self.google_client:
+                providers_to_try.append(("Google Gemini", self._call_google))
+            if self.local_llm_client:
+                providers_to_try.append(("Local LLM", self._call_local_llm))
+            
+            # Try each provider in order
+            for provider_name, provider_func in providers_to_try:
+                try:
+                    self.logger.info(f"Attempting to use {provider_name} for response generation")
+                    response = await provider_func(prompt, max_tokens, temperature)
+                    self.logger.info(f"Successfully generated response using {provider_name}")
+                    return response
+                except Exception as e:
+                    self.logger.warning(f"{provider_name} failed: {e}, trying next provider...")
+                    continue
+            
+            # If all providers failed, use fallback
+            self.logger.warning("All AI providers failed, using fallback response")
+            return self._generate_fallback_response(prompt)
                 
         except Exception as e:
             self.logger.error(f"Failed to generate response: {e}", exc_info=True)
@@ -227,9 +254,9 @@ class AIProvider:
     async def _call_google(self, prompt: str, max_tokens: int, temperature: float) -> str:
         """Call Google Gemini API."""
         try:
-            model = genai.GenerativeModel(self.config.google_model)
+            # Use the already initialized client
             response = await asyncio.to_thread(
-                model.generate_content,
+                self.google_client.generate_content,
                 prompt,
                 generation_config=genai.types.GenerationConfig(
                     max_output_tokens=max_tokens,
