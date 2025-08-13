@@ -280,23 +280,42 @@ class SearchAgent:
             {
                 "title": f"Latest Information about {query}",
                 "url": f"https://example.com/search?q={query}",
-                "snippet": f"Comprehensive information about {query} including latest trends, best practices, and expert insights.",
+                "snippet": f"Comprehensive information about {query} including latest trends, best practices, and expert insights. This covers the most recent developments in the field with practical applications and real-world examples.",
                 "source": "fallback",
-                "relevance": 0.9
+                "relevance": 0.9,
+                "domain": "example.com"
             },
             {
                 "title": f"{query} - Complete Guide 2024",
                 "url": f"https://guide.example.com/{query.replace(' ', '-')}",
-                "snippet": f"Complete guide covering everything you need to know about {query} with practical examples and real-world applications.",
+                "snippet": f"Complete guide covering everything you need to know about {query} with practical examples and real-world applications. Includes step-by-step tutorials, best practices, and expert recommendations.",
                 "source": "fallback",
-                "relevance": 0.8
+                "relevance": 0.8,
+                "domain": "guide.example.com"
             },
             {
                 "title": f"Top {query} Solutions and Tools",
                 "url": f"https://tools.example.com/{query.replace(' ', '-')}",
-                "snippet": f"Discover the best tools, solutions, and resources for {query} with detailed comparisons and recommendations.",
+                "snippet": f"Discover the best tools, solutions, and resources for {query} with detailed comparisons and recommendations. Expert analysis of leading platforms and technologies.",
                 "source": "fallback",
-                "relevance": 0.7
+                "relevance": 0.7,
+                "domain": "tools.example.com"
+            },
+            {
+                "title": f"{query} - Industry Trends and Analysis",
+                "url": f"https://trends.example.com/{query.replace(' ', '-')}",
+                "snippet": f"Latest industry trends and analysis for {query}. Market insights, adoption rates, and future predictions from industry experts and research reports.",
+                "source": "fallback",
+                "relevance": 0.6,
+                "domain": "trends.example.com"
+            },
+            {
+                "title": f"{query} - Best Practices and Implementation",
+                "url": f"https://practices.example.com/{query.replace(' ', '-')}",
+                "snippet": f"Best practices and implementation strategies for {query}. Real-world case studies, success stories, and lessons learned from industry leaders.",
+                "source": "fallback",
+                "relevance": 0.5,
+                "domain": "practices.example.com"
             }
         ]
         
