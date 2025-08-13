@@ -277,26 +277,26 @@ async def chat_endpoint(request: ChatRequest, orch: MultiAgentOrchestrator = Dep
         # Get conversational agent
         if not orch.conversational_agent:
             return ChatResponse(
-                success=False,
-                message="Conversational agent not available",
-                response="I'm sorry, but the conversational agent is currently unavailable. Please try again later."
+                response="I'm sorry, but the conversational agent is currently unavailable. Please try again later.",
+                session_id=request.session_id or "default",
+                timestamp=datetime.utcnow().isoformat()
             )
         
         # Process the chat request
         response = await orch.conversational_agent.chat(request.message)
         
         return ChatResponse(
-            success=True,
-            message="Chat processed successfully",
-            response=response
+            response=response,
+            session_id=request.session_id or "default",
+            timestamp=datetime.utcnow().isoformat()
         )
         
     except Exception as e:
         logging.error(f"Chat endpoint error: {e}", exc_info=True)
         return ChatResponse(
-            success=False,
-            message=f"Chat processing failed: {str(e)}",
-            response="I apologize, but I encountered an error while processing your message. Please try again."
+            response="I apologize, but I encountered an error while processing your message. Please try again.",
+            session_id=request.session_id or "default",
+            timestamp=datetime.utcnow().isoformat()
         )
 
 @app.post("/chat", response_model=ChatResponse)

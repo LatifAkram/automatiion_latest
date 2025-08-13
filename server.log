@@ -1,31 +1,143 @@
-INFO:     Started server process [223465]
+2025-08-13 10:08:09,338 - src.utils.logger - INFO - Logging configured with level: INFO
+2025-08-13 10:08:09,338 - __main__ - INFO - Configuration loaded successfully
+2025-08-13 10:08:09,339 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
+2025-08-13 10:08:09,339 - src.core.database - INFO - Database tables created successfully
+2025-08-13 10:08:09,339 - src.core.database - INFO - Database initialized: data/automation.db
+2025-08-13 10:08:09,411 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:08:09,412 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:08:09,413 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:08:09,414 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:08:09,414 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:08:09,414 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:08:09,414 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:08:09,415 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:08:09,415 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:08:09,415 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:08:09,416 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:08:09,416 - src.agents.planner - INFO - Planner Agent initialized
+2025-08-13 10:08:09,416 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:08:09,416 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:08:09,749 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:08:09,749 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:08:09,749 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:08:09,749 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:08:10,045 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:08:10,045 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:08:10,045 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:08:10,045 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:08:10,365 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:08:10,365 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:08:10,365 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:08:10,366 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:08:10,367 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:08:10,371 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:08:10,371 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:08:10,372 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:08:10,373 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:08:10,374 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:08:10,374 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:08:10,374 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:08:10,374 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:08:10,374 - src.agents.conversational - INFO - Conversational agent initialized successfully
+2025-08-13 10:08:10,374 - src.agents.search - INFO - Search agent initialized successfully
+2025-08-13 10:08:10,375 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
+2025-08-13 10:08:10,376 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
+2025-08-13 10:08:10,377 - __main__ - INFO - Multi-agent orchestrator initialized
+2025-08-13 10:08:10,377 - __main__ - INFO - Starting API server...
+INFO:     Started server process [231414]
 INFO:     Waiting for application startup.
-Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
-Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:08:10,407 - src.core.orchestrator - INFO - Initializing Multi-Agent Orchestrator...
+2025-08-13 10:08:10,407 - src.core.database - INFO - Database tables created successfully
+2025-08-13 10:08:10,407 - src.core.database - INFO - Database initialized: data/automation.db
+2025-08-13 10:08:10,409 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:08:10,409 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:08:10,411 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:08:10,411 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:08:10,412 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:08:10,412 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:08:10,412 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:08:10,413 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:08:10,413 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:08:10,414 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:08:10,414 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:08:10,414 - src.agents.planner - INFO - Planner Agent initialized
+2025-08-13 10:08:10,414 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:08:10,414 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:08:10,792 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:08:10,792 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:08:10,792 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:08:10,792 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:08:11,115 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:08:11,116 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:08:11,116 - src.utils.media_capture - INFO - Media capture initialized: data/media
+2025-08-13 10:08:11,116 - src.utils.selector_drift - INFO - Selector drift detector initialized
+2025-08-13 10:08:11,418 - src.agents.executor - INFO - Browser initialized: chromium
+2025-08-13 10:08:11,418 - src.agents.executor - INFO - Execution agent initialized successfully
+2025-08-13 10:08:11,418 - src.core.ai_provider - INFO - Initializing AI providers...
+2025-08-13 10:08:11,419 - src.core.ai_provider - WARNING - Failed to initialize Local LLM: Local LLM connection failed: Cannot connect to host 127.0.0.1:1234 ssl:default [Connect call failed ('127.0.0.1', 1234)]
+2025-08-13 10:08:11,419 - src.core.ai_provider - INFO - AI providers initialized. Available: []
+2025-08-13 10:08:11,421 - src.core.vector_store - INFO - Collection 'workflow_plans' initialized
+2025-08-13 10:08:11,422 - src.core.vector_store - INFO - Collection 'execution_patterns' initialized
+2025-08-13 10:08:11,423 - src.core.vector_store - INFO - Collection 'conversations' initialized
+2025-08-13 10:08:11,423 - src.core.vector_store - INFO - Collection 'task_templates' initialized
+2025-08-13 10:08:11,424 - src.core.vector_store - INFO - Collection 'failure_patterns' initialized
+2025-08-13 10:08:11,424 - src.core.vector_store - INFO - Initialized 5 collections
+2025-08-13 10:08:11,424 - src.core.vector_store - INFO - Vector store initialized: data/vector_db
+2025-08-13 10:08:11,424 - src.core.audit - INFO - Audit logging system initialized: data/audit.db
+2025-08-13 10:08:11,424 - src.agents.conversational - INFO - Conversational agent initialized successfully
+2025-08-13 10:08:11,424 - src.agents.search - INFO - Search agent initialized successfully
+2025-08-13 10:08:11,424 - src.agents.dom_extractor - INFO - DOM extraction agent initialized successfully
+2025-08-13 10:08:11,425 - src.core.orchestrator - INFO - Multi-Agent Orchestrator initialized successfully
+2025-08-13 10:08:11,425 - root - INFO - API server initialized successfully
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:56468 - "GET /health HTTP/1.1" 200 OK
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-WARNING:src.agents.executor:https://www.skyscanner.com failed: Page.goto: Timeout 30000ms exceeded.
-Call log:
-  - navigating to "https://www.skyscanner.com/", waiting until "networkidle"
-
-WARNING:src.utils.media_capture:Media libraries not available, using basic capture
-ERROR:root:Ticket booking failed: 'str' object has no attribute 'time'
+2025-08-13 10:08:33,846 - src.agents.conversational - ERROR - Chat failed: 1 validation error for Message
+context
+  Input should be a valid dictionary [type=dict_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.11/v/dict_type
 Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 457, in execute_ticket_booking
-    "booking_id": f"booking_{int(time.time())}",
-                                 ^^^^^^^^^
-AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
-ERROR:root:Unhandled exception: 'str' object has no attribute 'time'
+  File "/workspace/src/agents/conversational.py", line 165, in chat
+    user_message = Message(
+        content=message,
+    ...<2 lines>...
+        context=context
+    )
+  File "/workspace/venv/lib/python3.13/site-packages/pydantic/main.py", line 253, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 1 validation error for Message
+context
+  Input should be a valid dictionary [type=dict_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.11/v/dict_type
+2025-08-13 10:08:33,847 - root - ERROR - Chat endpoint error: 2 validation errors for ChatResponse
+session_id
+  Field required [type=missing, input_value={'success': True, 'messag...c.dev/2.11/v/dict_type'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+timestamp
+  Field required [type=missing, input_value={'success': True, 'messag...c.dev/2.11/v/dict_type'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
 Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 457, in execute_ticket_booking
-    "booking_id": f"booking_{int(time.time())}",
-                                 ^^^^^^^^^
-AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
-
-During handling of the above exception, another exception occurred:
-
+  File "/workspace/src/api/server.py", line 288, in chat_endpoint
+    return ChatResponse(
+        success=True,
+        message="Chat processed successfully",
+        response=response
+    )
+  File "/workspace/venv/lib/python3.13/site-packages/pydantic/main.py", line 253, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 2 validation errors for ChatResponse
+session_id
+  Field required [type=missing, input_value={'success': True, 'messag...c.dev/2.11/v/dict_type'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+timestamp
+  Field required [type=missing, input_value={'success': True, 'messag...c.dev/2.11/v/dict_type'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+2025-08-13 10:08:33,848 - root - ERROR - Unhandled exception: 2 validation errors for ChatResponse
+session_id
+  Field required [type=missing, input_value={'success': False, 'messa...age. Please try again.'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+timestamp
+  Field required [type=missing, input_value={'success': False, 'messa...age. Please try again.'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
 Traceback (most recent call last):
   File "/workspace/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
     await self.app(scope, receive, _send)
@@ -61,20 +173,23 @@ Traceback (most recent call last):
   File "/workspace/venv/lib/python3.13/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
     return await dependant.call(**values)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/workspace/src/api/server.py", line 466, in execute_ticket_booking
-    "booking_id": f"booking_{int(time.time())}",
-                                 ^^^^^^^^^
-AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
-INFO:     127.0.0.1:46688 - "POST /automation/ticket-booking HTTP/1.1" 500 Internal Server Error
+  File "/workspace/src/api/server.py", line 296, in chat_endpoint
+    return ChatResponse(
+        success=False,
+        message=f"Chat processing failed: {str(e)}",
+        response="I apologize, but I encountered an error while processing your message. Please try again."
+    )
+  File "/workspace/venv/lib/python3.13/site-packages/pydantic/main.py", line 253, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 2 validation errors for ChatResponse
+session_id
+  Field required [type=missing, input_value={'success': False, 'messa...age. Please try again.'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+timestamp
+  Field required [type=missing, input_value={'success': False, 'messa...age. Please try again.'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+INFO:     127.0.0.1:51310 - "POST /api/chat HTTP/1.1" 500 Internal Server Error
 ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/workspace/src/api/server.py", line 457, in execute_ticket_booking
-    "booking_id": f"booking_{int(time.time())}",
-                                 ^^^^^^^^^
-AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
-
-During handling of the above exception, another exception occurred:
-
 Traceback (most recent call last):
   File "/workspace/venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
     result = await app(  # type: ignore[func-returns-value]
@@ -126,7 +241,18 @@ Traceback (most recent call last):
   File "/workspace/venv/lib/python3.13/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
     return await dependant.call(**values)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/workspace/src/api/server.py", line 466, in execute_ticket_booking
-    "booking_id": f"booking_{int(time.time())}",
-                                 ^^^^^^^^^
-AttributeError: 'str' object has no attribute 'time'. Did you mean: 'title'?
+  File "/workspace/src/api/server.py", line 296, in chat_endpoint
+    return ChatResponse(
+        success=False,
+        message=f"Chat processing failed: {str(e)}",
+        response="I apologize, but I encountered an error while processing your message. Please try again."
+    )
+  File "/workspace/venv/lib/python3.13/site-packages/pydantic/main.py", line 253, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+pydantic_core._pydantic_core.ValidationError: 2 validation errors for ChatResponse
+session_id
+  Field required [type=missing, input_value={'success': False, 'messa...age. Please try again.'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+timestamp
+  Field required [type=missing, input_value={'success': False, 'messa...age. Please try again.'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
