@@ -42,8 +42,16 @@ interface Message {
   status?: 'sending' | 'sent' | 'error';
   automation?: {
     type: string;
-    status: 'running' | 'completed' | 'failed';
+    status: 'running' | 'completed' | 'failed' | 'paused' | 'handoff_required';
     progress: number;
+    automationId?: string;
+    screenshots?: Array<{
+      path: string;
+      timestamp: string;
+      action: string;
+    }>;
+    handoffReason?: string;
+    takeoverData?: any;
   };
   sources?: Array<{
     title: string;
@@ -52,6 +60,9 @@ interface Message {
     domain: string;
     relevance: number;
     source: string;
+    confidence?: number;
+    content_type?: string;
+    timestamp?: string;
   }>;
   files?: Array<{
     name: string;
@@ -60,6 +71,8 @@ interface Message {
     url: string;
   }>;
   isExpanded?: boolean;
+  chatId?: string;
+  agentType?: 'planner' | 'executor' | 'conversational' | 'search' | 'dom_analysis';
 }
 
 interface SimpleChatInterfaceProps {
