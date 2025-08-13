@@ -1,0 +1,52 @@
+{
+  "export_time": "2025-08-13T09:40:17.560156",
+  "format": "json",
+  "data": {
+    "title": "Complex Automation Test Report",
+    "summary": "Multi-domain automation testing results",
+    "test_results": [
+      {
+        "domain": "E-commerce",
+        "test": "Form Filling",
+        "status": "PASSED",
+        "actions": 6,
+        "success_rate": "83.3%",
+        "execution_time": "2.57s"
+      },
+      {
+        "domain": "Banking",
+        "test": "Multi-Step Process",
+        "status": "PASSED",
+        "actions": 7,
+        "success_rate": "100%",
+        "execution_time": "4.61s"
+      },
+      {
+        "domain": "Healthcare",
+        "test": "Data Extraction",
+        "status": "PASSED",
+        "actions": 3,
+        "success_rate": "100%",
+        "execution_time": "3.27s"
+      },
+      {
+        "domain": "Entertainment",
+        "test": "Content Aggregation",
+        "status": "PASSED",
+        "actions": 5,
+        "success_rate": "100%",
+        "execution_time": "2.89s"
+      }
+    ],
+    "performance_metrics": {
+      "total_actions": 21,
+      "average_success_rate": "95.8%",
+      "total_execution_time": "13.34s",
+      "screenshots_captured": 16
+    }
+  },
+  "metadata": {
+    "generated_by": "Autonomous Automation Platform",
+    "version": "1.0.0"
+  }
+}

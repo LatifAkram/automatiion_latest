@@ -88,3 +88,63 @@ Traceback (most recent call last):
 AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
 INFO:     127.0.0.1:33426 - "GET /health HTTP/1.1" 200 OK
 INFO:     127.0.0.1:37076 - "GET /health HTTP/1.1" 200 OK
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+ERROR:src.agents.executor:Action failed: Page.fill: Error: Input of type "radio" cannot be filled
+Call log:
+  - waiting for locator("input[name=size]")
+    - locator resolved to 3 elements. Proceeding with the first one: <input name="size" type="radio" value="small"/>
+    - fill("large")
+  - attempting fill action
+    - waiting for element to be visible, enabled and editable
+
+INFO:     127.0.0.1:53766 - "POST /automation/execute HTTP/1.1" 200 OK
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+INFO:     127.0.0.1:58764 - "POST /automation/execute HTTP/1.1" 200 OK
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+WARNING:src.utils.media_capture:Media libraries not available, using basic capture
+INFO:     127.0.0.1:50818 - "POST /automation/execute HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51982 - "POST /workflows HTTP/1.1" 200 OK
+ERROR:src.core.orchestrator:Workflow execution failed: 'DatabaseManager' object has no attribute 'update_workflow_status'
+Traceback (most recent call last):
+  File "/workspace/src/core/orchestrator.py", line 197, in _execute_workflow_async
+    await self._update_workflow_status(workflow_id, WorkflowStatus.PLANNING)
+  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
+    await self.database.update_workflow_status(workflow_id, status)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-36' coro=<MultiAgentOrchestrator._execute_workflow_async() done, defined at /workspace/src/core/orchestrator.py:193> exception=AttributeError("'DatabaseManager' object has no attribute 'update_workflow_status'")>
+Traceback (most recent call last):
+  File "/workspace/src/core/orchestrator.py", line 197, in _execute_workflow_async
+    await self._update_workflow_status(workflow_id, WorkflowStatus.PLANNING)
+  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
+    await self.database.update_workflow_status(workflow_id, status)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/src/core/orchestrator.py", line 213, in _execute_workflow_async
+    await self._update_workflow_status(workflow_id, WorkflowStatus.FAILED)
+  File "/workspace/src/core/orchestrator.py", line 416, in _update_workflow_status
+    await self.database.update_workflow_status(workflow_id, status)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DatabaseManager' object has no attribute 'update_workflow_status'
+WARNING:src.agents.search:Failed to parse JSON response: 200, message='Attempt to decode JSON with unexpected mimetype: application/x-javascript', url='https://api.duckduckgo.com/?q=AI+automation+trends+2024+machine+learning&format=json&no_html=1&skip_disambig=1'
+INFO:     127.0.0.1:48622 - "POST /search HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47396 - "POST /export HTTP/1.1" 200 OK
