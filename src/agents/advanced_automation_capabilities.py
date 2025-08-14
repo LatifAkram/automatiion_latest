@@ -690,3 +690,18 @@ class AdvancedAutomationCapabilities:
         
         durations = [execution.get("duration", 0) for execution in self.execution_history]
         return sum(durations) / len(durations)
+    
+    async def get_all_capabilities(self) -> List[Dict[str, Any]]:
+        """Get all available automation capabilities."""
+        return [
+            {
+                "name": cap.name,
+                "description": cap.description,
+                "category": cap.category.value,
+                "complexity": cap.complexity.value,
+                "examples": cap.examples,
+                "selectors": cap.selectors,
+                "validation_rules": cap.validation_rules
+            }
+            for cap in self.capabilities.values()
+        ]

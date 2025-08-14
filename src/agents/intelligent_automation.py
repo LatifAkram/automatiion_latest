@@ -167,17 +167,23 @@ class IntelligentAutomationAgent:
             )
             
             # Step 3: Predict success and optimize plan
-            success_prediction = await self.advanced_learning.predict_automation_success({
-                "domain": url.split("//")[1].split("/")[0] if "//" in url else url,
-                "automation_type": "web_automation",
-                "complexity": "medium",
-                "selectors": automation_plan.get("steps", []),
-                "ai_confidence": automation_plan.get("ai_analysis", {}).get("confidence_score", 0.5)
-            })
+            if automation_plan and isinstance(automation_plan, dict):
+                success_prediction = await self.advanced_learning.predict_automation_success({
+                    "domain": url.split("//")[1].split("/")[0] if "//" in url else url,
+                    "automation_type": "web_automation",
+                    "complexity": "medium",
+                    "selectors": automation_plan.get("steps", []),
+                    "ai_confidence": automation_plan.get("ai_analysis", {}).get("confidence_score", 0.5)
+                })
+            else:
+                success_prediction = {"success_probability": 0.5}
             
             # Optimize plan using learned patterns
-            optimization_result = await self.advanced_learning.optimize_automation_plan(automation_plan)
-            optimized_plan = optimization_result.get("optimized_plan", automation_plan)
+            if automation_plan and isinstance(automation_plan, dict):
+                optimization_result = await self.advanced_learning.optimize_automation_plan(automation_plan)
+                optimized_plan = optimization_result.get("optimized_plan", automation_plan)
+            else:
+                optimized_plan = automation_plan or {"steps": []}
             
             # Step 4: Execute the optimized automation plan with timeout
             results = await asyncio.wait_for(
@@ -195,24 +201,24 @@ class IntelligentAutomationAgent:
                 "status": "completed",
                 "instructions": instructions,
                 "url": url,
-                "automation_plan": automation_plan,
-                "results": results,
-                "screenshots": [final_screenshot],
-                "execution_time": results.get("execution_time", 0),
+                "automation_plan": automation_plan or {},
+                "results": results or {},
+                "screenshots": [final_screenshot] if final_screenshot else [],
+                "execution_time": results.get("execution_time", 0) if results else 0,
                 "timestamp": datetime.utcnow().isoformat(),
-                "steps": results.get("steps", []),
-                "success_rate": results.get("success_rate", 100),
-                "error_details": results.get("error_details", ""),
+                "steps": results.get("steps", []) if results else [],
+                "success_rate": results.get("success_rate", 100) if results else 100,
+                "error_details": results.get("error_details", "") if results else "",
                 "browser_kept_open": True,  # Indicate browser is kept open
-                "current_step": len(results.get("steps", [])),
-                "total_steps": len(automation_plan.get("steps", [])),
-                "ai_analysis": ai_dom_analysis,
+                "current_step": len(results.get("steps", [])) if results else 0,
+                "total_steps": len(automation_plan.get("steps", [])) if automation_plan and isinstance(automation_plan, dict) else 0,
+                "ai_analysis": ai_dom_analysis or "",
                 "execution_details": {
-                    "completed_steps": results.get("completed_steps", 0),
-                    "total_steps": results.get("total_steps", 0),
-                    "errors": results.get("errors", []),
-                    "learning_applied": results.get("learning_applied", False),
-                    "performance_improvement": results.get("performance_improvement", 0)
+                    "completed_steps": results.get("completed_steps", 0) if results else 0,
+                    "total_steps": results.get("total_steps", 0) if results else 0,
+                    "errors": results.get("errors", []) if results else [],
+                    "learning_applied": results.get("learning_applied", False) if results else False,
+                    "performance_improvement": results.get("performance_improvement", 0) if results else 0
                 }
             }
             
