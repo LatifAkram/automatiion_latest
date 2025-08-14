@@ -120,6 +120,7 @@ speech-recognition==3.10.0
 pydub==0.25.1
 tensorflow==2.15.0
 
+
 # Development & Debugging
 ipython==8.17.2
 jupyter==1.0.0

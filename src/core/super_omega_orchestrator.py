@@ -91,6 +91,18 @@ class SuperOmegaOrchestrator:
     """
     
     def __init__(self, config: SuperOmegaConfig):
+
+    Main SUPER-OMEGA orchestrator that coordinates all components.
+    
+    Provides the unified API for:
+    - Planning complex workflows
+    - Executing with self-healing
+    - Real-time data integration
+    - Evidence capture and audit
+    - Skill learning and reuse
+    """
+    
+    def __init__(self, config: SuperOmegaConfig = None):
         self.config = config or SuperOmegaConfig()
         self.logger = logging.getLogger(__name__)
         
@@ -204,6 +216,10 @@ class SuperOmegaOrchestrator:
         except Exception as e:
             self.logger.error(f"Failed to initialize SUPER-OMEGA: {e}")
             raise
+        await self.initialize_browser()
+        if self.data_fabric:
+            await self.data_fabric.__aenter__()
+        return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
@@ -247,6 +263,14 @@ class SuperOmegaOrchestrator:
             
             # Create page
             self.page = await self.context.new_page()
+            
+            # Initialize deterministic executor now that we have a page
+            self.deterministic_executor = DeterministicExecutor(
+                self.page,
+                self.semantic_graph,
+                self.locator_stack,
+                self.config
+            )
             
             self.logger.info(f"Browser initialized: {self.config.browser_type}")
             self.logger.info("🎯 Deterministic Executor ready for flakiness-free execution")
@@ -642,6 +666,8 @@ class SuperOmegaOrchestrator:
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get comprehensive system metrics including Guidewire analytics."""
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get system performance metrics."""
         healing_stats = self.locator_stack.get_healing_stats() if self.locator_stack else {}
         mining_stats = self.skill_miner.get_mining_stats() if self.skill_miner else {}
         
@@ -669,6 +695,8 @@ class SuperOmegaOrchestrator:
             base_metrics['skill_mining_stats'] = self.skill_miner.get_mining_stats()
         
         return base_metrics
+            'skill_mining_stats': mining_stats
+        }
     
     def get_run_report(self, run_id: str) -> Optional[RunReport]:
         """Get run report by ID."""
