@@ -1004,6 +1004,39 @@ class ExecutionAgent:
                 "timestamp": datetime.utcnow().isoformat()
             }
             
+    async def get_current_step_info(self) -> Dict[str, Any]:
+        """Get current step information."""
+        try:
+            return {
+                "current_step": getattr(self, 'current_step', 0),
+                "total_steps": getattr(self, 'total_steps', 0),
+                "status": getattr(self, 'status', 'idle'),
+                "last_action": getattr(self, 'last_action', ''),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        except Exception as e:
+            return {
+                "current_step": 0,
+                "total_steps": 0,
+                "status": "error",
+                "last_action": "",
+                "error": str(e),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+    async def close_browser(self) -> Dict[str, Any]:
+        """Close the browser."""
+        try:
+            if self.browser:
+                await self.browser.close()
+                self.browser = None
+                self.page = None
+                return {"success": True, "message": "Browser closed successfully"}
+            else:
+                return {"success": True, "message": "No browser to close"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
     async def execute_ticket_booking(self, booking_request: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute ticket booking automation with real websites.

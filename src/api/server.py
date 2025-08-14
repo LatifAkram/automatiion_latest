@@ -690,7 +690,7 @@ async def intelligent_automation(
             "advanced_capabilities": {
                 "analysis": analysis,
                 "plan": plan,
-                "capabilities_used": [cap.name for cap in plan.get("capabilities_used", [])],
+                "capabilities_used": [cap if isinstance(cap, str) else cap.name for cap in plan.get("capabilities_used", [])],
                 "complexity_level": analysis.get("complexity_level", "simple"),
                 "estimated_duration": analysis.get("estimated_duration", 300),
                 "risk_level": analysis.get("risk_level", "low"),

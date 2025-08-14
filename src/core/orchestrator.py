@@ -139,6 +139,9 @@ class MultiAgentOrchestrator:
         )
         await self.ai_conversational_agent.initialize()
         
+        # Set alias for compatibility
+        self.conversational_agent = self.ai_conversational_agent
+        
         # Initialize Search Agent
         self.search_agent = SearchAgent(
             config=self.config,
