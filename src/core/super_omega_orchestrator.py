@@ -22,6 +22,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
 from dataclasses import dataclass, asdict
 import uuid
+import time
 
 try:
     from playwright.async_api import async_playwright, Browser, Page, BrowserContext
@@ -36,6 +37,8 @@ from .constrained_planner import ConstrainedPlanner, ExecutionPlan, PlanStatus
 from .realtime_data_fabric import RealTimeDataFabric, DataQuery, DataType
 from .deterministic_executor import DeterministicExecutor
 from .auto_skill_mining import AutoSkillMiner
+from .enterprise_security import EnterpriseSecurityManager
+from ..industry.insurance.guidewire_automation import UniversalGuidewireOrchestrator, GuidewireProduct, GuidewireConfig
 
 from ..models.contracts import (
     StepContract, Action, ActionType, TargetSelector,
@@ -83,17 +86,11 @@ class SuperOmegaConfig:
 
 class SuperOmegaOrchestrator:
     """
-    Main SUPER-OMEGA orchestrator that coordinates all components.
-    
-    Provides the unified API for:
-    - Planning complex workflows
-    - Executing with self-healing
-    - Real-time data integration
-    - Evidence capture and audit
-    - Skill learning and reuse
+    The unified SUPER-OMEGA orchestrator that coordinates all components.
+    This is the main entry point for the entire automation system.
     """
     
-    def __init__(self, config: SuperOmegaConfig = None):
+    def __init__(self, config: SuperOmegaConfig):
         self.config = config or SuperOmegaConfig()
         self.logger = logging.getLogger(__name__)
         
@@ -130,6 +127,13 @@ class SuperOmegaOrchestrator:
         
         # Initialize components
         self._initialize_components()
+        
+        # Enterprise systems
+        self.security_manager = EnterpriseSecurityManager(config.dict() if hasattr(config, 'dict') else {})
+        self.guidewire_orchestrator = UniversalGuidewireOrchestrator(
+            executor=None,  # Will be set after page initialization
+            security_manager=self.security_manager
+        )
     
     def _initialize_components(self):
         """Initialize all SUPER-OMEGA components."""
@@ -179,10 +183,27 @@ class SuperOmegaOrchestrator:
     
     async def __aenter__(self):
         """Async context manager entry."""
-        await self.initialize_browser()
-        if self.data_fabric:
-            await self.data_fabric.__aenter__()
-        return self
+        try:
+            await self.initialize_browser()
+            if self.data_fabric:
+                await self.data_fabric.__aenter__()
+                
+            # Initialize deterministic executor after page creation
+            if self.config.enable_deterministic_execution:
+                self.deterministic_executor = DeterministicExecutor(
+                    page=self.page,
+                    semantic_graph=self.semantic_graph,
+                    locator_stack=self.locator_stack,
+                    config=self.config
+                )
+                # Update Guidewire orchestrator with executor
+                self.guidewire_orchestrator.executor = self.deterministic_executor
+            
+            return self
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize SUPER-OMEGA: {e}")
+            raise
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
@@ -226,14 +247,6 @@ class SuperOmegaOrchestrator:
             
             # Create page
             self.page = await self.context.new_page()
-            
-            # Initialize deterministic executor now that we have a page
-            self.deterministic_executor = DeterministicExecutor(
-                self.page,
-                self.semantic_graph,
-                self.locator_stack,
-                self.config
-            )
             
             self.logger.info(f"Browser initialized: {self.config.browser_type}")
             self.logger.info("🎯 Deterministic Executor ready for flakiness-free execution")
@@ -573,8 +586,62 @@ class SuperOmegaOrchestrator:
             self.logger.error(f"Real-time data fetch failed: {e}")
             return []
     
+    async def initialize_guidewire_environment(self, guidewire_configs: Dict[GuidewireProduct, GuidewireConfig]) -> Dict[str, Any]:
+        """Initialize Guidewire products for enterprise insurance automation."""
+        try:
+            results = {}
+            
+            for product, config in guidewire_configs.items():
+                success = await self.guidewire_orchestrator.initialize_guidewire_product(product, config)
+                results[product.value] = {
+                    'initialized': success,
+                    'base_url': config.base_url,
+                    'api_version': config.api_version
+                }
+                
+                if success:
+                    self.logger.info(f"✅ Guidewire {product.value} initialized successfully")
+                else:
+                    self.logger.error(f"❌ Failed to initialize Guidewire {product.value}")
+            
+            return {
+                'status': 'completed',
+                'products_initialized': len([r for r in results.values() if r['initialized']]),
+                'total_products': len(guidewire_configs),
+                'results': results
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Guidewire environment initialization failed: {e}")
+            return {
+                'status': 'failed',
+                'error': str(e)
+            }
+    
+    async def execute_insurance_workflow(self, workflow_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute comprehensive insurance workflow across Guidewire platforms."""
+        try:
+            workflow_type = workflow_data.get('type', 'general')
+            
+            if workflow_type == 'policy_lifecycle':
+                return await self.guidewire_orchestrator.execute_policy_lifecycle(workflow_data)
+            elif workflow_type == 'claim_lifecycle':
+                return await self.guidewire_orchestrator.execute_claim_lifecycle(workflow_data)
+            elif workflow_type == 'cross_product':
+                return await self.guidewire_orchestrator.execute_cross_product_workflow(workflow_data)
+            else:
+                # General workflow execution
+                return await self._execute_general_workflow(workflow_data)
+                
+        except Exception as e:
+            self.logger.error(f"Insurance workflow execution failed: {e}")
+            return {
+                'status': 'failed',
+                'error': str(e)
+            }
+    
     def get_metrics(self) -> Dict[str, Any]:
-        """Get system performance metrics."""
+        """Get comprehensive system metrics including Guidewire analytics."""
         healing_stats = self.locator_stack.get_healing_stats() if self.locator_stack else {}
         mining_stats = self.skill_miner.get_mining_stats() if self.skill_miner else {}
         
@@ -582,8 +649,26 @@ class SuperOmegaOrchestrator:
             **self.metrics,
             'healing_stats': healing_stats,
             'provider_stats': self.data_fabric.get_provider_stats() if self.data_fabric else {},
-            'skill_mining_stats': mining_stats
+            'skill_mining_stats': mining_stats,
+            "system_status": "operational",
+            "uptime": time.time() - self.start_time,
+            "total_runs": len(self.run_history),
+            "success_rate": self._calculate_success_rate(),
+            "avg_execution_time": self._calculate_avg_execution_time(),
+            "evidence_items": len(self.evidence_store),
+            "active_workflows": len(self.active_workflows),
+            "last_updated": datetime.utcnow().isoformat()
         }
+        
+        # Add Guidewire analytics
+        if self.guidewire_orchestrator:
+            base_metrics['guidewire_analytics'] = self.guidewire_orchestrator.get_guidewire_analytics()
+        
+        # Add skill mining stats if available
+        if hasattr(self, 'skill_miner') and self.skill_miner:
+            base_metrics['skill_mining_stats'] = self.skill_miner.get_mining_stats()
+        
+        return base_metrics
     
     def get_run_report(self, run_id: str) -> Optional[RunReport]:
         """Get run report by ID."""
