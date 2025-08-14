@@ -34,6 +34,8 @@ from .self_healing_locators import SelfHealingLocatorStack
 from .shadow_dom_simulator import ShadowDOMSimulator, DOMSnapshot, SimulationResult
 from .constrained_planner import ConstrainedPlanner, ExecutionPlan, PlanStatus
 from .realtime_data_fabric import RealTimeDataFabric, DataQuery, DataType
+from .deterministic_executor import DeterministicExecutor
+from .auto_skill_mining import AutoSkillMiner
 
 from ..models.contracts import (
     StepContract, Action, ActionType, TargetSelector,
@@ -101,6 +103,8 @@ class SuperOmegaOrchestrator:
         self.simulator: Optional[ShadowDOMSimulator] = None
         self.planner: Optional[ConstrainedPlanner] = None
         self.data_fabric: Optional[RealTimeDataFabric] = None
+        self.deterministic_executor: Optional[DeterministicExecutor] = None
+        self.skill_miner: Optional[AutoSkillMiner] = None
         
         # Browser management
         self.playwright = None
@@ -156,6 +160,16 @@ class SuperOmegaOrchestrator:
             # Initialize real-time data fabric
             if self.config.enable_realtime_data:
                 self.data_fabric = RealTimeDataFabric(self.config)
+            
+            # Initialize auto skill-mining system
+            if self.config.enable_skill_mining:
+                self.skill_miner = AutoSkillMiner(
+                    self.semantic_graph,
+                    self.simulator,
+                    self.config
+                )
+            
+            # Note: Deterministic executor will be initialized when page is available
             
             self.logger.info("SUPER-OMEGA components initialized successfully")
             
@@ -213,7 +227,16 @@ class SuperOmegaOrchestrator:
             # Create page
             self.page = await self.context.new_page()
             
+            # Initialize deterministic executor now that we have a page
+            self.deterministic_executor = DeterministicExecutor(
+                self.page,
+                self.semantic_graph,
+                self.locator_stack,
+                self.config
+            )
+            
             self.logger.info(f"Browser initialized: {self.config.browser_type}")
+            self.logger.info("🎯 Deterministic Executor ready for flakiness-free execution")
             
         except Exception as e:
             self.logger.error(f"Failed to initialize browser: {e}")
@@ -291,6 +314,15 @@ class SuperOmegaOrchestrator:
                 self.metrics['failed_runs'] += 1
             
             duration_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+            
+            # Auto skill-mining for successful runs
+            if self.skill_miner and execution_result.get('success', False):
+                try:
+                    skill_id = await self.skill_miner.analyze_successful_run(run_report)
+                    if skill_id:
+                        self.logger.info(f"🧠 Auto-mined skill from successful run: {skill_id}")
+                except Exception as e:
+                    self.logger.warning(f"Skill mining failed: {e}")
             
             result = {
                 'run_id': run_id,
@@ -394,80 +426,36 @@ class SuperOmegaOrchestrator:
                 self.planner._execute_node = original_execute_node
     
     async def _execute_node_with_healing(self, node) -> Dict[str, Any]:
-        """Execute a plan node with self-healing locator resolution."""
+        """Execute a plan node using the deterministic executor."""
         try:
+            if not self.deterministic_executor:
+                raise RuntimeError("Deterministic executor not initialized")
+            
             step = node.step
-            start_time = datetime.utcnow()
+            self.logger.info(f"🎯 Executing step with deterministic executor: {step.goal}")
             
-            # Capture evidence before execution
-            if self.config.capture_screenshots:
-                screenshot_path = f"./evidence/screenshots/{self.current_run_id}_{step.id}_before.png"
-                await self.page.screenshot(path=screenshot_path)
-                
-                evidence = StepEvidence(
-                    step_id=step.id,
-                    type=EvidenceType.SCREENSHOT,
-                    data="screenshot_before",
-                    file_path=screenshot_path,
-                    timestamp=datetime.utcnow()
-                )
-                self.run_evidence[self.current_run_id].append(evidence)
+            # Execute using the deterministic executor (no mock code!)
+            result = await self.deterministic_executor.execute_step(step)
             
-            # Resolve target element using self-healing locators
-            if step.action.target:
-                element = await self.locator_stack.resolve(
-                    self.page, 
-                    step.action.target, 
-                    step.action.type.value
-                )
-                
-                if not element:
-                    return {
-                        'step_id': step.id,
-                        'success': False,
-                        'error': 'Failed to resolve target element',
-                        'drift_detected': True,
-                        'needs_live_data': False
-                    }
+            # Capture evidence from deterministic executor
+            if 'evidence' in result and result['evidence']:
+                self.run_evidence[self.current_run_id].extend(result['evidence'])
             
-            # Execute the action
-            success = await self._execute_action(step.action, element if step.action.target else None)
-            
-            # Capture evidence after execution
-            if self.config.capture_screenshots:
-                screenshot_path = f"./evidence/screenshots/{self.current_run_id}_{step.id}_after.png"
-                await self.page.screenshot(path=screenshot_path)
-                
-                evidence = StepEvidence(
-                    step_id=step.id,
-                    type=EvidenceType.SCREENSHOT,
-                    data="screenshot_after",
-                    file_path=screenshot_path,
-                    timestamp=datetime.utcnow()
-                )
-                self.run_evidence[self.current_run_id].append(evidence)
-            
-            # Check postconditions
-            postconditions_met = await self._verify_postconditions(step.post)
-            
-            execution_time = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+            # Update metrics
             self.metrics['total_steps'] += 1
+            if result.get('success', False):
+                self.metrics['successful_runs'] += 1
             
-            result = {
-                'step_id': step.id,
-                'success': success and postconditions_met,
-                'execution_time_ms': execution_time,
-                'postconditions_met': postconditions_met,
-                'drift_detected': False,
-                'needs_live_data': False
-            }
+            # Track healing if it occurred
+            if result.get('metrics', {}).get('retry_count', 0) > 0:
+                self.metrics['healed_steps'] += 1
             
             return result
             
         except Exception as e:
-            self.logger.error(f"Node execution failed: {e}")
+            self.logger.error(f"Deterministic execution failed: {e}")
             return {
-                'step_id': step.id,
+                'step_id': node.step.id,
                 'success': False,
                 'error': str(e),
                 'drift_detected': False,
@@ -508,26 +496,8 @@ class SuperOmegaOrchestrator:
             self.logger.error(f"Action execution failed: {e}")
             return False
     
-    async def _verify_postconditions(self, postconditions: List[str]) -> bool:
-        """Verify postconditions are met."""
-        try:
-            for condition in postconditions:
-                # Simplified postcondition checking
-                # In practice, would use the simulator's condition evaluation
-                if "url_contains" in condition:
-                    expected_url = condition.split("'")[1]
-                    if expected_url not in self.page.url:
-                        return False
-                elif "visible" in condition:
-                    # Check if element is visible
-                    # Simplified implementation
-                    pass
-            
-            return True
-            
-        except Exception as e:
-            self.logger.error(f"Postcondition verification failed: {e}")
-            return False
+    # Postcondition verification is now handled by the DeterministicExecutor
+    # No more simplified/mock implementations!
     
     async def _generate_run_report(self, run_id: str, goal: str, plan: ExecutionPlan, result: Dict[str, Any]) -> RunReport:
         """Generate comprehensive run report."""
@@ -606,11 +576,13 @@ class SuperOmegaOrchestrator:
     def get_metrics(self) -> Dict[str, Any]:
         """Get system performance metrics."""
         healing_stats = self.locator_stack.get_healing_stats() if self.locator_stack else {}
+        mining_stats = self.skill_miner.get_mining_stats() if self.skill_miner else {}
         
         return {
             **self.metrics,
             'healing_stats': healing_stats,
-            'provider_stats': self.data_fabric.get_provider_stats() if self.data_fabric else {}
+            'provider_stats': self.data_fabric.get_provider_stats() if self.data_fabric else {},
+            'skill_mining_stats': mining_stats
         }
     
     def get_run_report(self, run_id: str) -> Optional[RunReport]:

@@ -345,6 +345,9 @@ RESPOND WITH:
     
     async def _query_llm(self, prompt: str) -> str:
         """Query LLM for plan generation."""
+        if not self.openai_client and not self.anthropic_client:
+            raise RuntimeError("No LLM provider configured. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable.")
+        
         try:
             if self.openai_client:
                 response = await self._query_openai(prompt)
@@ -356,12 +359,11 @@ RESPOND WITH:
                 if response:
                     return response
             
-            # Fallback to mock response for development
-            return self._generate_mock_plan_response()
+            raise RuntimeError("All LLM providers failed to respond")
             
         except Exception as e:
             self.logger.error(f"LLM query failed: {e}")
-            return self._generate_mock_plan_response()
+            raise
     
     async def _query_openai(self, prompt: str) -> Optional[str]:
         """Query OpenAI API."""
@@ -463,8 +465,7 @@ RESPOND WITH:
             
         except Exception as e:
             self.logger.error(f"Failed to parse LLM response: {e}")
-            # Return fallback plan
-            return json.loads(self._generate_mock_plan_response())
+            raise ValueError(f"Invalid LLM response format: {e}")
     
     def _build_execution_plan(self, goal: str, plan_data: Dict[str, Any]) -> ExecutionPlan:
         """Build ExecutionPlan from LLM response."""
@@ -673,31 +674,9 @@ Focus on:
     
     async def _execute_node(self, node: PlanNode) -> Dict[str, Any]:
         """Execute a single plan node."""
-        try:
-            step = node.step
-            
-            # This would integrate with the actual execution engine
-            # For now, return a mock successful result
-            
-            result = {
-                'step_id': step.id,
-                'success': True,
-                'execution_time_ms': 1000,
-                'evidence': ['screenshot_captured'],
-                'drift_detected': False,
-                'needs_live_data': False
-            }
-            
-            return result
-            
-        except Exception as e:
-            return {
-                'step_id': node.step.id,
-                'success': False,
-                'error': str(e),
-                'drift_detected': False,
-                'needs_live_data': False
-            }
+        # This method is now handled by the SuperOmegaOrchestrator
+        # which provides real execution with self-healing
+        raise NotImplementedError("Node execution is handled by SuperOmegaOrchestrator")
     
     async def _handle_drift(self, node: PlanNode, result: Dict[str, Any]):
         """Handle selector drift detection."""
