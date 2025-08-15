@@ -374,6 +374,70 @@ class SelfHealingLocatorAI:
         
         return fingerprint
     
+    async def heal_selector(self, original_selector: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Heal a broken selector - unified interface for external callers"""
+        try:
+            # Determine locator type from selector format
+            if original_selector.startswith('//') or original_selector.startswith('/'):
+                locator_type = LocatorType.XPATH
+            elif original_selector.startswith('#') or original_selector.startswith('.') or '[' in original_selector:
+                locator_type = LocatorType.CSS
+            else:
+                locator_type = LocatorType.CSS  # Default to CSS
+            
+            # Create minimal DOM tree and fingerprint for healing
+            dom_tree = context.get('dom_tree', {
+                'elements': {},
+                'metadata': {'url': context.get('platform', 'unknown'), 'title': 'Test Page'}
+            })
+            
+            # Create a basic fingerprint for the selector
+            fingerprint = ElementFingerprint(
+                element_id=f"heal_{hash(original_selector)}",
+                tag_name="div",  # Default
+                attributes={},
+                text_content="",
+                position=(0, 0, 100, 100),
+                css_properties={},
+                parent_chain=[],
+                siblings=[],
+                children=[],
+                nearby_text=[],
+                semantic_role="",
+                accessibility_info={},
+                visual_features={},
+                context_features={},
+                timestamp=time.time()
+            )
+            
+            # Call the main healing method
+            healing_result = await self.heal_broken_locator(
+                original_selector, locator_type, dom_tree, fingerprint
+            )
+            
+            if healing_result.success:
+                return {
+                    'success': True,
+                    'selector': healing_result.new_locator,
+                    'confidence': healing_result.confidence_score,
+                    'method': healing_result.method_used,
+                    'fallback_used': healing_result.method_used != 'semantic_similarity',
+                    'execution_time_ms': healing_result.recovery_time_ms
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': f"Healing failed: {healing_result.error_message}",
+                    'original_selector': original_selector
+                }
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f"Selector healing error: {str(e)}",
+                'original_selector': original_selector
+            }
+    
     async def heal_broken_locator(self, original_locator: str, locator_type: LocatorType,
                                  current_dom: Dict[str, Any], 
                                  original_fingerprint: ElementFingerprint,
