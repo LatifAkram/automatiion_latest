@@ -93,8 +93,8 @@ class HealingResult:
 class SemanticMatcher:
     """AI-powered semantic matching for element recovery"""
     
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
+    def __init__(self, config: Dict[str, Any] = None):
+        self.config = config or {'semantic_threshold': 0.8}
         self.text_model = None
         self.vision_model = None
         self.fallback_processor = BuiltinAIProcessor()
@@ -318,9 +318,9 @@ class ContextAnalyzer:
 class SelfHealingLocatorAI:
     """Main self-healing locator system with AI capabilities"""
     
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        self.semantic_matcher = SemanticMatcher(config)
+    def __init__(self, config: Dict[str, Any] = None):
+        self.config = config or {'default_confidence_threshold': 0.7, 'max_recovery_time_ms': 15000}
+        self.semantic_matcher = SemanticMatcher(self.config)
         self.context_analyzer = ContextAnalyzer()
         self.builtin_vision = BuiltinVisionProcessor()
         
