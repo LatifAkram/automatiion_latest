@@ -84,13 +84,26 @@ def start_simple_server():
         print("=" * 60)
         
         # Try to start the builtin web server directly
-        from src.ui.builtin_web_server import BuiltinWebServer
+        from src.ui.builtin_web_server import LiveConsoleServer
         
-        server = BuiltinWebServer()
+        server = LiveConsoleServer()
         
         # Start the server
-        import asyncio
-        asyncio.run(server.start_server())
+        if server.start():
+            print(f"✅ Server running at http://{server.host}:{server.port}")
+            print("🔗 Open the URL in your browser to start automation")
+            print("📡 WebSocket support included - no external dependencies!")
+            print("Press Ctrl+C to stop...")
+            
+            try:
+                while server.running:
+                    import time
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print("\n🛑 Stopping server...")
+                server.stop()
+        else:
+            print("❌ Failed to start server")
         
     except ImportError as e:
         print(f"❌ Import error: {e}")

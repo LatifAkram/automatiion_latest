@@ -19,7 +19,7 @@ from .config import Config, get_config, load_config, save_config
 try:
     from .semantic_dom_graph import SemanticDOMGraph
     from .shadow_dom_simulator import ShadowDOMSimulator
-    from .realtime_data_fabric import RealtimeDataFabric
+    from .realtime_data_fabric import RealTimeDataFabric as RealtimeDataFabric
     from .auto_skill_mining import AutoSkillMining
     from .orchestrator import Orchestrator
     from .advanced_orchestrator import AdvancedOrchestrator
