@@ -1,0 +1,26 @@
+{
+  "id": "step_1755283558",
+  "timestamp": "2025-08-15T18:45:59.531088",
+  "session_id": "live_verification_1755283550",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://jsonplaceholder.typicode.com/",
+    "execution_time_ms": 778.4438133239746,
+    "performance": {
+      "domContentLoaded": 6.300000004470348,
+      "loadComplete": 0,
+      "firstContentfulPaint": 148,
+      "transferSize": 3642,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/live_verification_1755283550/frames/step_1755283558_1755283558901.png"
+    ],
+    "dom_snapshots": [
+      "runs/live_verification_1755283550/dom_step_1755283558_1755283558901.html"
+    ]
+  }
+}

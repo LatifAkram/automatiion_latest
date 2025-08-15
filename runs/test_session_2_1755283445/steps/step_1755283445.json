@@ -1,0 +1,26 @@
+{
+  "id": "step_1755283445",
+  "timestamp": "2025-08-15T18:44:07.037666",
+  "session_id": "test_session_2_1755283445",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://www.w3schools.com/html/html_forms.asp",
+    "execution_time_ms": 1512.805461883545,
+    "performance": {
+      "domContentLoaded": 0.20000000298023224,
+      "loadComplete": 0,
+      "firstContentfulPaint": 184,
+      "transferSize": 42487,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/test_session_2_1755283445/frames/step_1755283445_1755283445773.png"
+    ],
+    "dom_snapshots": [
+      "runs/test_session_2_1755283445/dom_step_1755283445_1755283445773.html"
+    ]
+  }
+}

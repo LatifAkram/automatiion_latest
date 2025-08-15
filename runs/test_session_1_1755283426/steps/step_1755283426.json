@@ -1,0 +1,26 @@
+{
+  "id": "step_1755283426",
+  "timestamp": "2025-08-15T18:43:47.363559",
+  "session_id": "test_session_1_1755283426",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://demo.opencart.com/",
+    "execution_time_ms": 542.9725646972656,
+    "performance": {
+      "domContentLoaded": 0.0650000050663948,
+      "loadComplete": 0.015000000596046448,
+      "firstContentfulPaint": 203.7449999973178,
+      "transferSize": 5170,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/test_session_1_1755283426/frames/step_1755283426_1755283427157.png"
+    ],
+    "dom_snapshots": [
+      "runs/test_session_1_1755283426/dom_step_1755283426_1755283427157.html"
+    ]
+  }
+}

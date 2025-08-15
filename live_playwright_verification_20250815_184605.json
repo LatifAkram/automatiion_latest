@@ -1,0 +1,27 @@
+{
+  "verification_result": "FAILED",
+  "timestamp": "2025-08-15T18:46:05.379295",
+  "session_id": "live_verification_1755283550",
+  "browser_launched": false,
+  "step_success_rate": 100.0,
+  "browser_processes": {
+    "initial": 55,
+    "peak": 67,
+    "final": 60,
+    "new_detected": 12
+  },
+  "execution_times": {
+    "navigation_1": 0.3581576347351074,
+    "element_finding": 0.02485823631286621,
+    "navigation_2": 0.7787082195281982
+  },
+  "evidence_collected": [
+    "element_analysis"
+  ],
+  "system_info": {
+    "platform": "SUPER-OMEGA Fixed Live Automation",
+    "playwright_available": true,
+    "headless_mode": false,
+    "automation_engine": "Playwright + Self-Healing"
+  }
+}
