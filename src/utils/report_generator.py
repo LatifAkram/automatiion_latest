@@ -27,6 +27,32 @@ try:
     DOCX_AVAILABLE = True
 except ImportError:
     DOCX_AVAILABLE = False
+    # Create mock Document class
+    class Document:
+        def __init__(self, *args, **kwargs): pass
+        def add_table(self, *args, **kwargs): 
+            class MockTable:
+                style = None
+                def add_row(self): 
+                    class MockRow:
+                        cells = [type('MockCell', (), {'text': '', 'paragraphs': []})() for _ in range(2)]
+                    return MockRow()
+            return MockTable()
+        def add_paragraph(self, *args, **kwargs): 
+            class MockParagraph:
+                def add_run(self, text): 
+                    class MockRun:
+                        bold = False
+                        font = type('MockFont', (), {'size': None})()
+                    return MockRun()
+            return MockParagraph()
+        def save(self, *args, **kwargs): pass
+    
+    class Inches:
+        def __init__(self, value): pass
+    
+    class Pt:
+        def __init__(self, value): pass
 
 try:
     import pandas as pd

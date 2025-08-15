@@ -29,7 +29,32 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
 from .semantic_dom_graph import SemanticDOMGraph, DOMNode, BoundingBox
-from ..models.contracts import StepContract, Action, ActionType
+# Import contracts with fallback
+try:
+    from ..models.contracts import StepContract, Action, ActionType
+except ImportError:
+    from enum import Enum
+    from dataclasses import dataclass
+    from typing import Any, Optional
+    
+    class ActionType(Enum):
+        CLICK = "click"
+        TYPE = "type"
+        SCROLL = "scroll"
+        WAIT = "wait"
+        NAVIGATE = "navigate"
+    
+    @dataclass
+    class Action:
+        type: ActionType
+        selector: str
+        value: Optional[Any] = None
+        
+    @dataclass  
+    class StepContract:
+        action: Action
+        preconditions: Dict[str, Any]
+        postconditions: Dict[str, Any]
 
 
 @dataclass

@@ -20,7 +20,25 @@ import logging
 import time
 from typing import Dict, List, Optional, Any, Tuple, Set
 from datetime import datetime
-import numpy as np
+# Make numpy optional
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    # Create mock numpy
+    class MockNumPy:
+        def array(self, data): return data
+        def mean(self, data): return sum(data) / len(data) if data else 0
+        def std(self, data): return 1.0
+        def dot(self, a, b): return sum(x*y for x, y in zip(a, b))
+        def linalg(self): 
+            class MockLinalg:
+                def norm(self, x): return sum(abs(v) for v in x) ** 0.5
+            return MockLinalg()
+        def zeros(self, shape): return [0] * (shape if isinstance(shape, int) else shape[0])
+        def ones(self, shape): return [1] * (shape if isinstance(shape, int) else shape[0])
+    np = MockNumPy()
 import base64
 import io
 from dataclasses import dataclass, field

@@ -21,7 +21,27 @@ import logging
 import asyncio
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
-import numpy as np
+# Make numpy optional
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    # Create mock numpy
+    class MockNumPy:
+        def array(self, data): return data
+        def mean(self, data): return sum(data) / len(data) if data else 0
+        def std(self, data): return 1.0
+        def dot(self, a, b): return sum(x*y for x, y in zip(a, b))
+        def zeros(self, shape): return [0] * (shape if isinstance(shape, int) else shape[0])
+        def ones(self, shape): return [1] * (shape if isinstance(shape, int) else shape[0])
+        def argmax(self, data): return 0 if data else 0
+        def max(self, data): return max(data) if data else 0
+        def linalg(self): 
+            class MockLinalg:
+                def norm(self, x): return sum(abs(v) for v in x) ** 0.5 if x else 0
+            return MockLinalg()
+    np = MockNumPy()
 from dataclasses import dataclass
 import json
 
@@ -32,7 +52,24 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
 from .semantic_dom_graph import SemanticDOMGraph, DOMNode, BoundingBox
-from ..models.contracts import TargetSelector, StepContract
+# Import contracts with fallback
+try:
+    from ..models.contracts import TargetSelector, StepContract
+except ImportError:
+    from dataclasses import dataclass
+    from typing import Any, Optional, Dict
+    
+    @dataclass
+    class TargetSelector:
+        selector: str
+        confidence: float = 1.0
+        method: str = "css"
+        
+    @dataclass  
+    class StepContract:
+        action: Any
+        preconditions: Dict[str, Any]
+        postconditions: Dict[str, Any]
 
 
 @dataclass

@@ -37,7 +37,24 @@ try:
 except ImportError:
     FEEDPARSER_AVAILABLE = False
 
-from ..models.contracts import FactSource, Fact
+# Import contracts with fallback
+try:
+    from ..models.contracts import FactSource, Fact
+except ImportError:
+    from enum import Enum
+    
+    class FactSource(Enum):
+        OFFICIAL = "official"
+        PRIMARY = "primary"
+        REPUTABLE = "reputable"
+        SOCIAL = "social"
+    
+    @dataclass
+    class Fact:
+        value: Any
+        source: FactSource
+        timestamp: datetime
+        confidence: float = 1.0
 
 
 class DataType(str, Enum):

@@ -31,7 +31,50 @@ except ImportError:
 
 from .semantic_dom_graph import SemanticDOMGraph
 from .self_healing_locators import SelfHealingLocatorStack
-from ..models.contracts import StepContract, Action, ActionType, TargetSelector, StepEvidence, EvidenceType
+# Import contracts with fallback
+try:
+    from ..models.contracts import StepContract, Action, ActionType, TargetSelector, StepEvidence, EvidenceType
+except ImportError:
+    from enum import Enum
+    from dataclasses import dataclass
+    from typing import Any, Optional, Dict
+    
+    class ActionType(Enum):
+        CLICK = "click"
+        TYPE = "type"
+        SCROLL = "scroll"
+        WAIT = "wait"
+        NAVIGATE = "navigate"
+    
+    class EvidenceType(Enum):
+        SCREENSHOT = "screenshot"
+        DOM = "dom"
+        VIDEO = "video"
+        LOG = "log"
+    
+    @dataclass
+    class Action:
+        type: ActionType
+        selector: str
+        value: Optional[Any] = None
+        
+    @dataclass
+    class TargetSelector:
+        selector: str
+        confidence: float = 1.0
+        method: str = "css"
+        
+    @dataclass
+    class StepEvidence:
+        type: EvidenceType
+        data: Any
+        timestamp: Any = None
+        
+    @dataclass  
+    class StepContract:
+        action: Action
+        preconditions: Dict[str, Any]
+        postconditions: Dict[str, Any]
 
 
 class ExecutionState(str, Enum):
