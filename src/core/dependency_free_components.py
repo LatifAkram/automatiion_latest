@@ -630,7 +630,9 @@ class DependencyFreeMicroPlanner:
                     'decision': decision,
                     'execution_time_ms': execution_time,
                     'cached': True,
-                    'confidence': 0.9
+                    'confidence': 0.9,
+                    'success': True,
+                    'sub_25ms': execution_time < 25
                 }
             
             # Fast decision tree traversal
@@ -646,6 +648,7 @@ class DependencyFreeMicroPlanner:
                 'execution_time_ms': execution_time,
                 'cached': False,
                 'confidence': 0.85,
+                'success': True,
                 'sub_25ms': execution_time < 25
             }
             
@@ -655,8 +658,15 @@ class DependencyFreeMicroPlanner:
                 'decision': 'fallback_action',
                 'execution_time_ms': execution_time,
                 'error': str(e),
-                'confidence': 0.5
+                'confidence': 0.5,
+                'success': False,
+                'sub_25ms': execution_time < 25
             }
+    
+    async def make_enhanced_decision(self, context: Dict[str, Any], max_time_ms: int = 25) -> Dict[str, Any]:
+        """Enhanced decision making with additional features"""
+        # For compatibility, just call the main decision method
+        return await self.make_decision(context, max_time_ms)
     
     def _generate_cache_key(self, context: Dict[str, Any]) -> str:
         """Generate cache key for decision context"""

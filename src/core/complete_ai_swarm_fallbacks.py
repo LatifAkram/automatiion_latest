@@ -436,6 +436,7 @@ class EnhancedMicroPlannerAI:
                     'execution_time_ms': execution_time,
                     'cached': True,
                     'confidence': 0.95,  # High confidence for cached decisions
+                    'success': True,
                     'sub_25ms': execution_time < 25,
                     'learning_applied': True
                 }
@@ -462,6 +463,7 @@ class EnhancedMicroPlannerAI:
                 'execution_time_ms': execution_time,
                 'cached': False,
                 'confidence': 0.88,
+                'success': True,
                 'sub_25ms': execution_time < 25,
                 'learning_applied': True,
                 'patterns_used': len(self.learned_patterns.get(cache_key, []))
@@ -474,6 +476,7 @@ class EnhancedMicroPlannerAI:
                 'execution_time_ms': execution_time,
                 'error': str(e),
                 'confidence': 0.3,
+                'success': False,
                 'sub_25ms': execution_time < 25
             }
     
