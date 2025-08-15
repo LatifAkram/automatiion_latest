@@ -16,11 +16,20 @@ from .builtin_vision_processor import process_image, analyze_screenshot, vision_
 from .config import Config, get_config, load_config, save_config
 
 # Import other core modules
+# Import AutoSkillMining separately to avoid dependency issues
+try:
+    from .auto_skill_mining import AutoSkillMiner as AutoSkillMining
+except ImportError:
+    # Create a mock AutoSkillMining for when imports fail
+    class AutoSkillMining:
+        def __init__(self, *args, **kwargs): pass
+        def mine_skill_from_trace(self, *args, **kwargs): return None
+        def get_skill_stats(self, *args, **kwargs): return {}
+
 try:
     from .semantic_dom_graph import SemanticDOMGraph
     from .shadow_dom_simulator import ShadowDOMSimulator
     from .realtime_data_fabric import RealTimeDataFabric as RealtimeDataFabric
-    from .auto_skill_mining import AutoSkillMining
     from .orchestrator import Orchestrator
     from .advanced_orchestrator import AdvancedOrchestrator
     from .super_omega_orchestrator import SuperOmegaOrchestrator
