@@ -234,6 +234,87 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
             except Exception as e:
                 return {"error": str(e)}
         
+        @self.route("/api/run-real-world-benchmark", methods=["POST"])
+        def run_real_world_benchmark(request):
+            """Run comprehensive real-world benchmark tests"""
+            try:
+                import asyncio
+                from testing.real_world_benchmark import get_real_world_tester, BenchmarkReporter
+                
+                # Get tester instance
+                tester = get_real_world_tester()
+                
+                # Run benchmark in asyncio context
+                async def run_benchmark():
+                    return await tester.run_comprehensive_benchmark()
+                
+                # Execute benchmark
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    report = loop.run_until_complete(run_benchmark())
+                    
+                    # Generate console report
+                    console_report = BenchmarkReporter.generate_console_report(report)
+                    
+                    # Save detailed report
+                    report_path = BenchmarkReporter.save_detailed_report(report)
+                    
+                    return {
+                        "success": True,
+                        "report": {
+                            "total_tests": report.total_tests,
+                            "successful_tests": report.successful_tests,
+                            "success_rate": report.success_rate_percent,
+                            "avg_time_ms": report.avg_execution_time_ms,
+                            "platform_results": report.platform_results,
+                            "architecture_performance": report.architecture_performance,
+                            "console_report": console_report,
+                            "detailed_report_path": report_path,
+                            "timestamp": report.timestamp
+                        }
+                    }
+                finally:
+                    loop.close()
+                    
+            except Exception as e:
+                return {"error": str(e), "success": False}
+        
+        @self.route("/api/get-benchmark-history")
+        def get_benchmark_history(request):
+            """Get historical benchmark reports"""
+            try:
+                from pathlib import Path
+                import glob
+                
+                reports_dir = Path("reports")
+                if not reports_dir.exists():
+                    return {"reports": [], "count": 0}
+                
+                # Get all benchmark report files
+                report_files = glob.glob(str(reports_dir / "benchmark_report_*.json"))
+                report_files.sort(reverse=True)  # Most recent first
+                
+                reports = []
+                for report_file in report_files[:10]:  # Last 10 reports
+                    try:
+                        with open(report_file, 'r') as f:
+                            report_data = json.load(f)
+                            reports.append({
+                                "filename": Path(report_file).name,
+                                "timestamp": report_data.get("timestamp"),
+                                "success_rate": report_data.get("success_rate_percent"),
+                                "total_tests": report_data.get("total_tests"),
+                                "path": report_file
+                            })
+                    except Exception as e:
+                        continue
+                
+                return {"reports": reports, "count": len(reports)}
+                
+            except Exception as e:
+                return {"error": str(e), "reports": [], "count": 0}
+        
         # Enhanced console HTML with more features
         enhanced_console_html = """
 <!DOCTYPE html>
@@ -405,6 +486,7 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
                 <button class="btn" onclick="getSystemMetrics()">📊 System Metrics</button>
                 <button class="btn" onclick="testAI()">🧠 Test AI</button>
                 <button class="btn" onclick="testAISwarm()">🤖 AI Swarm</button>
+                <button class="btn" onclick="runRealWorldBenchmark()">🌍 Real Benchmark</button>
                 <button class="btn" onclick="clearMessages()">🗑️ Clear</button>
                 <button class="btn" onclick="startDemo()">🎬 Demo</button>
                 <button class="btn" onclick="showHelp()">❓ Help</button>
@@ -805,6 +887,80 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
                     addMessage(`CPU: ${data.system_metrics.cpu_percent.toFixed(1)}%, Memory: ${data.system_metrics.memory_percent.toFixed(1)}%`);
                     addMessage(`Processes: ${data.system_metrics.process_count}, Uptime: ${(data.system_metrics.uptime_seconds/3600).toFixed(1)}h`);
                 }
+            });
+        }
+        
+        function runRealWorldBenchmark() {
+            addMessage('🌍 STARTING REAL-WORLD BENCHMARK TESTS');
+            addMessage('⚠️ HONEST ASSESSMENT MODE: Testing actual websites with complex workflows');
+            addMessage('📋 Testing Platforms: Google, GitHub, StackOverflow, Wikipedia');
+            addMessage('🔄 Running comprehensive multi-platform automation tests...');
+            
+            const startTime = Date.now();
+            
+            fetch('/api/run-real-world-benchmark', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+                
+                if (data.error) {
+                    addMessage('❌ BENCHMARK FAILED: ' + data.error);
+                } else if (data.success) {
+                    const report = data.report;
+                    
+                    addMessage(`<strong>🏆 REAL-WORLD BENCHMARK RESULTS</strong>`);
+                    addMessage(`Execution Time: ${duration}s`);
+                    addMessage(``);
+                    
+                    addMessage(`<strong>📊 OVERALL PERFORMANCE:</strong>`);
+                    addMessage(`Total Tests: ${report.total_tests}`);
+                    addMessage(`Successful: ${report.successful_tests}`);
+                    addMessage(`Success Rate: ${report.success_rate.toFixed(1)}%`);
+                    addMessage(`Avg Time: ${report.avg_time_ms.toFixed(1)}ms`);
+                    addMessage(``);
+                    
+                    addMessage(`<strong>🌐 PLATFORM BREAKDOWN:</strong>`);
+                    Object.entries(report.platform_results).forEach(([platform, stats]) => {
+                        addMessage(`${platform.toUpperCase()}: ${stats.success_rate.toFixed(1)}% (${stats.successful}/${stats.total_tests})`);
+                    });
+                    addMessage(``);
+                    
+                    addMessage(`<strong>🏗️ ARCHITECTURE PERFORMANCE:</strong>`);
+                    const arch = report.architecture_performance;
+                    if (arch.builtin_foundation && arch.builtin_foundation.success) {
+                        addMessage(`Built-in Foundation: ✅ ${arch.builtin_foundation.execution_time_ms.toFixed(1)}ms`);
+                    }
+                    if (arch.ai_swarm && arch.ai_swarm.success) {
+                        addMessage(`AI Swarm: ✅ ${arch.ai_swarm.components} components, ${arch.ai_swarm.execution_time_ms.toFixed(1)}ms`);
+                    }
+                    addMessage(``);
+                    
+                    // Honest Assessment
+                    if (report.success_rate >= 90) {
+                        addMessage(`<strong>🎯 HONEST ASSESSMENT: ✅ EXCELLENT - Production Ready</strong>`);
+                    } else if (report.success_rate >= 70) {
+                        addMessage(`<strong>🎯 HONEST ASSESSMENT: ⚠️ GOOD - Minor Issues</strong>`);
+                    } else if (report.success_rate >= 50) {
+                        addMessage(`<strong>🎯 HONEST ASSESSMENT: ❌ NEEDS WORK - Significant Issues</strong>`);
+                    } else {
+                        addMessage(`<strong>🎯 HONEST ASSESSMENT: ❌ CRITICAL - Major Problems</strong>`);
+                    }
+                    
+                    addMessage(``);
+                    addMessage(`📄 Detailed report saved: ${report.detailed_report_path}`);
+                    addMessage(`🕒 Timestamp: ${report.timestamp}`);
+                    
+                } else {
+                    addMessage('❌ Unexpected benchmark response');
+                }
+            })
+            .catch(error => {
+                const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+                addMessage(`❌ BENCHMARK ERROR (${duration}s): ${error.message}`);
             });
         }
         
