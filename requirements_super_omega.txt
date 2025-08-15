@@ -1,0 +1,49 @@
+# SUPER-OMEGA Complete Requirements
+# ================================
+
+# Core Dependencies (Required)
+asyncio-mqtt>=0.11.0
+pydantic>=2.0.0
+numpy>=1.21.0
+pandas>=1.5.0
+sqlite3-utils>=3.30.0
+
+# Playwright (Browser Automation)
+playwright>=1.40.0
+playwright-stealth>=1.0.6
+
+# AI/ML Dependencies (with fallbacks)
+torch>=2.0.0
+transformers>=4.30.0
+sentence-transformers>=2.2.0
+clip-by-openai>=1.0
+openai>=1.0.0
+
+# Vision Processing
+opencv-python>=4.8.0
+pillow>=9.5.0
+scikit-image>=0.21.0
+
+# Web Server & Networking
+websockets>=11.0.0
+aiohttp>=3.8.0
+requests>=2.31.0
+
+# Data Processing
+jsonlines>=3.1.0
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# Performance & Monitoring
+psutil>=5.9.0
+memory-profiler>=0.61.0
+
+# Optional AI Services (fallback implementations provided)
+# anthropic>=0.3.0
+# google-generativeai>=0.3.0
+
+# Development & Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.7.0
+mypy>=1.5.0
