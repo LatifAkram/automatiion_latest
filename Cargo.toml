@@ -9,7 +9,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
-headless_chrome = "1.0"
+# Use alternative to headless_chrome that doesn't require edition2024
+fantoccini = "0.19"
 uuid = { version = "1.0", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1.0"
@@ -22,23 +23,25 @@ candle-transformers = "0.3"
 hf-hub = "0.3"
 safetensors = "0.4"
 
-# Real Computer Vision Dependencies  
-opencv = { version = "0.88", features = ["opencv-4"] }
+# Computer Vision Dependencies - Use image processing
 image = "0.24"
-tesseract = "0.13"
+imageproc = "0.23"
+# OCR capability
+tesseract = { version = "0.13", optional = true }
 
 # Performance and Concurrency
 rayon = "1.8"
 crossbeam = "0.8"
 
-# Real YOLO Implementation
-ort = "1.16"  # ONNX Runtime for YOLOv5
+# Real YOLO Implementation via ONNX
+ort = { version = "1.16", optional = true }  # ONNX Runtime for YOLOv5
 ndarray = "0.15"
 
 # Audio Processing for Voice OTP
 rodio = "0.17"
 hound = "3.5"
-whisper-rs = "0.10"
+# Use alternative audio processing
+cpal = "0.15"
 
 # WebAssembly Support for Browser Extension
 web-sys = "0.3"
@@ -48,19 +51,29 @@ wasm-bindgen-futures = "0.4"
 
 # Real Browser Integration
 webdriver = "0.46"
-fantoccini = "0.19"
 
-# Performance Monitoring
-criterion = { version = "0.5", features = ["html_reports"] }
-pprof = { version = "0.13", features = ["criterion", "flamegraph"] }
+# Database and Storage
+rusqlite = { version = "0.29", features = ["bundled"] }
+sled = "0.34"
 
-[build-dependencies]
-tauri-build = { version = "1.5", features = [] }
+# Networking and HTTP
+hyper = { version = "0.14", features = ["full"] }
+tungstenite = "0.20"
+tokio-tungstenite = "0.20"
+
+# Logging and Monitoring
+log = "0.4"
+env_logger = "0.10"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# File system and compression
+walkdir = "2.3"
+flate2 = "1.0"
+tar = "0.4"
 
 [features]
-default = ["custom-protocol"]
-custom-protocol = ["tauri/custom-protocol"]
-
-[[bench]]
-name = "performance_benchmarks"
-harness = false
+default = ["vision", "ocr", "yolo"]
+vision = []
+ocr = ["tesseract"]
+yolo = ["ort"]
