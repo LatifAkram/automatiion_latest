@@ -13,16 +13,22 @@ Features:
 - Node matching and similarity scoring
 """
 
+import asyncio
 import hashlib
 import json
 import logging
+import time
 from typing import Dict, List, Optional, Any, Tuple, Set
 from datetime import datetime
-from dataclasses import dataclass, asdict
 import numpy as np
-from PIL import Image
-import io
 import base64
+import io
+from PIL import Image
+import torch
+import clip
+from transformers import CLIPProcessor, CLIPModel
+import cv2
+from dataclasses import dataclass, field
 
 try:
     from playwright.async_api import Page, ElementHandle
@@ -63,24 +69,25 @@ class BoundingBox:
 
 @dataclass
 class DOMNode:
-    """Semantic DOM node with all required properties."""
-    id: str
-    tag_name: str
+    """Enhanced DOM node with real vision and text embeddings"""
+    # Basic attributes
+    node_id: str
+    tag: str
     role: Optional[str] = None
-    text_content: Optional[str] = None
-    text_norm: Optional[str] = None
-    attributes: Optional[Dict[str, str]] = None
-    bbox: Optional[BoundingBox] = None
-    css_properties: Optional[Dict[str, str]] = None
-    xpath: Optional[str] = None
-    aria_label: Optional[str] = None
-    aria_role: Optional[str] = None
-    parent_id: Optional[str] = None
-    children_ids: List[str] = None
+    text_content: str = ""
+    normalized_text: str = ""
+    attributes: Dict[str, str] = field(default_factory=dict)
     
-    # Embeddings and fingerprints
-    vision_embed: Optional[List[float]] = None
-    text_embed: Optional[List[float]] = None
+    # Position and styling
+    bbox: Optional[Tuple[int, int, int, int]] = None  # x, y, width, height
+    css_properties: Dict[str, str] = field(default_factory=dict)
+    xpath: str = ""
+    css_selector: str = ""
+    aria_attributes: Dict[str, str] = field(default_factory=dict)
+    
+    # Embeddings and fingerprints - NOW POPULATED WITH REAL DATA
+    vision_embed: Optional[List[float]] = None  # REAL CLIP embeddings
+    text_embed: Optional[List[float]] = None    # REAL text embeddings
     fingerprint: Optional[str] = None
     
     # Visual data
@@ -88,18 +95,314 @@ class DOMNode:
     visual_hash: Optional[str] = None
     
     # Metadata
-    timestamp: datetime = None
-    confidence: float = 1.0
+    parent_id: Optional[str] = None
+    children_ids: List[str] = field(default_factory=list)
+    depth: int = 0
+    is_visible: bool = True
+    is_interactable: bool = False
+    confidence_score: float = 0.0
+    last_updated: datetime = field(default_factory=datetime.now)
+
+class RealVisionEmbeddingProcessor:
+    """Real CLIP-based vision embedding processor"""
     
-    def __post_init__(self):
-        if self.children_ids is None:
-            self.children_ids = []
-        if self.timestamp is None:
-            self.timestamp = datetime.utcnow()
-        if self.attributes is None:
-            self.attributes = {}
-        if self.css_properties is None:
-            self.css_properties = {}
+    def __init__(self):
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.clip_model = None
+        self.clip_processor = None
+        self.initialize_models()
+        
+    def initialize_models(self):
+        """Initialize real CLIP models"""
+        try:
+            # Load actual CLIP model from HuggingFace
+            self.clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+            self.clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+            
+            self.clip_model.to(self.device)
+            self.clip_model.eval()
+            
+            logging.info(f"CLIP model loaded successfully on {self.device}")
+            
+        except Exception as e:
+            logging.error(f"Failed to load CLIP model: {e}")
+            # Fallback to torch CLIP if HuggingFace fails
+            try:
+                self.clip_model, self.clip_processor = clip.load("ViT-B/32", device=self.device)
+                logging.info("Fallback torch CLIP model loaded")
+            except Exception as e2:
+                logging.error(f"Failed to load fallback CLIP model: {e2}")
+                
+    def generate_vision_embedding(self, image_data: bytes) -> Optional[List[float]]:
+        """Generate real CLIP vision embeddings from image data"""
+        if not self.clip_model:
+            return None
+            
+        try:
+            # Convert bytes to PIL Image
+            image = Image.open(io.BytesIO(image_data)).convert('RGB')
+            
+            # Process image with CLIP
+            if hasattr(self.clip_processor, 'process_images'):
+                # HuggingFace CLIP
+                inputs = self.clip_processor(images=image, return_tensors="pt")
+                inputs = {k: v.to(self.device) for k, v in inputs.items()}
+                
+                with torch.no_grad():
+                    vision_features = self.clip_model.get_image_features(**inputs)
+                    # Normalize embeddings
+                    vision_features = vision_features / vision_features.norm(dim=-1, keepdim=True)
+                    
+                return vision_features.cpu().numpy().flatten().tolist()
+            else:
+                # Torch CLIP
+                image_tensor = self.clip_processor(image).unsqueeze(0).to(self.device)
+                
+                with torch.no_grad():
+                    vision_features = self.clip_model.encode_image(image_tensor)
+                    # Normalize embeddings
+                    vision_features = vision_features / vision_features.norm(dim=-1, keepdim=True)
+                    
+                return vision_features.cpu().numpy().flatten().tolist()
+                
+        except Exception as e:
+            logging.error(f"Failed to generate vision embedding: {e}")
+            return None
+            
+    def generate_text_embedding(self, text: str) -> Optional[List[float]]:
+        """Generate real CLIP text embeddings"""
+        if not self.clip_model or not text.strip():
+            return None
+            
+        try:
+            if hasattr(self.clip_processor, 'process_text'):
+                # HuggingFace CLIP
+                inputs = self.clip_processor(text=[text], return_tensors="pt", padding=True)
+                inputs = {k: v.to(self.device) for k, v in inputs.items()}
+                
+                with torch.no_grad():
+                    text_features = self.clip_model.get_text_features(**inputs)
+                    # Normalize embeddings
+                    text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+                    
+                return text_features.cpu().numpy().flatten().tolist()
+            else:
+                # Torch CLIP
+                text_tokens = clip.tokenize([text]).to(self.device)
+                
+                with torch.no_grad():
+                    text_features = self.clip_model.encode_text(text_tokens)
+                    # Normalize embeddings
+                    text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+                    
+                return text_features.cpu().numpy().flatten().tolist()
+                
+        except Exception as e:
+            logging.error(f"Failed to generate text embedding: {e}")
+            return None
+
+class SemanticDOMGraph:
+    """Enhanced semantic DOM graph with REAL vision embeddings"""
+    
+    def __init__(self):
+        self.nodes: Dict[str, DOMNode] = {}
+        self.adjacency: Dict[str, Set[str]] = {}
+        self.root_nodes: Set[str] = set()
+        self.embeddings_cache: Dict[str, List[float]] = {}
+        
+        # Initialize REAL vision processor
+        self.vision_processor = RealVisionEmbeddingProcessor()
+        
+        # Performance tracking
+        self.embedding_generation_times: List[float] = []
+        self.cache_hit_rate = 0.0
+        
+    def add_node_with_real_embeddings(
+        self, 
+        node: DOMNode, 
+        screenshot_data: Optional[bytes] = None,
+        element_screenshot: Optional[bytes] = None
+    ) -> str:
+        """Add node with REAL vision and text embeddings"""
+        start_time = time.time()
+        
+        # Generate real text embedding
+        if node.text_content or node.normalized_text:
+            text_for_embedding = node.normalized_text or node.text_content
+            node.text_embed = self.vision_processor.generate_text_embedding(text_for_embedding)
+            
+        # Generate real vision embedding from element screenshot
+        if element_screenshot:
+            node.vision_embed = self.vision_processor.generate_vision_embedding(element_screenshot)
+            
+            # Store screenshot as base64 for evidence
+            node.screenshot_crop = base64.b64encode(element_screenshot).decode('utf-8')
+            
+            # Generate visual hash for comparison
+            node.visual_hash = hashlib.md5(element_screenshot).hexdigest()
+        
+        # Generate fingerprint from real embeddings
+        node.fingerprint = self._generate_real_fingerprint(node)
+        
+        # Add to graph
+        self.nodes[node.node_id] = node
+        
+        # Track performance
+        embedding_time = time.time() - start_time
+        self.embedding_generation_times.append(embedding_time)
+        
+        logging.info(f"Added node {node.node_id} with REAL embeddings in {embedding_time:.3f}s")
+        
+        return node.node_id
+        
+    def _generate_real_fingerprint(self, node: DOMNode) -> str:
+        """Generate fingerprint from real embeddings and attributes"""
+        fingerprint_data = {
+            'role': node.role,
+            'normalized_text': node.normalized_text[:100],  # First 100 chars
+            'tag': node.tag,
+            'vision_embed_hash': None,
+            'text_embed_hash': None,
+            'bbox_quantized': None
+        }
+        
+        # Hash vision embedding if available
+        if node.vision_embed:
+            vision_array = np.array(node.vision_embed)
+            # Quantize to reduce sensitivity
+            quantized_vision = np.round(vision_array, decimals=3)
+            fingerprint_data['vision_embed_hash'] = hashlib.md5(
+                quantized_vision.tobytes()
+            ).hexdigest()[:16]
+            
+        # Hash text embedding if available
+        if node.text_embed:
+            text_array = np.array(node.text_embed)
+            quantized_text = np.round(text_array, decimals=3)
+            fingerprint_data['text_embed_hash'] = hashlib.md5(
+                quantized_text.tobytes()
+            ).hexdigest()[:16]
+            
+        # Quantize bounding box
+        if node.bbox:
+            x, y, w, h = node.bbox
+            # Quantize to 10-pixel blocks to reduce noise
+            fingerprint_data['bbox_quantized'] = (
+                x // 10, y // 10, w // 10, h // 10
+            )
+            
+        # Generate final fingerprint
+        fingerprint_json = json.dumps(fingerprint_data, sort_keys=True)
+        return hashlib.sha256(fingerprint_json.encode()).hexdigest()[:32]
+        
+    def find_similar_nodes_by_vision(
+        self, 
+        target_vision_embed: List[float], 
+        threshold: float = 0.85
+    ) -> List[Tuple[str, float]]:
+        """Find nodes with similar vision embeddings using real similarity"""
+        if not target_vision_embed:
+            return []
+            
+        target_array = np.array(target_vision_embed)
+        similar_nodes = []
+        
+        for node_id, node in self.nodes.items():
+            if not node.vision_embed:
+                continue
+                
+            node_array = np.array(node.vision_embed)
+            
+            # Calculate cosine similarity
+            similarity = np.dot(target_array, node_array) / (
+                np.linalg.norm(target_array) * np.linalg.norm(node_array)
+            )
+            
+            if similarity >= threshold:
+                similar_nodes.append((node_id, similarity))
+                
+        # Sort by similarity (highest first)
+        similar_nodes.sort(key=lambda x: x[1], reverse=True)
+        
+        return similar_nodes
+        
+    def find_similar_nodes_by_text(
+        self, 
+        target_text_embed: List[float], 
+        threshold: float = 0.80
+    ) -> List[Tuple[str, float]]:
+        """Find nodes with similar text embeddings using real similarity"""
+        if not target_text_embed:
+            return []
+            
+        target_array = np.array(target_text_embed)
+        similar_nodes = []
+        
+        for node_id, node in self.nodes.items():
+            if not node.text_embed:
+                continue
+                
+            node_array = np.array(node.text_embed)
+            
+            # Calculate cosine similarity
+            similarity = np.dot(target_array, node_array) / (
+                np.linalg.norm(target_array) * np.linalg.norm(node_array)
+            )
+            
+            if similarity >= threshold:
+                similar_nodes.append((node_id, similarity))
+                
+        # Sort by similarity (highest first)
+        similar_nodes.sort(key=lambda x: x[1], reverse=True)
+        
+        return similar_nodes
+        
+    def update_node_embeddings(self, node_id: str, element_screenshot: Optional[bytes] = None):
+        """Update embeddings for existing node with real data"""
+        if node_id not in self.nodes:
+            return
+            
+        node = self.nodes[node_id]
+        
+        # Regenerate text embedding if text changed
+        if node.text_content or node.normalized_text:
+            text_for_embedding = node.normalized_text or node.text_content
+            new_text_embed = self.vision_processor.generate_text_embedding(text_for_embedding)
+            if new_text_embed:
+                node.text_embed = new_text_embed
+                
+        # Regenerate vision embedding if new screenshot provided
+        if element_screenshot:
+            new_vision_embed = self.vision_processor.generate_vision_embedding(element_screenshot)
+            if new_vision_embed:
+                node.vision_embed = new_vision_embed
+                node.screenshot_crop = base64.b64encode(element_screenshot).decode('utf-8')
+                node.visual_hash = hashlib.md5(element_screenshot).hexdigest()
+                
+        # Regenerate fingerprint with new embeddings
+        node.fingerprint = self._generate_real_fingerprint(node)
+        node.last_updated = datetime.now()
+        
+    def get_embedding_statistics(self) -> Dict[str, Any]:
+        """Get statistics about embedding generation"""
+        total_nodes = len(self.nodes)
+        nodes_with_vision = sum(1 for node in self.nodes.values() if node.vision_embed)
+        nodes_with_text = sum(1 for node in self.nodes.values() if node.text_embed)
+        
+        avg_embedding_time = (
+            np.mean(self.embedding_generation_times) 
+            if self.embedding_generation_times else 0
+        )
+        
+        return {
+            'total_nodes': total_nodes,
+            'nodes_with_vision_embeddings': nodes_with_vision,
+            'nodes_with_text_embeddings': nodes_with_text,
+            'vision_embedding_coverage': nodes_with_vision / max(total_nodes, 1),
+            'text_embedding_coverage': nodes_with_text / max(total_nodes, 1),
+            'average_embedding_generation_time_ms': avg_embedding_time * 1000,
+            'total_embedding_generation_time_s': sum(self.embedding_generation_times)
+        }
 
 
 class SemanticDOMGraph:
