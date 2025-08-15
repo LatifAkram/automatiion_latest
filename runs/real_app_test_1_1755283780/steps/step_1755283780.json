@@ -1,0 +1,26 @@
+{
+  "id": "step_1755283780",
+  "timestamp": "2025-08-15T18:49:43.395536",
+  "session_id": "real_app_test_1_1755283780",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://amazon.com",
+    "execution_time_ms": 2518.1546211242676,
+    "performance": {
+      "domContentLoaded": 0.6999999955296516,
+      "loadComplete": 39.5,
+      "firstContentfulPaint": 220,
+      "transferSize": 168678,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/real_app_test_1_1755283780/frames/step_1755283780_1755283781528.png"
+    ],
+    "dom_snapshots": [
+      "runs/real_app_test_1_1755283780/dom_step_1755283780_1755283781528.html"
+    ]
+  }
+}

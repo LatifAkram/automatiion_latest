@@ -1,0 +1,26 @@
+{
+  "id": "step_1755283971",
+  "timestamp": "2025-08-15T18:52:54.967506",
+  "session_id": "real_app_test_3_1755283971",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://github.com",
+    "execution_time_ms": 3429.5222759246826,
+    "performance": {
+      "domContentLoaded": 0.29999999701976776,
+      "loadComplete": 1.6000000014901161,
+      "firstContentfulPaint": 196,
+      "transferSize": 124695,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/real_app_test_3_1755283971/frames/step_1755283971_1755283972112.png"
+    ],
+    "dom_snapshots": [
+      "runs/real_app_test_3_1755283971/dom_step_1755283971_1755283972112.html"
+    ]
+  }
+}

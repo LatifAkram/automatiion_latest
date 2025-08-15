@@ -1,0 +1,26 @@
+{
+  "id": "step_1755284274",
+  "timestamp": "2025-08-15T18:57:55.530785",
+  "session_id": "real_app_test_5_1755284273",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://stackoverflow.com",
+    "execution_time_ms": 1442.3997402191162,
+    "performance": {
+      "domContentLoaded": 1.0999999940395355,
+      "loadComplete": 4,
+      "firstContentfulPaint": 404,
+      "transferSize": 43524,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/real_app_test_5_1755284273/frames/step_1755284274_1755284274570.png"
+    ],
+    "dom_snapshots": [
+      "runs/real_app_test_5_1755284273/dom_step_1755284274_1755284274570.html"
+    ]
+  }
+}

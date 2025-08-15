@@ -1,0 +1,33 @@
+{
+  "session_id": "real_app_test_1_1755283780",
+  "start_time": "2025-08-15T18:49:40.876991",
+  "end_time": "2025-08-15T18:50:13.486367",
+  "duration_seconds": 32.609164,
+  "actions_performed": 1,
+  "errors_encountered": 3,
+  "success_rate": -2.0,
+  "healing_attempts": 3,
+  "successful_healings": 0,
+  "healing_success_rate": 0.0,
+  "evidence_collected": {
+    "screenshots": 1,
+    "dom_snapshots": 1,
+    "videos": 0
+  },
+  "super_omega_components": {
+    "semantic_dom": true,
+    "shadow_simulator": true,
+    "micro_planner": true,
+    "edge_kernel": true
+  },
+  "skills_discovered": 0,
+  "patterns_identified": 0,
+  "performance_metrics": {
+    "domContentLoaded": 0.6999999955296516,
+    "loadComplete": 39.5,
+    "firstContentfulPaint": 220,
+    "transferSize": 168678,
+    "domInteractive": NaN
+  },
+  "dependency_free": true
+}

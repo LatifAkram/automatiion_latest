@@ -1,0 +1,26 @@
+{
+  "id": "step_1755284121",
+  "timestamp": "2025-08-15T18:55:21.307302",
+  "session_id": "real_app_test_4_1755284120",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://reddit.com",
+    "execution_time_ms": 202.12125778198242,
+    "performance": {
+      "domContentLoaded": 0.10000000149011612,
+      "loadComplete": 0,
+      "firstContentfulPaint": 80,
+      "transferSize": 190540,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/real_app_test_4_1755284120/frames/step_1755284121_1755284121145.png"
+    ],
+    "dom_snapshots": [
+      "runs/real_app_test_4_1755284120/dom_step_1755284121_1755284121145.html"
+    ]
+  }
+}

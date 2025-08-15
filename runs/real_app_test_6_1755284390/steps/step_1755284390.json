@@ -1,0 +1,26 @@
+{
+  "id": "step_1755284390",
+  "timestamp": "2025-08-15T18:59:51.734768",
+  "session_id": "real_app_test_6_1755284390",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://news.google.com",
+    "execution_time_ms": 1166.9068336486816,
+    "performance": {
+      "domContentLoaded": 0.10000000149011612,
+      "loadComplete": 0.10000000149011612,
+      "firstContentfulPaint": 296,
+      "transferSize": 274166,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/real_app_test_6_1755284390/frames/step_1755284390_1755284391036.png"
+    ],
+    "dom_snapshots": [
+      "runs/real_app_test_6_1755284390/dom_step_1755284390_1755284391036.html"
+    ]
+  }
+}

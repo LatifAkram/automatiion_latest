@@ -1,0 +1,26 @@
+{
+  "id": "step_1755283817",
+  "timestamp": "2025-08-15T18:50:18.892004",
+  "session_id": "real_app_test_2_1755283817",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://linkedin.com",
+    "execution_time_ms": 1514.5046710968018,
+    "performance": {
+      "domContentLoaded": 0,
+      "loadComplete": 0.20000000298023224,
+      "firstContentfulPaint": 456,
+      "transferSize": 16615,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/real_app_test_2_1755283817/frames/step_1755283817_1755283817750.png"
+    ],
+    "dom_snapshots": [
+      "runs/real_app_test_2_1755283817/dom_step_1755283817_1755283817750.html"
+    ]
+  }
+}

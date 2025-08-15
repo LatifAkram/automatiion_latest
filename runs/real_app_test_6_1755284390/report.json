@@ -1,0 +1,21 @@
+{
+  "session_id": "real_app_test_6_1755284390",
+  "start_time": "2025-08-15T18:59:50.567395",
+  "evidence_dir": "runs/real_app_test_6_1755284390",
+  "super_omega_components": {
+    "semantic_dom": true,
+    "shadow_simulator": true,
+    "micro_planner": true,
+    "edge_kernel": true
+  },
+  "configuration": {
+    "headless": false,
+    "record_video": true,
+    "capture_screenshots": true,
+    "slow_mo": 500,
+    "timeout": 30000,
+    "debug": true
+  },
+  "status": "initialized",
+  "dependency_free": true
+}
