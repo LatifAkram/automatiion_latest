@@ -232,12 +232,12 @@ class FixedSuperOmegaLiveAutomation:
             
             logger.info(f"✅ FIXED SUPER-OMEGA session created: {session_id}")
             logger.info(f"📁 Evidence directory: {evidence_dir}")
-            logger.info(f"🎭 Execution mode: {mode.value}")
+            logger.info(f"🎭 Execution mode: {mode}")
             
             return {
                 'success': True,
                 'session_id': session_id,
-                'mode': mode.value,
+                'mode': str(mode),
                 'evidence_dir': str(evidence_dir),
                 'super_omega': True,
                 'dependency_free': True,

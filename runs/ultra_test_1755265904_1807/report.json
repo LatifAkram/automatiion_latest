@@ -1,0 +1,16 @@
+{
+  "session_id": "ultra_test_1755265904_1807",
+  "start_time": "2025-08-15T13:51:45.168923",
+  "evidence_dir": "runs/ultra_test_1755265904_1807",
+  "super_omega_components": {
+    "semantic_dom": true,
+    "shadow_simulator": true,
+    "micro_planner": true,
+    "edge_kernel": true
+  },
+  "configuration": {
+    "headless": false
+  },
+  "status": "initialized",
+  "dependency_free": true
+}

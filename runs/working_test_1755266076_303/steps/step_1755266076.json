@@ -1,0 +1,26 @@
+{
+  "id": "step_1755266076",
+  "timestamp": "2025-08-15T13:54:39.949872",
+  "session_id": "working_test_1755266076_303",
+  "step_data": {
+    "action": "navigate",
+    "url": "https://httpbin.org/html",
+    "execution_time_ms": 3594.4983959198,
+    "performance": {
+      "domContentLoaded": 0,
+      "loadComplete": 0,
+      "firstContentfulPaint": 3492,
+      "transferSize": 4041,
+      "domInteractive": NaN
+    },
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/working_test_1755266076_303/frames/step_1755266076_1755266079823.png"
+    ],
+    "dom_snapshots": [
+      "runs/working_test_1755266076_303/dom_step_1755266076_1755266079823.html"
+    ]
+  }
+}

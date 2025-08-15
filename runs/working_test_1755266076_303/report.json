@@ -1,0 +1,33 @@
+{
+  "session_id": "working_test_1755266076_303",
+  "start_time": "2025-08-15T13:54:36.355097",
+  "end_time": "2025-08-15T13:54:49.982271",
+  "duration_seconds": 13.62716,
+  "actions_performed": 1,
+  "errors_encountered": 1,
+  "success_rate": 0.0,
+  "healing_attempts": 1,
+  "successful_healings": 0,
+  "healing_success_rate": 0.0,
+  "evidence_collected": {
+    "screenshots": 1,
+    "dom_snapshots": 1,
+    "videos": 0
+  },
+  "super_omega_components": {
+    "semantic_dom": true,
+    "shadow_simulator": true,
+    "micro_planner": true,
+    "edge_kernel": true
+  },
+  "skills_discovered": 0,
+  "patterns_identified": 0,
+  "performance_metrics": {
+    "domContentLoaded": 0,
+    "loadComplete": 0,
+    "firstContentfulPaint": 3492,
+    "transferSize": 4041,
+    "domInteractive": NaN
+  },
+  "dependency_free": true
+}
