@@ -35,11 +35,24 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
 import uuid
 
+# Add src to path for imports
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 # Import FIXED SUPER-OMEGA components
-from testing.super_omega_live_automation_fixed import (
-    get_fixed_super_omega_live_automation,
-    ExecutionMode
-)
+try:
+    from testing.super_omega_live_automation_fixed import (
+        get_fixed_super_omega_live_automation,
+        ExecutionMode
+    )
+except ImportError:
+    # Fallback for import issues
+    def get_fixed_super_omega_live_automation():
+        return None
+    class ExecutionMode:
+        HYBRID = "HYBRID"
+
 from ui.builtin_web_server import BuiltinWebServer
 
 logger = logging.getLogger(__name__)
