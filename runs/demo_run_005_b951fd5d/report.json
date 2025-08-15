@@ -1,0 +1,76 @@
+{
+  "run_id": "demo_run_005_b951fd5d",
+  "start_time": "2025-08-15T09:40:48.921967",
+  "end_time": "2025-08-15T09:40:48.921974",
+  "duration_ms": 47.51412600126059,
+  "steps": [
+    {
+      "step_id": "e1eb171a-b03d-4912-8794-2b7500f2f644",
+      "description": "Fast Selector Lookup",
+      "start_time": 13700.173408254,
+      "end_time": 13700.173622052,
+      "duration_ms": 0.21379799909482244,
+      "status": "failed",
+      "confidence": 0.95,
+      "retries": 0,
+      "error_message": "no such column: css_selector"
+    },
+    {
+      "step_id": "abe3796f-e13a-4076-b5de-ff4d98937216",
+      "description": "Semantic DOM Graph Processing",
+      "start_time": 13700.173633954,
+      "end_time": 13700.178798593,
+      "duration_ms": 5.164639000213356,
+      "status": "success",
+      "confidence": 0.95,
+      "retries": 0,
+      "error_message": null
+    },
+    {
+      "step_id": "bfd1a736-2629-46fe-9b38-ed988cf5ebaf",
+      "description": "Counterfactual Planning",
+      "start_time": 13700.178821929,
+      "end_time": 13700.187039656,
+      "duration_ms": 8.217727001465391,
+      "status": "success",
+      "confidence": 0.95,
+      "retries": 0,
+      "error_message": null
+    },
+    {
+      "step_id": "fad3dcbf-6642-49dd-859d-55243ece9dd9",
+      "description": "Self-Healing Locator",
+      "start_time": 13700.187061702,
+      "end_time": 13700.199193057,
+      "duration_ms": 12.131355000747135,
+      "status": "success",
+      "confidence": 0.94,
+      "retries": 0,
+      "error_message": null
+    },
+    {
+      "step_id": "7ab5a941-3880-40c2-ac21-cff3d365c67c",
+      "description": "Real-time Data Fabric Query",
+      "start_time": 13700.199214982,
+      "end_time": 13700.214400705,
+      "duration_ms": 15.185722999376594,
+      "status": "success",
+      "confidence": 0.95,
+      "retries": 0,
+      "error_message": null
+    },
+    {
+      "step_id": "9d1e46b8-1b08-4a1e-bad9-69b7a73eb604",
+      "description": "Auto Skill Mining",
+      "start_time": 13700.214422787,
+      "end_time": 13700.220618682,
+      "duration_ms": 6.195895000928431,
+      "status": "success",
+      "confidence": 0.95,
+      "retries": 0,
+      "error_message": null
+    }
+  ],
+  "success_rate": 83.33333333333334,
+  "status": "partial_success"
+}

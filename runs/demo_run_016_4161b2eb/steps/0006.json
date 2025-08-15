@@ -1,0 +1,11 @@
+{
+  "step_id": "94f44634-c1b7-461e-9c35-fb1e051e4418",
+  "description": "Auto Skill Mining",
+  "start_time": 13701.84836884,
+  "end_time": 13701.854544628,
+  "duration_ms": 6.175788001200999,
+  "status": "success",
+  "confidence": 0.95,
+  "retries": 0,
+  "error_message": null
+}
