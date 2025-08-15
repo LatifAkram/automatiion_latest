@@ -315,6 +315,95 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
             except Exception as e:
                 return {"error": str(e), "reports": [], "count": 0}
         
+        @self.route("/api/live-automation", methods=["POST"])
+        def execute_live_automation(request):
+            """Execute REAL live automation from UI instruction"""
+            try:
+                import asyncio
+                import json
+                
+                # Parse request body
+                body = request.get("body", "")
+                if body:
+                    try:
+                        data = json.loads(body)
+                        instruction = data.get('instruction', '')
+                    except:
+                        instruction = ""
+                else:
+                    instruction = ""
+                
+                if not instruction:
+                    return {'success': False, 'error': 'No instruction provided'}
+                
+                # Execute REAL live automation
+                try:
+                    from ui.live_automation_api import get_live_automation_api
+                    
+                    api = get_live_automation_api()
+                    
+                    # Run async function in sync context
+                    try:
+                        result = asyncio.run(api.execute_live_instruction(instruction))
+                    except RuntimeError:
+                        # If there's already an event loop running
+                        import concurrent.futures
+                        import threading
+                        
+                        def run_in_thread():
+                            return asyncio.run(api.execute_live_instruction(instruction))
+                        
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            result = future.result(timeout=120)  # 2 minute timeout
+                    
+                    return result
+                    
+                except ImportError:
+                    return {
+                        'success': False,
+                        'error': 'Live automation not available. Install Playwright: pip install playwright && playwright install',
+                        'instruction': instruction
+                    }
+                
+            except Exception as e:
+                return {'success': False, 'error': f'Live automation failed: {str(e)}'}
+        
+        @self.route("/api/live-status")
+        def get_live_automation_status(request):
+            """Get live automation status"""
+            try:
+                import asyncio
+                
+                try:
+                    from ui.live_automation_api import get_live_automation_api
+                    
+                    api = get_live_automation_api()
+                    
+                    # Run async function in sync context
+                    try:
+                        status = asyncio.run(api.get_live_status())
+                    except RuntimeError:
+                        import concurrent.futures
+                        
+                        def run_in_thread():
+                            return asyncio.run(api.get_live_status())
+                        
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(run_in_thread)
+                            status = future.result(timeout=10)
+                    
+                    return status
+                    
+                except ImportError:
+                    return {
+                        'available': False,
+                        'error': 'Live automation not available. Install Playwright: pip install playwright && playwright install'
+                    }
+                
+            except Exception as e:
+                return {'available': False, 'error': str(e)}
+        
         # Enhanced console HTML with more features
         enhanced_console_html = """
 <!DOCTYPE html>
@@ -781,6 +870,8 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
                 • 📡 Test Connection: Verify WebSocket connectivity<br>
                 • 📊 System Metrics: Get real-time system performance<br>
                 • 🧠 Test AI: Test both Built-in and AI Swarm capabilities<br>
+                • 🎭 executeLiveAutomation(): Execute REAL browser automation<br>
+                • 🔍 checkLiveAutomationStatus(): Check Playwright status<br>
                 • 🗑️ Clear: Clear all messages<br>
                 • 🎬 Start Demo: Run comprehensive dual architecture demo<br>
                 <br>
@@ -812,6 +903,73 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
         function startPerformanceMonitoring() {
             // Update metrics every 2 seconds
             setInterval(getSystemMetrics, 2000);
+        }
+        
+        function executeLiveAutomation(instruction) {
+            if (!instruction) {
+                instruction = prompt('🎯 Enter automation instruction:\\n\\nExamples:\\n• "Search for AI automation on Google"\\n• "Navigate to GitHub and search for playwright"\\n• "Go to Stack Overflow and find Python questions"');
+                if (!instruction) return;
+            }
+            
+            addMessage(`🚀 Executing REAL live automation: ${instruction}`);
+            
+            const startTime = Date.now();
+            
+            fetch('/api/live-automation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    instruction: instruction
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const executionTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                
+                if (data.success) {
+                    addMessage(`✅ Live automation completed: ${data.results.success_rate_percent}% success (${executionTime}s)`);
+                    addMessage(`   📋 Workflow: ${data.results.successful_steps}/${data.results.steps_executed} steps successful`);
+                    addMessage(`   🎭 Browser: Real ${data.results.live_automation ? 'Playwright' : 'Simulated'} automation`);
+                    addMessage(`   🆔 Session: ${data.session_id}`);
+                    if (data.results.close_result && data.results.close_result.success) {
+                        addMessage(`   📸 Screenshots: ${data.results.close_result.screenshots_count} captured`);
+                        addMessage(`   ⏱️ Duration: ${data.results.close_result.session_duration_seconds.toFixed(1)}s`);
+                    }
+                } else {
+                    addMessage(`❌ Live automation failed: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                addMessage(`❌ Live automation error: ${error}`);
+            });
+        }
+        
+        function checkLiveAutomationStatus() {
+            addMessage('🔍 Checking live automation status...');
+            
+            fetch('/api/live-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        addMessage(`✅ Live Automation Available`);
+                        addMessage(`   🎭 Playwright: ${data.playwright_available ? '✅ Available' : '❌ Not Available'}`);
+                        addMessage(`   🔄 Active Sessions: ${data.active_sessions}`);
+                        if (data.automation_stats) {
+                            addMessage(`   📊 Success Rate: ${data.automation_stats.success_rate_percent.toFixed(1)}%`);
+                            addMessage(`   🌐 Browser: ${data.automation_stats.browser_type} (${data.automation_stats.automation_mode})`);
+                            addMessage(`   🔧 Healing Rate: ${data.automation_stats.healing_success_rate_percent.toFixed(1)}%`);
+                        }
+                    } else {
+                        addMessage(`❌ Live Automation Not Available`);
+                        addMessage(`   Error: ${data.error}`);
+                        addMessage(`   💡 Install with: pip install playwright && playwright install`);
+                    }
+                })
+                .catch(error => {
+                    addMessage(`❌ Live status error: ${error}`);
+                });
         }
         
         // Initialize
