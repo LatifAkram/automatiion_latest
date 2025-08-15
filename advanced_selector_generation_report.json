@@ -1,0 +1,54 @@
+{
+  "generation_summary": {
+    "total_selectors": 99690,
+    "target_achieved": false,
+    "generation_date": "2025-08-15 07:38:19",
+    "database_file": "platform_selectors.db"
+  },
+  "quality_metrics": {
+    "average_confidence_score": 0.856,
+    "average_success_rate": 0.915,
+    "production_ready": false
+  },
+  "distribution": {
+    "by_category": {
+      "banking": 16650,
+      "ecommerce": 16560,
+      "enterprise": 16560,
+      "entertainment": 16650,
+      "financial": 16650,
+      "social_media": 16620
+    },
+    "by_action_type": {
+      "click": 24413,
+      "conditional": 16615,
+      "context_click": 4156,
+      "double_click": 4129,
+      "drag_drop": 4187,
+      "form_fill": 16615,
+      "hover": 8374,
+      "select": 5901,
+      "type": 15300
+    },
+    "top_platforms": {
+      "Discord": 1662,
+      "Facebook": 1662,
+      "Instagram": 1662,
+      "LinkedIn": 1662,
+      "Pinterest": 1662,
+      "Reddit": 1662,
+      "Snapchat": 1662,
+      "Telegram": 1662,
+      "Twitter": 1662,
+      "WhatsApp": 1662
+    }
+  },
+  "advanced_features": {
+    "ai_powered_selectors": true,
+    "workflow_automation": true,
+    "mobile_responsive": true,
+    "accessibility_support": true,
+    "self_healing_capabilities": true,
+    "performance_monitoring": true
+  }
+}
