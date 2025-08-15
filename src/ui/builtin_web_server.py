@@ -198,6 +198,10 @@ class BuiltinWebServer:
                 static_file = self.static_files[path]
                 request_handler.send_response(200)
                 request_handler.send_header('Content-Type', static_file['content_type'])
+                # Add CORS headers
+                request_handler.send_header('Access-Control-Allow-Origin', '*')
+                request_handler.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                request_handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
                 request_handler.end_headers()
                 request_handler.wfile.write(static_file['content'].encode('utf-8'))
                 return
@@ -236,6 +240,15 @@ class BuiltinWebServer:
                                     handler = route_handler
                                     break
             
+            # Handle OPTIONS preflight requests
+            if method == 'OPTIONS':
+                request_handler.send_response(200)
+                request_handler.send_header('Access-Control-Allow-Origin', '*')
+                request_handler.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                request_handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+                request_handler.end_headers()
+                return
+            
             if handler:
                 # Create request context
                 request_context = {
@@ -272,29 +285,49 @@ class BuiltinWebServer:
                     json_data = json.dumps(response)
                     request_handler.send_response(200)
                     request_handler.send_header('Content-Type', 'application/json')
+                    # Add CORS headers
+                    request_handler.send_header('Access-Control-Allow-Origin', '*')
+                    request_handler.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                    request_handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
                     request_handler.end_headers()
                     request_handler.wfile.write(json_data.encode('utf-8'))
                 elif isinstance(response, str):
                     # Text response
                     request_handler.send_response(200)
                     request_handler.send_header('Content-Type', 'text/plain')
+                    # Add CORS headers
+                    request_handler.send_header('Access-Control-Allow-Origin', '*')
+                    request_handler.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                    request_handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
                     request_handler.end_headers()
                     request_handler.wfile.write(response.encode('utf-8'))
                 else:
                     # Default response
                     request_handler.send_response(200)
+                    # Add CORS headers
+                    request_handler.send_header('Access-Control-Allow-Origin', '*')
+                    request_handler.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+                    request_handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
                     request_handler.end_headers()
                 
                 return
             
             # 404 Not Found
             request_handler.send_response(404)
+            # Add CORS headers
+            request_handler.send_header('Access-Control-Allow-Origin', '*')
+            request_handler.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            request_handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
             request_handler.end_headers()
             request_handler.wfile.write(b'Not Found')
             
         except Exception as e:
             logger.error(f"Request handling error: {e}")
             request_handler.send_response(500)
+            # Add CORS headers
+            request_handler.send_header('Access-Control-Allow-Origin', '*')
+            request_handler.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            request_handler.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
             request_handler.end_headers()
             request_handler.wfile.write(b'Internal Server Error')
     
@@ -413,6 +446,9 @@ class BuiltinWebServer:
                 self.web_server.handle_request(self)
             
             def do_PUT(self):
+                self.web_server.handle_request(self)
+            
+            def do_OPTIONS(self):
                 self.web_server.handle_request(self)
             
             def log_message(self, format, *args):
