@@ -1,0 +1,11 @@
+{
+  "step_id": "0a54a281-96ad-4dc7-8809-68553feacd05",
+  "description": "Self-Healing Locator",
+  "start_time": 11477.984563267,
+  "end_time": 11477.996844721,
+  "duration_ms": 12.281453999094083,
+  "status": "success",
+  "confidence": 0.94,
+  "retries": 0,
+  "error_message": null
+}

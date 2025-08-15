@@ -666,8 +666,6 @@ class SuperOmegaOrchestrator:
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get comprehensive system metrics including Guidewire analytics."""
-    def get_metrics(self) -> Dict[str, Any]:
-        """Get system performance metrics."""
         healing_stats = self.locator_stack.get_healing_stats() if self.locator_stack else {}
         mining_stats = self.skill_miner.get_mining_stats() if self.skill_miner else {}
         
@@ -713,4 +711,4 @@ class SuperOmegaOrchestrator:
                 'duration_ms': report.duration_ms
             }
             for run_id, report in self.run_reports.items()
-        ]
+        ]        ]

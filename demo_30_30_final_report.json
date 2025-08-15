@@ -1,0 +1,2301 @@
+{
+  "demo_suite": "SUPER-OMEGA 30/30 Success Gate",
+  "timestamp": "2025-08-15T09:03:50.103196",
+  "total_runs": 30,
+  "successful_runs": 0,
+  "overall_success_rate": 0.0,
+  "total_duration_ms": 4476.6680560005625,
+  "performance_metrics": {
+    "avg_step_duration_ms": 7.857928349919045,
+    "p95_step_duration_ms": 15.172648349926021,
+    "sub_25ms_compliance": 100.0,
+    "total_steps_executed": 180
+  },
+  "gate_compliance": {
+    "30_30_success": false,
+    "sub_25ms_target": true,
+    "specification_met": false
+  },
+  "runs": [
+    {
+      "run_id": "demo_run_001_14e0383f",
+      "start_time": "2025-08-15T09:03:45.674957",
+      "end_time": "2025-08-15T09:03:45.674988",
+      "duration_ms": 48.690145998989465,
+      "steps": [
+        {
+          "step_id": "47acccf2-3823-4315-8c81-55a3942e7264",
+          "description": "Fast Selector Lookup",
+          "start_time": 11476.925174001,
+          "end_time": 11476.926700984,
+          "duration_ms": 1.526983000076143,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "50d237f0-6bff-4629-bee4-16552a9678b0",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11476.92672903,
+          "end_time": 11476.931899916,
+          "duration_ms": 5.170886000996688,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "8d2776e8-dd06-4637-b209-e852fb9d4530",
+          "description": "Counterfactual Planning",
+          "start_time": 11476.931922365,
+          "end_time": 11476.940087437,
+          "duration_ms": 8.165072000338114,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "28a43b01-54ea-4ea5-b11b-333fa5e467fc",
+          "description": "Self-Healing Locator",
+          "start_time": 11476.940110565,
+          "end_time": 11476.952262582,
+          "duration_ms": 12.15201699960744,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "0cbc85bb-68bd-4fc9-8f62-98e630d2af87",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11476.952286194,
+          "end_time": 11476.96742893,
+          "duration_ms": 15.142735999688739,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "a1a048d7-eb9d-4197-a18a-2e491aa7369b",
+          "description": "Auto Skill Mining",
+          "start_time": 11476.967457173,
+          "end_time": 11476.973596914,
+          "duration_ms": 6.1397410008794395,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_002_0a6698cf",
+      "start_time": "2025-08-15T09:03:45.823576",
+      "end_time": "2025-08-15T09:03:45.823590",
+      "duration_ms": 47.49364600138506,
+      "steps": [
+        {
+          "step_id": "8ab3fa35-9ead-495e-ae17-744b1ff9c899",
+          "description": "Fast Selector Lookup",
+          "start_time": 11477.075125582,
+          "end_time": 11477.075436332,
+          "duration_ms": 0.31074999969860073,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "49ba8954-c9a6-42c7-9e63-8e1741d6870d",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11477.075451287,
+          "end_time": 11477.080598132,
+          "duration_ms": 5.146845000126632,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "a014a7f4-d9a1-42bf-b418-80198ec81039",
+          "description": "Counterfactual Planning",
+          "start_time": 11477.080620185,
+          "end_time": 11477.088736745,
+          "duration_ms": 8.11656000041694,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "92df11c4-5667-47d0-9dd1-57992e278232",
+          "description": "Self-Healing Locator",
+          "start_time": 11477.088760691,
+          "end_time": 11477.100896318,
+          "duration_ms": 12.135626999224769,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "7029aa72-4f86-4cef-b53f-cb96667e19fb",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11477.100920582,
+          "end_time": 11477.116060099,
+          "duration_ms": 15.139517001443892,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "7e5c732a-132e-4099-8f45-3c20e8edd646",
+          "description": "Auto Skill Mining",
+          "start_time": 11477.116085349,
+          "end_time": 11477.122220364,
+          "duration_ms": 6.1350150008365745,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_003_b7a3f481",
+      "start_time": "2025-08-15T09:03:45.972361",
+      "end_time": "2025-08-15T09:03:45.972374",
+      "duration_ms": 47.49537200041232,
+      "steps": [
+        {
+          "step_id": "13bdaf5e-3e8e-4a3b-9e27-fb5c832358a7",
+          "description": "Fast Selector Lookup",
+          "start_time": 11477.223928199,
+          "end_time": 11477.224248936,
+          "duration_ms": 0.32073699912871234,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "ddb868b5-74cc-4cbd-a6b0-7f3a8854802e",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11477.224264521,
+          "end_time": 11477.229400381,
+          "duration_ms": 5.135859999427339,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "665acc94-2eb9-4216-b265-5199a0275e3c",
+          "description": "Counterfactual Planning",
+          "start_time": 11477.229422241,
+          "end_time": 11477.237541407,
+          "duration_ms": 8.119165999232791,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "618284a8-0a12-40b3-8e6b-777d6cf1b240",
+          "description": "Self-Healing Locator",
+          "start_time": 11477.237575674,
+          "end_time": 11477.249695083,
+          "duration_ms": 12.119408998842118,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "56ce4135-5739-4232-a9be-f66f53e76c2e",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11477.249719182,
+          "end_time": 11477.264852056,
+          "duration_ms": 15.13287399939145,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "620d47ff-6d9a-4987-adfb-82d2dceeb2e5",
+          "description": "Auto Skill Mining",
+          "start_time": 11477.264876204,
+          "end_time": 11477.271008555,
+          "duration_ms": 6.132350999905611,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_004_6c49a922",
+      "start_time": "2025-08-15T09:03:46.121226",
+      "end_time": "2025-08-15T09:03:46.121238",
+      "duration_ms": 47.75019100088684,
+      "steps": [
+        {
+          "step_id": "7d04e3a1-6ff2-484f-bb13-56e2561f8f16",
+          "description": "Fast Selector Lookup",
+          "start_time": 11477.372587271,
+          "end_time": 11477.372903251,
+          "duration_ms": 0.31597999986843206,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "41ce09d0-6e37-4edc-8454-e1d81b986f2a",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11477.372918876,
+          "end_time": 11477.378053257,
+          "duration_ms": 5.134380999152199,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "af6b482f-46eb-4499-bc0b-3d760c6cf25b",
+          "description": "Counterfactual Planning",
+          "start_time": 11477.378075529,
+          "end_time": 11477.386260726,
+          "duration_ms": 8.185196998965694,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "cfb683c6-3ea9-4c14-b7df-a140459bae10",
+          "description": "Self-Healing Locator",
+          "start_time": 11477.386283677,
+          "end_time": 11477.398519679,
+          "duration_ms": 12.236001999553991,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "d2edb3ef-5db5-4b9e-b439-2bae9be0606a",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11477.398555927,
+          "end_time": 11477.413702632,
+          "duration_ms": 15.146705000006477,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "8a4d1346-24c7-47d1-a146-cf38a1cf7577",
+          "description": "Auto Skill Mining",
+          "start_time": 11477.413736127,
+          "end_time": 11477.419872913,
+          "duration_ms": 6.136785999842687,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_005_21100448",
+      "start_time": "2025-08-15T09:03:46.272182",
+      "end_time": "2025-08-15T09:03:46.272195",
+      "duration_ms": 49.79787299998861,
+      "steps": [
+        {
+          "step_id": "33d7df15-c6b6-4242-b826-3aa5998e73a8",
+          "description": "Fast Selector Lookup",
+          "start_time": 11477.523640461,
+          "end_time": 11477.523973954,
+          "duration_ms": 0.3334929988341173,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "34452b66-3dcb-4e86-baa9-6c28bb6ed685",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11477.523989528,
+          "end_time": 11477.529151712,
+          "duration_ms": 5.16218400116486,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "91a95c7d-1a03-4dae-aeb8-128da1d1f23a",
+          "description": "Counterfactual Planning",
+          "start_time": 11477.529174268,
+          "end_time": 11477.537293159,
+          "duration_ms": 8.118890998957795,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "ba2b6ed8-2355-4a9c-a664-873488c4f1b7",
+          "description": "Self-Healing Locator",
+          "start_time": 11477.537316616,
+          "end_time": 11477.549435665,
+          "duration_ms": 12.119048999011284,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "188a59b0-16de-40ef-b5e0-2fbc07f1cf65",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11477.549459061,
+          "end_time": 11477.564602372,
+          "duration_ms": 15.143311000429094,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "a0ac32cc-2e72-463d-8724-d2a083433e2d",
+          "description": "Auto Skill Mining",
+          "start_time": 11477.564629149,
+          "end_time": 11477.570828299,
+          "duration_ms": 6.199150000611553,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_006_56ea1388",
+      "start_time": "2025-08-15T09:03:46.421139",
+      "end_time": "2025-08-15T09:03:46.421150",
+      "duration_ms": 47.611848000087775,
+      "steps": [
+        {
+          "step_id": "db6a153f-2147-42f8-b60c-0cba71befe9f",
+          "description": "Fast Selector Lookup",
+          "start_time": 11477.672655193,
+          "end_time": 11477.672968834,
+          "duration_ms": 0.3136409995931899,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "7c26ce84-bf9c-4612-9dab-1a5f6ef2e000",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11477.672982655,
+          "end_time": 11477.678141866,
+          "duration_ms": 5.15921099940897,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "b8583827-d9a7-4320-bdbc-43120bf673d8",
+          "description": "Counterfactual Planning",
+          "start_time": 11477.678164315,
+          "end_time": 11477.686298248,
+          "duration_ms": 8.133932999044191,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "953a0946-3d9d-4b61-b8de-5162e6984eda",
+          "description": "Self-Healing Locator",
+          "start_time": 11477.686320967,
+          "end_time": 11477.698437945,
+          "duration_ms": 12.116978001358802,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "3fdfaca8-02f4-42ce-8401-22615326621a",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11477.69846155,
+          "end_time": 11477.713607625,
+          "duration_ms": 15.146075000302517,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "3e45bd57-242f-448a-9529-2b1b25796e09",
+          "description": "Auto Skill Mining",
+          "start_time": 11477.713633817,
+          "end_time": 11477.719783273,
+          "duration_ms": 6.149455999548081,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_007_87435675",
+      "start_time": "2025-08-15T09:03:46.570255",
+      "end_time": "2025-08-15T09:03:46.570268",
+      "duration_ms": 47.8437390011095,
+      "steps": [
+        {
+          "step_id": "25dc6f41-469e-4806-86fc-005d112990dc",
+          "description": "Fast Selector Lookup",
+          "start_time": 11477.821457774,
+          "end_time": 11477.821774757,
+          "duration_ms": 0.31698299972049426,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "82de96fc-7054-4a18-a6a5-3e05d2ef9e64",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11477.821790312,
+          "end_time": 11477.827052174,
+          "duration_ms": 5.2618619993154425,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "2593eb6e-bab2-4346-a716-720d32206ab0",
+          "description": "Counterfactual Planning",
+          "start_time": 11477.827080437,
+          "end_time": 11477.835299522,
+          "duration_ms": 8.219084998927428,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "53eb6d32-8e47-4dda-86b5-053820a99bae",
+          "description": "Self-Healing Locator",
+          "start_time": 11477.835323802,
+          "end_time": 11477.847438936,
+          "duration_ms": 12.115133999031968,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "d1e33dba-f498-49c6-9f4c-f06bae9b3a52",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11477.847461966,
+          "end_time": 11477.862635806,
+          "duration_ms": 15.173839999988559,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "0d3a08dc-1ce4-4885-9524-c97a5dadf18a",
+          "description": "Auto Skill Mining",
+          "start_time": 11477.862660854,
+          "end_time": 11477.86890207,
+          "duration_ms": 6.241216000489658,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_008_3be1fc17",
+      "start_time": "2025-08-15T09:03:46.719539",
+      "end_time": "2025-08-15T09:03:46.719550",
+      "duration_ms": 47.633194999434636,
+      "steps": [
+        {
+          "step_id": "49ff426a-bebf-4a93-a2ca-8ea6cd68f755",
+          "description": "Fast Selector Lookup",
+          "start_time": 11477.970957761,
+          "end_time": 11477.971243878,
+          "duration_ms": 0.28611700145120267,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "8bebc60e-aa20-4c11-877f-0c2be5ae63d7",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11477.971258683,
+          "end_time": 11477.976394702,
+          "duration_ms": 5.136019000929082,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "d958f827-68b5-424c-abe2-43b9c395b2d6",
+          "description": "Counterfactual Planning",
+          "start_time": 11477.976418095,
+          "end_time": 11477.984532289,
+          "duration_ms": 8.11419399906299,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "0a54a281-96ad-4dc7-8809-68553feacd05",
+          "description": "Self-Healing Locator",
+          "start_time": 11477.984563267,
+          "end_time": 11477.996844721,
+          "duration_ms": 12.281453999094083,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "d0cd5603-1a04-423b-995d-263c3b6f5037",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11477.996871015,
+          "end_time": 11478.012020506,
+          "duration_ms": 15.149490998737747,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "1c4a7704-4c1c-49bb-8308-b9bbf211211f",
+          "description": "Auto Skill Mining",
+          "start_time": 11478.012049028,
+          "end_time": 11478.018184141,
+          "duration_ms": 6.1351129988906905,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_009_8c81de49",
+      "start_time": "2025-08-15T09:03:46.873003",
+      "end_time": "2025-08-15T09:03:46.873016",
+      "duration_ms": 48.77202899842814,
+      "steps": [
+        {
+          "step_id": "c3faa51d-36d1-4c20-8ece-9cff895dba72",
+          "description": "Fast Selector Lookup",
+          "start_time": 11478.124418003,
+          "end_time": 11478.124720112,
+          "duration_ms": 0.30210899967642035,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "42ed8cb8-192b-41ee-9492-97478899c126",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11478.12473805,
+          "end_time": 11478.129876262,
+          "duration_ms": 5.138212000019848,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "bd31356e-e4d7-4fb0-beb6-c69415870a2c",
+          "description": "Counterfactual Planning",
+          "start_time": 11478.129897229,
+          "end_time": 11478.138144813,
+          "duration_ms": 8.247583999036578,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "8792306d-17dc-46a3-a556-b1d0d87ba29a",
+          "description": "Self-Healing Locator",
+          "start_time": 11478.138166697,
+          "end_time": 11478.150302593,
+          "duration_ms": 12.135896000472712,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "8bf8af12-094e-4805-875f-472302e5bf48",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11478.15032464,
+          "end_time": 11478.165458767,
+          "duration_ms": 15.134126999328146,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "c3de36b9-252c-45db-a68a-7431b33c32b5",
+          "description": "Auto Skill Mining",
+          "start_time": 11478.165481865,
+          "end_time": 11478.171651704,
+          "duration_ms": 6.169838999994681,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_010_745faa02",
+      "start_time": "2025-08-15T09:03:47.021961",
+      "end_time": "2025-08-15T09:03:47.021972",
+      "duration_ms": 47.68239499935589,
+      "steps": [
+        {
+          "step_id": "79a6d60f-4e06-4756-a7ef-717c10b26042",
+          "description": "Fast Selector Lookup",
+          "start_time": 11478.273296023,
+          "end_time": 11478.273574388,
+          "duration_ms": 0.27836499975819606,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "eadb2553-e7f7-431e-9c0b-88f5c243a36b",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11478.273590724,
+          "end_time": 11478.278879158,
+          "duration_ms": 5.288434000249254,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "a8e74424-4deb-4a3b-842e-6dcac5ec8edb",
+          "description": "Counterfactual Planning",
+          "start_time": 11478.278902203,
+          "end_time": 11478.287034236,
+          "duration_ms": 8.132033000947558,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "f566393c-558b-4376-84ce-1ae0a213622a",
+          "description": "Self-Healing Locator",
+          "start_time": 11478.287056337,
+          "end_time": 11478.299289185,
+          "duration_ms": 12.23284800107649,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e5f2afac-976b-4b37-9c65-0c09b65d04cd",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11478.299313162,
+          "end_time": 11478.314450179,
+          "duration_ms": 15.137016998778563,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "828e33f3-0b4e-4b7f-b61c-7816d4e95118",
+          "description": "Auto Skill Mining",
+          "start_time": 11478.314473066,
+          "end_time": 11478.320609374,
+          "duration_ms": 6.136307998531265,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_011_47053d11",
+      "start_time": "2025-08-15T09:03:47.170914",
+      "end_time": "2025-08-15T09:03:47.170927",
+      "duration_ms": 47.77961400031927,
+      "steps": [
+        {
+          "step_id": "e1655f1f-c75f-44e3-9bb8-700b243a2b52",
+          "description": "Fast Selector Lookup",
+          "start_time": 11478.422151365,
+          "end_time": 11478.422408995,
+          "duration_ms": 0.2576299993961584,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "da1d3053-ee9d-4bb0-bf69-e78060c54f96",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11478.422422427,
+          "end_time": 11478.427661247,
+          "duration_ms": 5.238820000158739,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "8a71d4ea-89f3-41a8-88fb-5ecf187cc9ae",
+          "description": "Counterfactual Planning",
+          "start_time": 11478.427685594,
+          "end_time": 11478.43582211,
+          "duration_ms": 8.136515998558025,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "d89064b1-1338-4915-8b54-100eca3ea37d",
+          "description": "Self-Healing Locator",
+          "start_time": 11478.435845061,
+          "end_time": 11478.447965767,
+          "duration_ms": 12.120706000132486,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "127b9844-2d05-48af-a7e0-a5374d233efa",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11478.447989002,
+          "end_time": 11478.463291274,
+          "duration_ms": 15.302272000553785,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "3ab1218a-bf81-4bc2-89ae-b57c78b8787f",
+          "description": "Auto Skill Mining",
+          "start_time": 11478.463317001,
+          "end_time": 11478.469560438,
+          "duration_ms": 6.243436999284313,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_012_772b0bb4",
+      "start_time": "2025-08-15T09:03:47.319658",
+      "end_time": "2025-08-15T09:03:47.319669",
+      "duration_ms": 47.563128000547295,
+      "steps": [
+        {
+          "step_id": "24048178-7cd5-4b08-ab12-a93c8c2b4583",
+          "description": "Fast Selector Lookup",
+          "start_time": 11478.571217318,
+          "end_time": 11478.571476181,
+          "duration_ms": 0.25886299954436254,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "d5bd97cb-c285-4309-b7d4-3ff15471c488",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11478.571491186,
+          "end_time": 11478.57663142,
+          "duration_ms": 5.140233999554766,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "5a1aac8a-7ffd-4970-8800-6e6d9cbc5fef",
+          "description": "Counterfactual Planning",
+          "start_time": 11478.576653018,
+          "end_time": 11478.584789596,
+          "duration_ms": 8.136577998811845,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "dd26e8cb-09bb-4e71-bf6d-43354c10417f",
+          "description": "Self-Healing Locator",
+          "start_time": 11478.584812089,
+          "end_time": 11478.596927685,
+          "duration_ms": 12.115595998693607,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e0aab39e-7f8d-4b6d-ae9a-6666d7d732de",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11478.596949243,
+          "end_time": 11478.612088379,
+          "duration_ms": 15.139136001380393,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "30f35405-210a-49b6-a3b5-db2543c9bd73",
+          "description": "Auto Skill Mining",
+          "start_time": 11478.612112974,
+          "end_time": 11478.618305812,
+          "duration_ms": 6.192838000060874,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_013_e05b75ab",
+      "start_time": "2025-08-15T09:03:47.469163",
+      "end_time": "2025-08-15T09:03:47.469174",
+      "duration_ms": 48.32122799962235,
+      "steps": [
+        {
+          "step_id": "4b3bdb63-5841-47f0-b613-1f00d2b618b0",
+          "description": "Fast Selector Lookup",
+          "start_time": 11478.719918123,
+          "end_time": 11478.720183187,
+          "duration_ms": 0.2650639999046689,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "5dbfce32-3262-4638-b6f9-8b6eb03a2d03",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11478.720197213,
+          "end_time": 11478.725332239,
+          "duration_ms": 5.135026000061771,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "1eaeaf7e-5848-427c-85cd-b3bc97b91174",
+          "description": "Counterfactual Planning",
+          "start_time": 11478.725354084,
+          "end_time": 11478.733537714,
+          "duration_ms": 8.183630001440179,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "46cc19a8-9d52-49f2-90a4-6dd1f7309ee3",
+          "description": "Self-Healing Locator",
+          "start_time": 11478.733575759,
+          "end_time": 11478.745856708,
+          "duration_ms": 12.280948998522945,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "306318b6-ecb1-4e74-a4ee-78b1d60a9fe8",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11478.745882002,
+          "end_time": 11478.761665499,
+          "duration_ms": 15.783496999574709,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "172c398f-ba6d-456d-8d2c-341ded2a5296",
+          "description": "Auto Skill Mining",
+          "start_time": 11478.761689797,
+          "end_time": 11478.76781098,
+          "duration_ms": 6.121182999777375,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_014_80ae4493",
+      "start_time": "2025-08-15T09:03:47.621378",
+      "end_time": "2025-08-15T09:03:47.621389",
+      "duration_ms": 47.71185600111494,
+      "steps": [
+        {
+          "step_id": "83dd9196-dff4-48a0-adee-2f8223878ef7",
+          "description": "Fast Selector Lookup",
+          "start_time": 11478.872689343,
+          "end_time": 11478.872939887,
+          "duration_ms": 0.25054400066437665,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "2e22b521-7fef-4d63-ace9-87315d65795b",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11478.872951162,
+          "end_time": 11478.878233358,
+          "duration_ms": 5.28219599982549,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "8abb618f-a25c-40df-b934-4fee08b8bd8e",
+          "description": "Counterfactual Planning",
+          "start_time": 11478.878259517,
+          "end_time": 11478.8863792,
+          "duration_ms": 8.119682999677025,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "b766cb2e-b042-418a-a66d-6f78707e16bd",
+          "description": "Self-Healing Locator",
+          "start_time": 11478.886401128,
+          "end_time": 11478.898512171,
+          "duration_ms": 12.111042999094934,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "fdbf9e87-c0f4-4205-855e-be4dce391151",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11478.89853284,
+          "end_time": 11478.913866869,
+          "duration_ms": 15.334028999859584,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "4fbf26b2-e16b-4c9a-b73e-e965b1ddfb66",
+          "description": "Auto Skill Mining",
+          "start_time": 11478.913893913,
+          "end_time": 11478.920022679,
+          "duration_ms": 6.128765999164898,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_015_09d83661",
+      "start_time": "2025-08-15T09:03:47.770173",
+      "end_time": "2025-08-15T09:03:47.770185",
+      "duration_ms": 47.65348000000813,
+      "steps": [
+        {
+          "step_id": "c23fe1d2-ca0a-40f3-882f-1a72fd852947",
+          "description": "Fast Selector Lookup",
+          "start_time": 11479.021582398,
+          "end_time": 11479.021843758,
+          "duration_ms": 0.2613600008771755,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "5cedad8d-d362-4b86-afda-ae062e3b257a",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11479.021856186,
+          "end_time": 11479.027112809,
+          "duration_ms": 5.256623000605032,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e86ff83a-df4f-4ea8-9db2-78428353d381",
+          "description": "Counterfactual Planning",
+          "start_time": 11479.027138463,
+          "end_time": 11479.035361716,
+          "duration_ms": 8.223253000323894,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "6db441ad-6244-4fd1-83de-5b3764d73955",
+          "description": "Self-Healing Locator",
+          "start_time": 11479.035385581,
+          "end_time": 11479.047505157,
+          "duration_ms": 12.119575998440268,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "bd998e21-d44f-45b9-8024-db7762f4419e",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11479.047527619,
+          "end_time": 11479.062664598,
+          "duration_ms": 15.136978998270934,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "13c5b131-b56c-491d-8a35-d750c305c5d3",
+          "description": "Auto Skill Mining",
+          "start_time": 11479.062687217,
+          "end_time": 11479.068821707,
+          "duration_ms": 6.134490000476944,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_016_2fb1aa48",
+      "start_time": "2025-08-15T09:03:47.919372",
+      "end_time": "2025-08-15T09:03:47.919383",
+      "duration_ms": 47.46300499937206,
+      "steps": [
+        {
+          "step_id": "68de5e23-f736-4e8f-856b-95a7f0dca343",
+          "description": "Fast Selector Lookup",
+          "start_time": 11479.170943262,
+          "end_time": 11479.171217613,
+          "duration_ms": 0.27435100128059275,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "c8aedd44-c305-45d9-ad19-86fe4e9b9610",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11479.171230139,
+          "end_time": 11479.176363666,
+          "duration_ms": 5.133526999998139,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "75b42547-b2f6-496a-9123-bef245b0fe72",
+          "description": "Counterfactual Planning",
+          "start_time": 11479.176386215,
+          "end_time": 11479.184501462,
+          "duration_ms": 8.115246999295778,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e5c53fee-07e4-4923-97c8-8614fe8c689d",
+          "description": "Self-Healing Locator",
+          "start_time": 11479.184523145,
+          "end_time": 11479.196638439,
+          "duration_ms": 12.115293999158894,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "c28f0833-d8bb-4a95-ad03-0836e9778bd1",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11479.196660273,
+          "end_time": 11479.211793118,
+          "duration_ms": 15.132844999243389,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "5f9b2c79-0822-4fe6-840d-465fff23cced",
+          "description": "Auto Skill Mining",
+          "start_time": 11479.211814839,
+          "end_time": 11479.218021455,
+          "duration_ms": 6.206616000781651,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_017_ddcd1687",
+      "start_time": "2025-08-15T09:03:48.067512",
+      "end_time": "2025-08-15T09:03:48.067518",
+      "duration_ms": 47.159791000012774,
+      "steps": [
+        {
+          "step_id": "bc7c3bd8-2f0d-478a-991e-6dda56e00ba0",
+          "description": "Fast Selector Lookup",
+          "start_time": 11479.319252148,
+          "end_time": 11479.319432053,
+          "duration_ms": 0.17990500055020675,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "a1726b56-8a23-43a4-9c27-77dbc0436595",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11479.319444456,
+          "end_time": 11479.324570183,
+          "duration_ms": 5.125727000631741,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "7d8467aa-502a-4cb6-8abd-571391959c29",
+          "description": "Counterfactual Planning",
+          "start_time": 11479.324592034,
+          "end_time": 11479.332713334,
+          "duration_ms": 8.121300001221243,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "b04b282f-66fa-42a0-aa91-8385dc12c018",
+          "description": "Self-Healing Locator",
+          "start_time": 11479.332739656,
+          "end_time": 11479.344852902,
+          "duration_ms": 12.11324600080843,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "0a337c3a-29d8-4f6b-8062-4f887d543228",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11479.344873627,
+          "end_time": 11479.360016898,
+          "duration_ms": 15.14327099903312,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "6f84745d-6ce3-4be0-911f-55b450fd9592",
+          "description": "Auto Skill Mining",
+          "start_time": 11479.360039565,
+          "end_time": 11479.366161604,
+          "duration_ms": 6.122039001638768,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_018_60830bd8",
+      "start_time": "2025-08-15T09:03:48.215741",
+      "end_time": "2025-08-15T09:03:48.215750",
+      "duration_ms": 47.18221300026926,
+      "steps": [
+        {
+          "step_id": "0cf2890a-3c25-4095-8f61-6073e5c0f0d3",
+          "description": "Fast Selector Lookup",
+          "start_time": 11479.467512099,
+          "end_time": 11479.467709045,
+          "duration_ms": 0.1969460008695023,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "44068dd3-7fa9-4a77-9397-f88c1bfe79fe",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11479.467721443,
+          "end_time": 11479.472840752,
+          "duration_ms": 5.11930900029256,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "32283bd0-c3d5-4ca4-a31c-c634b9c9f7e4",
+          "description": "Counterfactual Planning",
+          "start_time": 11479.472862245,
+          "end_time": 11479.480978724,
+          "duration_ms": 8.11647899899981,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e4808081-3c69-46ad-81df-43fdc5575472",
+          "description": "Self-Healing Locator",
+          "start_time": 11479.481000397,
+          "end_time": 11479.49311517,
+          "duration_ms": 12.114773000575951,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "ecf1d472-c963-4318-97dd-bd41f65a20ac",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11479.493136334,
+          "end_time": 11479.508253357,
+          "duration_ms": 15.117023000129848,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "38435d04-7854-4a63-9f50-21365fba2209",
+          "description": "Auto Skill Mining",
+          "start_time": 11479.508278688,
+          "end_time": 11479.5143921,
+          "duration_ms": 6.1134120005590376,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_019_e60f5aa7",
+      "start_time": "2025-08-15T09:03:48.364324",
+      "end_time": "2025-08-15T09:03:48.364335",
+      "duration_ms": 47.39222300122492,
+      "steps": [
+        {
+          "step_id": "c93627ad-6c32-4287-81c0-c74d9a577134",
+          "description": "Fast Selector Lookup",
+          "start_time": 11479.615949093,
+          "end_time": 11479.616215674,
+          "duration_ms": 0.26658099886844866,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "fbe807b5-ea04-4ce4-b9b2-81c8dc8cc658",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11479.616229716,
+          "end_time": 11479.621368193,
+          "duration_ms": 5.138476999491104,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "fc0f656e-128e-48f3-a43a-7f93a464a205",
+          "description": "Counterfactual Planning",
+          "start_time": 11479.621392424,
+          "end_time": 11479.629511146,
+          "duration_ms": 8.11872200029029,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "4f5057f8-07a1-4feb-9c23-a4c4f2d60369",
+          "description": "Self-Healing Locator",
+          "start_time": 11479.629536366,
+          "end_time": 11479.641657948,
+          "duration_ms": 12.121581999963382,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e2fea77b-d5d7-4521-b4ea-8b22528a0b24",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11479.641679756,
+          "end_time": 11479.656815339,
+          "duration_ms": 15.135583000301267,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "c64e0006-bed6-4e15-b73d-83077ab4a3e6",
+          "description": "Auto Skill Mining",
+          "start_time": 11479.656839264,
+          "end_time": 11479.66297194,
+          "duration_ms": 6.132676000561332,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_020_c33d397a",
+      "start_time": "2025-08-15T09:03:48.512958",
+      "end_time": "2025-08-15T09:03:48.512969",
+      "duration_ms": 47.48207699958584,
+      "steps": [
+        {
+          "step_id": "546fb009-7578-4067-9a0c-e6b30d3da0ee",
+          "description": "Fast Selector Lookup",
+          "start_time": 11479.764513807,
+          "end_time": 11479.764768317,
+          "duration_ms": 0.2545099996495992,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "ead1c2d1-6df3-4e29-9382-fdcb3880af2b",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11479.764782195,
+          "end_time": 11479.769898666,
+          "duration_ms": 5.116471000292222,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "42301bbb-1d83-4479-8ad5-9465de7adc8b",
+          "description": "Counterfactual Planning",
+          "start_time": 11479.769912036,
+          "end_time": 11479.7780322,
+          "duration_ms": 8.120164000501973,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "691167f3-af28-4649-bb63-6ba3f7387cf4",
+          "description": "Self-Healing Locator",
+          "start_time": 11479.778054864,
+          "end_time": 11479.790166455,
+          "duration_ms": 12.111591000575572,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "f9594404-782e-467c-8d1b-211c70058119",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11479.790188714,
+          "end_time": 11479.805451836,
+          "duration_ms": 15.263122000760632,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "673b2080-44ad-41ea-b7b8-9b9c5cf55703",
+          "description": "Auto Skill Mining",
+          "start_time": 11479.805475131,
+          "end_time": 11479.811605837,
+          "duration_ms": 6.1307060004764935,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_021_e17df550",
+      "start_time": "2025-08-15T09:03:48.661910",
+      "end_time": "2025-08-15T09:03:48.661922",
+      "duration_ms": 47.679847999461344,
+      "steps": [
+        {
+          "step_id": "dd175ebf-a6ef-40bb-9300-108c5c0ca6f9",
+          "description": "Fast Selector Lookup",
+          "start_time": 11479.913284209,
+          "end_time": 11479.91352654,
+          "duration_ms": 0.2423309997539036,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "bdc66574-1ba5-4e82-86c9-3df9de9d8e7a",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11479.913540624,
+          "end_time": 11479.918703976,
+          "duration_ms": 5.1633519997267285,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "b5b8296e-3ecc-4ecd-a6af-f764c715d20c",
+          "description": "Counterfactual Planning",
+          "start_time": 11479.91872789,
+          "end_time": 11479.926869158,
+          "duration_ms": 8.141267999235424,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e082358d-9f12-435e-bfc0-7e539d009b1c",
+          "description": "Self-Healing Locator",
+          "start_time": 11479.926891449,
+          "end_time": 11479.939013768,
+          "duration_ms": 12.122318999900017,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "de126615-23f4-4119-9066-34b0d2f89f2b",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11479.939041091,
+          "end_time": 11479.954392542,
+          "duration_ms": 15.351451000242378,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "379a35ff-eb25-46c3-a667-293dbaa08bde",
+          "description": "Auto Skill Mining",
+          "start_time": 11479.954415987,
+          "end_time": 11479.960558043,
+          "duration_ms": 6.142055999589502,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_022_628082d2",
+      "start_time": "2025-08-15T09:03:48.810807",
+      "end_time": "2025-08-15T09:03:48.810819",
+      "duration_ms": 47.79621300076542,
+      "steps": [
+        {
+          "step_id": "d635cd0b-f4d3-49b8-a9e4-ec6471d0a5b2",
+          "description": "Fast Selector Lookup",
+          "start_time": 11480.06208958,
+          "end_time": 11480.062334394,
+          "duration_ms": 0.24481400032527745,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "e25b5b31-1821-4fdd-bdd7-5de2a6f2ecb3",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11480.062347079,
+          "end_time": 11480.067587617,
+          "duration_ms": 5.24053800108959,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "97146886-8383-40fd-9e0f-d4556542431d",
+          "description": "Counterfactual Planning",
+          "start_time": 11480.067609635,
+          "end_time": 11480.075896982,
+          "duration_ms": 8.287347000077716,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "1df2ba28-d154-4ecd-a85f-d4411159765c",
+          "description": "Self-Healing Locator",
+          "start_time": 11480.07591897,
+          "end_time": 11480.088045571,
+          "duration_ms": 12.126600999181392,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "ed11255e-b8e6-4c16-9bb5-bdc48e729765",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11480.088068202,
+          "end_time": 11480.103203786,
+          "duration_ms": 15.135584000745439,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "0d3867fd-ba1d-44dc-92d6-2430971f35a7",
+          "description": "Auto Skill Mining",
+          "start_time": 11480.10322845,
+          "end_time": 11480.109454963,
+          "duration_ms": 6.226513000001432,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_023_e995bc78",
+      "start_time": "2025-08-15T09:03:48.959740",
+      "end_time": "2025-08-15T09:03:48.959751",
+      "duration_ms": 47.759103999851504,
+      "steps": [
+        {
+          "step_id": "d3405112-81a0-4b58-9a4b-815950488dce",
+          "description": "Fast Selector Lookup",
+          "start_time": 11480.211059228,
+          "end_time": 11480.211302787,
+          "duration_ms": 0.2435589995002374,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "b3cbfbf6-20fa-49c1-acce-5595100e98a6",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11480.211314924,
+          "end_time": 11480.21645103,
+          "duration_ms": 5.136106001373264,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "d7b64b81-bf84-49b0-ad41-20aad60995f5",
+          "description": "Counterfactual Planning",
+          "start_time": 11480.216472963,
+          "end_time": 11480.224605367,
+          "duration_ms": 8.132404000207316,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "74f4ec8a-6e19-47fd-ae1d-14bf44e7bae3",
+          "description": "Self-Healing Locator",
+          "start_time": 11480.224627264,
+          "end_time": 11480.236891485,
+          "duration_ms": 12.264220998986275,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "ca7c6a08-02ac-4e11-a9ad-3b3e956ce133",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11480.236919723,
+          "end_time": 11480.252189547,
+          "duration_ms": 15.269823999915388,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "0566634b-32dc-470b-9106-edd1af5c4c25",
+          "description": "Auto Skill Mining",
+          "start_time": 11480.252214518,
+          "end_time": 11480.258381003,
+          "duration_ms": 6.166484999994282,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_024_ce6b4219",
+      "start_time": "2025-08-15T09:03:49.108326",
+      "end_time": "2025-08-15T09:03:49.108336",
+      "duration_ms": 47.50511299971549,
+      "steps": [
+        {
+          "step_id": "21dd8318-0418-4213-9f59-cc5e29f11ffb",
+          "description": "Fast Selector Lookup",
+          "start_time": 11480.359862949,
+          "end_time": 11480.360183869,
+          "duration_ms": 0.32091999855765607,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "8f3115b2-1d14-4569-904c-859f89080af1",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11480.360198439,
+          "end_time": 11480.36533439,
+          "duration_ms": 5.13595099982922,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "c5575e98-8f11-49e3-84bb-a789797f4217",
+          "description": "Counterfactual Planning",
+          "start_time": 11480.365355868,
+          "end_time": 11480.373474463,
+          "duration_ms": 8.118595000269124,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "1f9664f6-5665-4275-884f-dce0d8fc5ff6",
+          "description": "Self-Healing Locator",
+          "start_time": 11480.373496431,
+          "end_time": 11480.385609923,
+          "duration_ms": 12.113491999116377,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "2b4bfd18-3711-4573-b1fc-080f22eab0a9",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11480.385632303,
+          "end_time": 11480.400811655,
+          "duration_ms": 15.179351999904611,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "82d3c18a-b4f8-472e-9d8b-213a18261ce9",
+          "description": "Auto Skill Mining",
+          "start_time": 11480.400840847,
+          "end_time": 11480.406975425,
+          "duration_ms": 6.134577999546309,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_025_adff9c0c",
+      "start_time": "2025-08-15T09:03:49.257584",
+      "end_time": "2025-08-15T09:03:49.257597",
+      "duration_ms": 47.54427900115843,
+      "steps": [
+        {
+          "step_id": "57428193-a6ab-46ae-976b-57903f2646b6",
+          "description": "Fast Selector Lookup",
+          "start_time": 11480.509048319,
+          "end_time": 11480.509330512,
+          "duration_ms": 0.2821930011123186,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "3d46b6f1-39b5-4895-9e17-65e7cb4fc381",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11480.509345922,
+          "end_time": 11480.514510448,
+          "duration_ms": 5.164525999134639,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "518d28c6-6a93-4246-9f17-47f8ab2fa281",
+          "description": "Counterfactual Planning",
+          "start_time": 11480.51453564,
+          "end_time": 11480.522755088,
+          "duration_ms": 8.219448000090779,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "9744ddd1-d8e2-4612-86d6-b5e2229d07b0",
+          "description": "Self-Healing Locator",
+          "start_time": 11480.522777485,
+          "end_time": 11480.53489134,
+          "duration_ms": 12.113855000279727,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "374e4b7d-c3c8-41a4-a2ea-144ffe39fdb8",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11480.534912786,
+          "end_time": 11480.550050667,
+          "duration_ms": 15.137880998736364,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "fc69217e-e6e8-4780-b4a2-9b978106a1dd",
+          "description": "Auto Skill Mining",
+          "start_time": 11480.550075569,
+          "end_time": 11480.556231996,
+          "duration_ms": 6.156427001769771,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_026_cb222b74",
+      "start_time": "2025-08-15T09:03:49.406292",
+      "end_time": "2025-08-15T09:03:49.406304",
+      "duration_ms": 47.55547600143473,
+      "steps": [
+        {
+          "step_id": "4be8c108-3ba0-4591-be2c-73df37ba3945",
+          "description": "Fast Selector Lookup",
+          "start_time": 11480.657781578,
+          "end_time": 11480.658054554,
+          "duration_ms": 0.2729759999056114,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "fd602dc3-3ee3-4224-88cb-399aa0a5efad",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11480.658066101,
+          "end_time": 11480.66326075,
+          "duration_ms": 5.194649000259233,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "94ef8a82-60ba-4cc5-8a49-661ff1b6e46a",
+          "description": "Counterfactual Planning",
+          "start_time": 11480.663285263,
+          "end_time": 11480.671418302,
+          "duration_ms": 8.133039000313147,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e06d9989-eba4-40d9-84fe-6e03ac770620",
+          "description": "Self-Healing Locator",
+          "start_time": 11480.671440444,
+          "end_time": 11480.683557741,
+          "duration_ms": 12.117296999349492,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "fe73c46e-61f0-4ec9-842f-3433e5491eed",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11480.683579495,
+          "end_time": 11480.698716886,
+          "duration_ms": 15.137390999370837,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "2ac9443f-cae3-4def-b816-c2737b6b8014",
+          "description": "Auto Skill Mining",
+          "start_time": 11480.698740428,
+          "end_time": 11480.704937936,
+          "duration_ms": 6.197507998876972,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_027_31f649a8",
+      "start_time": "2025-08-15T09:03:49.555224",
+      "end_time": "2025-08-15T09:03:49.555237",
+      "duration_ms": 47.68958500062581,
+      "steps": [
+        {
+          "step_id": "4a38595e-07ad-4e75-bd8a-dc924b44019c",
+          "description": "Fast Selector Lookup",
+          "start_time": 11480.806619008,
+          "end_time": 11480.806885713,
+          "duration_ms": 0.2667049993760884,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "b6919081-c6e8-4eb3-942c-90b46dc616c5",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11480.80689842,
+          "end_time": 11480.812081141,
+          "duration_ms": 5.182721000892343,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "902980ad-012b-4861-89ea-1e3c8bb8007a",
+          "description": "Counterfactual Planning",
+          "start_time": 11480.812103775,
+          "end_time": 11480.820222197,
+          "duration_ms": 8.118421999824932,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "0e145b8c-8dda-4179-84bf-f41da39e075e",
+          "description": "Self-Healing Locator",
+          "start_time": 11480.820244352,
+          "end_time": 11480.832509858,
+          "duration_ms": 12.265506000403548,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "609b4347-eb1b-4345-8766-4f248b9277fd",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11480.832532934,
+          "end_time": 11480.847682941,
+          "duration_ms": 15.150006998737808,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "7841abf9-39d6-4bb9-b4e6-23a4f6d60387",
+          "description": "Auto Skill Mining",
+          "start_time": 11480.84770658,
+          "end_time": 11480.853871736,
+          "duration_ms": 6.165156000861316,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_028_77c59b01",
+      "start_time": "2025-08-15T09:03:49.703890",
+      "end_time": "2025-08-15T09:03:49.703902",
+      "duration_ms": 47.46294700089493,
+      "steps": [
+        {
+          "step_id": "b1847b0c-41c6-4f55-a49f-f1381413ce2e",
+          "description": "Fast Selector Lookup",
+          "start_time": 11480.955498856,
+          "end_time": 11480.95578666,
+          "duration_ms": 0.28780400134564843,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "fa4414ff-1d57-4775-bc19-0b280a98a9f7",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11480.955799543,
+          "end_time": 11480.960924013,
+          "duration_ms": 5.124469998918357,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "97756859-e066-4840-ac85-7e699dc13b63",
+          "description": "Counterfactual Planning",
+          "start_time": 11480.960944848,
+          "end_time": 11480.969062756,
+          "duration_ms": 8.117907998894225,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "220a8c56-4afa-4850-806f-90be11a92b4a",
+          "description": "Self-Healing Locator",
+          "start_time": 11480.969088288,
+          "end_time": 11480.98121118,
+          "duration_ms": 12.122891999752028,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "17727abf-414a-46e4-b63a-05c7aa0912b4",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11480.981233604,
+          "end_time": 11480.996376468,
+          "duration_ms": 15.142864000154077,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "e56d8ab0-8310-46fa-8f73-e7e45add89cd",
+          "description": "Auto Skill Mining",
+          "start_time": 11480.996400613,
+          "end_time": 11481.002529686,
+          "duration_ms": 6.129073000920471,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_029_14c24096",
+      "start_time": "2025-08-15T09:03:49.852541",
+      "end_time": "2025-08-15T09:03:49.852554",
+      "duration_ms": 47.52226900018286,
+      "steps": [
+        {
+          "step_id": "b5e6e8a2-1d99-473a-8821-1489f110187d",
+          "description": "Fast Selector Lookup",
+          "start_time": 11481.104033125,
+          "end_time": 11481.104273152,
+          "duration_ms": 0.24002699865377508,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "bb6fd181-721c-4c1f-af23-1a144b83458e",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11481.104285378,
+          "end_time": 11481.109418979,
+          "duration_ms": 5.133601000125054,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "2054c76c-1e4e-487a-b8fe-e795ed87acf6",
+          "description": "Counterfactual Planning",
+          "start_time": 11481.109442833,
+          "end_time": 11481.117595626,
+          "duration_ms": 8.152792999680969,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "96fd5080-f834-4bec-b51e-a42b53a41509",
+          "description": "Self-Healing Locator",
+          "start_time": 11481.11761802,
+          "end_time": 11481.129766182,
+          "duration_ms": 12.14816200081259,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "aa15c699-7df2-428b-96a2-ea547b9cb934",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11481.129794509,
+          "end_time": 11481.145025811,
+          "duration_ms": 15.231302000756841,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "2edf1010-d868-4b81-a957-e201341fa6db",
+          "description": "Auto Skill Mining",
+          "start_time": 11481.145053034,
+          "end_time": 11481.15118756,
+          "duration_ms": 6.13452600009623,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    },
+    {
+      "run_id": "demo_run_030_15ed9f66",
+      "start_time": "2025-08-15T09:03:50.001756",
+      "end_time": "2025-08-15T09:03:50.001770",
+      "duration_ms": 47.94708499866829,
+      "steps": [
+        {
+          "step_id": "5dfedf18-e74d-4c61-976a-caed7157dfb6",
+          "description": "Fast Selector Lookup",
+          "start_time": 11481.252885215,
+          "end_time": 11481.253123099,
+          "duration_ms": 0.23788399994373322,
+          "status": "failed",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": "no such column: css_selector"
+        },
+        {
+          "step_id": "3e5dc2dc-ef52-4ce4-9b3d-5e882b022ed8",
+          "description": "Semantic DOM Graph Processing",
+          "start_time": 11481.253135732,
+          "end_time": 11481.258288137,
+          "duration_ms": 5.152404999535065,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "01fdb297-e187-44fa-85cb-6f5e5f06a738",
+          "description": "Counterfactual Planning",
+          "start_time": 11481.25831136,
+          "end_time": 11481.266488607,
+          "duration_ms": 8.177247000276111,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "3d2118aa-2cff-467a-a461-25e830592bc9",
+          "description": "Self-Healing Locator",
+          "start_time": 11481.266510233,
+          "end_time": 11481.278905498,
+          "duration_ms": 12.395265001032385,
+          "status": "success",
+          "confidence": 0.94,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "216eece0-c68f-4a0f-980e-96d780f911fb",
+          "description": "Real-time Data Fabric Query",
+          "start_time": 11481.278933223,
+          "end_time": 11481.294074566,
+          "duration_ms": 15.14134299941361,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        },
+        {
+          "step_id": "c1824a74-7314-4d4d-b92e-ecaacc281f71",
+          "description": "Auto Skill Mining",
+          "start_time": 11481.294099415,
+          "end_time": 11481.300403723,
+          "duration_ms": 6.30430800083559,
+          "status": "success",
+          "confidence": 0.95,
+          "retries": 0,
+          "error_message": null
+        }
+      ],
+      "success_rate": 83.33333333333334,
+      "status": "partial_success"
+    }
+  ]
+}

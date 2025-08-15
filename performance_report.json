@@ -1,0 +1,78 @@
+{
+  "timestamp": "2025-08-15 09:05:06",
+  "overall_score": 7.51,
+  "sub_25ms_compliance": 75.0,
+  "component_results": [
+    {
+      "component": "SelectorLookup",
+      "operation": "database_query",
+      "duration_ms": 999.0,
+      "success": false,
+      "iterations": 0,
+      "metadata": {
+        "error": "no such column: css_selector"
+      }
+    },
+    {
+      "component": "SemanticDOM",
+      "operation": "html_processing",
+      "duration_ms": 0.0021649099107889924,
+      "success": true,
+      "iterations": 100,
+      "metadata": {
+        "success_rate": 1.0,
+        "avg_nodes_processed": 8,
+        "embeddings_generated": 800
+      }
+    },
+    {
+      "component": "ShadowDOM",
+      "operation": "action_simulation",
+      "duration_ms": 0.00021377978555392474,
+      "success": true,
+      "iterations": 50,
+      "metadata": {
+        "success_rate": 1.0,
+        "actions_simulated": 50
+      }
+    },
+    {
+      "component": "DataFabric",
+      "operation": "data_query",
+      "duration_ms": 0.001008100025501335,
+      "success": true,
+      "iterations": 20,
+      "metadata": {
+        "success_rate": 1.0,
+        "providers_tested": 3,
+        "cross_verification": true
+      }
+    }
+  ],
+  "competitive_analysis": {
+    "selector_speed_advantage": {
+      "vs_UiPath": -2120.0,
+      "vs_Manus_AI": -1148.8
+    },
+    "success_rate_comparison": {
+      "SUPER_OMEGA": 75.0,
+      "UiPath": 92.0,
+      "Manus_AI": 88.0
+    },
+    "platform_coverage": {
+      "SUPER_OMEGA": 500,
+      "UiPath": 400,
+      "Manus_AI": 50
+    },
+    "sub_25ms_capability": {
+      "SUPER_OMEGA": true,
+      "UiPath": false,
+      "Manus_AI": false
+    }
+  },
+  "system_specs": {
+    "python_version": "3.13.3 (main, Apr  8 2025, 19:55:40) [GCC 14.2.0]",
+    "platform": "linux",
+    "python_implementation": "cpython"
+  }
+}

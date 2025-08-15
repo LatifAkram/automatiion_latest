@@ -1,0 +1,11 @@
+{
+  "step_id": "2593eb6e-bab2-4346-a716-720d32206ab0",
+  "description": "Counterfactual Planning",
+  "start_time": 11477.827080437,
+  "end_time": 11477.835299522,
+  "duration_ms": 8.219084998927428,
+  "status": "success",
+  "confidence": 0.95,
+  "retries": 0,
+  "error_message": null
+}

@@ -389,7 +389,7 @@ class TrainingManager:
                         "compliance_requirements": ["data_encryption", "audit_trail", "access_control"]
                     }
                 ]
-            }
+            )
         }
     
     async def get_user_progress(self, user_id: str) -> Dict[str, Any]:
