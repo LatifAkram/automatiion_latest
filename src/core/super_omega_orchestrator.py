@@ -669,7 +669,7 @@ class SuperOmegaOrchestrator:
         healing_stats = self.locator_stack.get_healing_stats() if self.locator_stack else {}
         mining_stats = self.skill_miner.get_mining_stats() if self.skill_miner else {}
         
-        return {
+        base_metrics = {
             **self.metrics,
             'healing_stats': healing_stats,
             'provider_stats': self.data_fabric.get_provider_stats() if self.data_fabric else {},
@@ -688,13 +688,7 @@ class SuperOmegaOrchestrator:
         if self.guidewire_orchestrator:
             base_metrics['guidewire_analytics'] = self.guidewire_orchestrator.get_performance_metrics()
         
-        # Add skill mining stats if available
-        if hasattr(self, 'skill_miner') and self.skill_miner:
-            base_metrics['skill_mining_stats'] = self.skill_miner.get_mining_stats()
-        
         return base_metrics
-            'skill_mining_stats': mining_stats
-        }
     
     def get_run_report(self, run_id: str) -> Optional[RunReport]:
         """Get run report by ID."""
@@ -711,4 +705,5 @@ class SuperOmegaOrchestrator:
                 'duration_ms': report.duration_ms
             }
             for run_id, report in self.run_reports.items()
-        ]        ]
+        ]
+"""

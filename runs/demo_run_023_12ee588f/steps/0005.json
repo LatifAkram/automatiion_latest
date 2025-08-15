@@ -1,0 +1,11 @@
+{
+  "step_id": "752a6c16-2aa5-4c9d-be15-5b7426d91b16",
+  "description": "Real-time Data Fabric Query",
+  "start_time": 12456.607981037,
+  "end_time": 12456.623118905,
+  "duration_ms": 15.137868000238086,
+  "status": "success",
+  "confidence": 0.95,
+  "retries": 0,
+  "error_message": null
+}
