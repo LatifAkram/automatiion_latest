@@ -8,7 +8,7 @@ import AIThinkingDisplay from '../src/components/ai-thinking-display';
 import { RealTimeBrowser } from '../src/components/real-time-browser';
 
 // Backend configuration
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
 // Theme configuration
 type Theme = 'light' | 'dark' | 'auto';
@@ -389,11 +389,10 @@ export default function Home() {
                              message.toLowerCase().includes('look up');
 
       // Send message to backend - use intelligent automation for automation requests
-      const endpoint = isAutomationRequest ? '/automation/intelligent' : '/api/chat';
+      const endpoint = isAutomationRequest ? '/api/fixed-super-omega-execute' : '/api/chat';
       const requestBody = isAutomationRequest 
         ? {
-            instructions: message,
-            url: message.includes('https://') ? message.match(/https?:\/\/[^\s]+/)?.[0] || 'https://www.google.com' : 'https://www.google.com'
+            instruction: message
           }
         : {
             message,
@@ -752,12 +751,11 @@ export default function Home() {
       }
 
       // Execute intelligent automation
-      const automationResponse = await fetch(`${BACKEND_URL}/automation/intelligent`, {
+      const automationResponse = await fetch(`${BACKEND_URL}/api/fixed-super-omega-execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instructions: message,
-          url: url || 'https://www.google.com'
+          instruction: message
         })
       });
 

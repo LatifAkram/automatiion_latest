@@ -10,23 +10,23 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/:path*',
+        destination: 'http://localhost:8080/:path*',
       },
       {
         source: '/automation/:path*',
-        destination: 'http://localhost:8000/automation/:path*',
+        destination: 'http://localhost:8080/automation/:path*',
       },
       {
         source: '/search/:path*',
-        destination: 'http://localhost:8000/search/:path*',
+        destination: 'http://localhost:8080/search/:path*',
       },
       {
         source: '/export/:path*',
-        destination: 'http://localhost:8000/export/:path*',
+        destination: 'http://localhost:8080/export/:path*',
       },
       {
         source: '/health',
-        destination: 'http://localhost:8000/health',
+        destination: 'http://localhost:8080/health',
       },
     ];
   },
