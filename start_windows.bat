@@ -2,13 +2,22 @@
 echo 🎯 SUPER-OMEGA Windows Startup
 echo ================================
 
-echo 📦 Installing dependencies...
-pip install fastapi uvicorn aiohttp websockets psutil playwright
+echo ℹ️ Choose startup method:
+echo 1. Simple (Core automation only - RECOMMENDED for Windows)
+echo 2. Full (With AI features - may have compatibility issues)
+echo.
 
-echo 🌐 Installing Playwright browsers...
-python -m playwright install chromium
+set /p choice="Enter choice (1 or 2): "
 
-echo 🚀 Starting SUPER-OMEGA Live Console...
-python windows_startup_fix.py
+if "%choice%"=="1" (
+    echo 🚀 Starting Simple SUPER-OMEGA...
+    python start_simple_windows.py
+) else if "%choice%"=="2" (
+    echo 🚀 Starting Full SUPER-OMEGA...
+    python windows_startup_fix.py
+) else (
+    echo ❌ Invalid choice, starting Simple version...
+    python start_simple_windows.py
+)
 
 pause

@@ -23,12 +23,44 @@ from datetime import datetime
 import numpy as np
 import base64
 import io
-from PIL import Image
-import torch
-import clip
-from transformers import CLIPProcessor, CLIPModel
-import cv2
 from dataclasses import dataclass, field
+
+# Windows compatibility - make AI dependencies optional
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    Image = None
+
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+
+try:
+    import clip
+    CLIP_AVAILABLE = True
+except ImportError:
+    CLIP_AVAILABLE = False
+    clip = None
+
+try:
+    from transformers import CLIPProcessor, CLIPModel
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
+    CLIPProcessor = None
+    CLIPModel = None
+
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    cv2 = None
 
 try:
     from playwright.async_api import Page, ElementHandle
@@ -210,12 +242,79 @@ class SemanticDOMGraph:
         self.root_nodes: Set[str] = set()
         self.embeddings_cache: Dict[str, List[float]] = {}
         
-        # Initialize REAL vision processor
-        self.vision_processor = RealVisionEmbeddingProcessor()
+        # Initialize vision processor with fallback handling
+        try:
+            if TORCH_AVAILABLE and CLIP_AVAILABLE and PIL_AVAILABLE:
+                self.vision_processor = RealVisionEmbeddingProcessor()
+                self.ai_features_available = True
+            else:
+                self.vision_processor = self._create_fallback_processor()
+                self.ai_features_available = False
+                print("⚠️ AI dependencies not available, using fallback processor")
+        except Exception as e:
+            print(f"⚠️ Vision processor initialization failed: {e}")
+            self.vision_processor = self._create_fallback_processor()
+            self.ai_features_available = False
         
         # Performance tracking
         self.embedding_generation_times: List[float] = []
         self.cache_hit_rate = 0.0
+    
+    def _create_fallback_processor(self):
+        """Create a fallback processor when AI dependencies are not available"""
+        class FallbackVisionProcessor:
+            def __init__(self):
+                self.fallback_mode = True
+            
+            def generate_text_embedding(self, text: str) -> List[float]:
+                """Generate simple hash-based embedding for text"""
+                if not text:
+                    return [0.0] * 512
+                
+                # Simple TF-IDF-like approach using character frequencies
+                embedding = [0.0] * 512
+                for i, char in enumerate(text.lower()[:512]):
+                    embedding[i % 512] += ord(char) / 1000.0
+                
+                # Normalize
+                norm = sum(x * x for x in embedding) ** 0.5
+                if norm > 0:
+                    embedding = [x / norm for x in embedding]
+                
+                return embedding
+            
+            def generate_vision_embedding(self, image_data: bytes) -> List[float]:
+                """Generate simple hash-based embedding for images"""
+                if not image_data:
+                    return [0.0] * 512
+                
+                # Simple hash-based approach
+                embedding = [0.0] * 512
+                for i, byte_val in enumerate(image_data[:512]):
+                    embedding[i % 512] += byte_val / 255.0
+                
+                # Normalize
+                norm = sum(x * x for x in embedding) ** 0.5
+                if norm > 0:
+                    embedding = [x / norm for x in embedding]
+                
+                return embedding
+            
+            def compute_similarity(self, emb1: List[float], emb2: List[float]) -> float:
+                """Compute cosine similarity between embeddings"""
+                if len(emb1) != len(emb2):
+                    return 0.0
+                
+                dot_product = sum(a * b for a, b in zip(emb1, emb2))
+                norm1 = sum(a * a for a in emb1) ** 0.5
+                norm2 = sum(b * b for b in emb2) ** 0.5
+                
+                if norm1 == 0 or norm2 == 0:
+                    return 0.0
+                
+                return dot_product / (norm1 * norm2)
+        
+        return FallbackVisionProcessor()
         
     def add_node_with_real_embeddings(
         self, 

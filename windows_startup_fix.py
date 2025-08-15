@@ -49,6 +49,10 @@ def fix_windows_compatibility():
     # The resource module fix is already applied to builtin_performance_monitor.py
     print("✅ Resource module compatibility fixed")
     
+    # Fix protobuf compatibility issue
+    os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+    print("✅ Protobuf compatibility fixed")
+    
     # Set Windows-specific environment variables
     os.environ['PYTHONIOENCODING'] = 'utf-8'
     os.environ['PYTHONUTF8'] = '1'
