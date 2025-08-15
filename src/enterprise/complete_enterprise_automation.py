@@ -81,7 +81,7 @@ class CompleteEnterpriseAutomation:
         self.azure = AzureAutomation()
         self.aws = AWSAutomation()
         self.google_cloud = GoogleCloudAutomation()
-        self.guidewire = GuidewireAutomation()
+        self.guidewire = None  # Will use CompleteGuidewirePlatformOrchestrator from main orchestrator
         
         logger.info("Complete Enterprise Automation initialized")
 

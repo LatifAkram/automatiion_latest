@@ -38,7 +38,12 @@ from .realtime_data_fabric import RealTimeDataFabric, DataQuery, DataType
 from .deterministic_executor import DeterministicExecutor
 from .auto_skill_mining import AutoSkillMiner
 from .enterprise_security import EnterpriseSecurityManager
-from ..industry.insurance.guidewire_automation import UniversalGuidewireOrchestrator, GuidewireProduct, GuidewireConfig
+from ..industry.insurance.complete_guidewire_platform import (
+    CompleteGuidewirePlatformOrchestrator, 
+    GuidewirePlatform, 
+    GuidewireConnection,
+    create_complete_guidewire_orchestrator
+)
 
 from ..models.contracts import (
     StepContract, Action, ActionType, TargetSelector,
@@ -142,10 +147,7 @@ class SuperOmegaOrchestrator:
         
         # Enterprise systems
         self.security_manager = EnterpriseSecurityManager(config.dict() if hasattr(config, 'dict') else {})
-        self.guidewire_orchestrator = UniversalGuidewireOrchestrator(
-            executor=None,  # Will be set after page initialization
-            security_manager=self.security_manager
-        )
+        self.guidewire_orchestrator = None  # Will be initialized with complete platform configs
     
     def _initialize_components(self):
         """Initialize all SUPER-OMEGA components."""
@@ -610,29 +612,27 @@ class SuperOmegaOrchestrator:
             self.logger.error(f"Real-time data fetch failed: {e}")
             return []
     
-    async def initialize_guidewire_environment(self, guidewire_configs: Dict[GuidewireProduct, GuidewireConfig]) -> Dict[str, Any]:
-        """Initialize Guidewire products for enterprise insurance automation."""
+    async def initialize_guidewire_environment(self, guidewire_configs: Dict[GuidewirePlatform, Dict[str, Any]]) -> Dict[str, Any]:
+        """Initialize complete Guidewire platform ecosystem for enterprise insurance automation."""
         try:
-            results = {}
+            # Initialize the complete Guidewire orchestrator if not already done
+            if self.guidewire_orchestrator is None:
+                self.guidewire_orchestrator = await create_complete_guidewire_orchestrator(
+                    self.deterministic_executor,
+                    self.security_manager,
+                    guidewire_configs
+                )
             
-            for product, config in guidewire_configs.items():
-                success = await self.guidewire_orchestrator.initialize_guidewire_product(product, config)
-                results[product.value] = {
-                    'initialized': success,
-                    'base_url': config.base_url,
-                    'api_version': config.api_version
-                }
-                
-                if success:
-                    self.logger.info(f"✅ Guidewire {product.value} initialized successfully")
-                else:
-                    self.logger.error(f"❌ Failed to initialize Guidewire {product.value}")
+            # Get initialization results
+            connections = {GuidewirePlatform(k): GuidewireConnection(**v) for k, v in guidewire_configs.items()}
+            results = await self.guidewire_orchestrator.initialize_complete_platform(connections)
             
             return {
-                'status': 'completed',
-                'products_initialized': len([r for r in results.values() if r['initialized']]),
-                'total_products': len(guidewire_configs),
-                'results': results
+                'status': results['status'],
+                'platforms_initialized': results['platforms_initialized'],
+                'total_platforms': results['total_platforms'],
+                'real_time_streams': results['real_time_streams'],
+                'results': results['initialization_results']
             }
             
         except Exception as e:
@@ -688,7 +688,7 @@ class SuperOmegaOrchestrator:
         
         # Add Guidewire analytics
         if self.guidewire_orchestrator:
-            base_metrics['guidewire_analytics'] = self.guidewire_orchestrator.get_guidewire_analytics()
+            base_metrics['guidewire_analytics'] = self.guidewire_orchestrator.get_performance_metrics()
         
         # Add skill mining stats if available
         if hasattr(self, 'skill_miner') and self.skill_miner:
