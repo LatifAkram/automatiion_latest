@@ -96,19 +96,19 @@ class SuperOmegaOrchestrator:
     """
     
     def __init__(self, config: SuperOmegaConfig):
-
-    Main SUPER-OMEGA orchestrator that coordinates all components.
+        """
+        Main SUPER-OMEGA orchestrator that coordinates all components.
+        
+        Provides the unified API for:
+        - Planning complex workflows
+        - Executing with self-healing
+        - Real-time data integration
+        """
+        self.config = config
+        self.initialize_components()
     
-    Provides the unified API for:
-    - Planning complex workflows
-    - Executing with self-healing
-    - Real-time data integration
-    - Evidence capture and audit
-    - Skill learning and reuse
-    """
-    
-    def __init__(self, config: SuperOmegaConfig = None):
-        self.config = config or SuperOmegaConfig()
+    def initialize_components(self):
+        """Initialize all SUPER-OMEGA components"""
         self.logger = logging.getLogger(__name__)
         
         # Core components
@@ -706,4 +706,3 @@ class SuperOmegaOrchestrator:
             }
             for run_id, report in self.run_reports.items()
         ]
-"""

@@ -11,7 +11,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.builtin_web_server import LiveConsoleServer
+from ui.builtin_web_server import BuiltinWebServer
 from core.builtin_performance_monitor import get_system_metrics
 from core.builtin_ai_processor import process_with_ai
 from core.builtin_vision_processor import analyze_screenshot
@@ -21,7 +21,7 @@ import json
 import threading
 from typing import Dict, List, Any
 
-class SuperOmegaLiveConsole(LiveConsoleServer):
+class SuperOmegaLiveConsole(BuiltinWebServer):
     """Enhanced live console with SUPER-OMEGA capabilities"""
     
     def __init__(self, host: str = "localhost", port: int = 8080):
