@@ -1,0 +1,11 @@
+{
+  "step_id": "0e868f81-d249-45e5-9bfd-e61f610d5a18",
+  "description": "Fast Selector Lookup",
+  "start_time": 12800.640278021,
+  "end_time": 12800.640670157,
+  "duration_ms": 0.39213600030052476,
+  "status": "failed",
+  "confidence": 0.95,
+  "retries": 0,
+  "error_message": "no such column: css_selector"
+}

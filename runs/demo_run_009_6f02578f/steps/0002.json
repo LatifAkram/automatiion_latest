@@ -1,0 +1,11 @@
+{
+  "step_id": "ab7db027-898d-42cb-89a5-6e7e6f224cc8",
+  "description": "Semantic DOM Graph Processing",
+  "start_time": 12801.388547342,
+  "end_time": 12801.393746856,
+  "duration_ms": 5.199514000196359,
+  "status": "success",
+  "confidence": 0.95,
+  "retries": 0,
+  "error_message": null
+}
