@@ -12,7 +12,7 @@ import struct
 import zlib
 import io
 import math
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional, Tuple, Union
 from dataclasses import dataclass
 import json
 import time
@@ -516,6 +516,32 @@ class BuiltinVisionProcessor:
             return f"//nav[{index + 1}]"
         else:
             return f"//*[@class='element-{index}']"
+    
+    def analyze_colors(self, image_data: Union[bytes, str]) -> Dict[str, Any]:
+        """Analyze colors in image data - wrapper method for compatibility"""
+        if isinstance(image_data, str):
+            # Handle base64 data
+            result = self.process_base64_image(image_data)
+        else:
+            # Handle binary data
+            result = self.process_image_data(image_data)
+        
+        if "error" in result:
+            return {
+                "error": result["error"],
+                "dominant_color": (128, 128, 128),
+                "color_diversity": 0.0,
+                "color_distribution": {}
+            }
+        
+        color_analysis = result.get("color_analysis", {})
+        return {
+            "dominant_color": color_analysis.get("dominant_color", (128, 128, 128)),
+            "color_diversity": color_analysis.get("color_diversity", 0.0),
+            "color_distribution": color_analysis.get("color_distribution", {}),
+            "brightness": color_analysis.get("brightness", 0.5),
+            "contrast": color_analysis.get("contrast", 0.5)
+        }
 
 # Global vision processor instance
 vision_processor = BuiltinVisionProcessor()

@@ -13,7 +13,7 @@ import platform
 import subprocess
 import threading
 import json
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass, asdict
 import resource
 import gc
@@ -381,6 +381,11 @@ builtin_monitor = BuiltinPerformanceMonitor()
 def get_system_metrics() -> SystemMetrics:
     """Quick access to system metrics"""
     return builtin_monitor.get_comprehensive_metrics()
+
+def get_system_metrics_dict() -> Dict[str, Any]:
+    """Get system metrics as dictionary for easy access"""
+    metrics = builtin_monitor.get_comprehensive_metrics()
+    return asdict(metrics)
 
 def start_system_monitoring(interval: float = 1.0):
     """Start system monitoring"""

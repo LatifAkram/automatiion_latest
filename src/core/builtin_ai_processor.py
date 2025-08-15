@@ -428,6 +428,72 @@ class BuiltinAIProcessor:
     def recall(self, key: str) -> Any:
         """Retrieve information from memory"""
         return self.memory.get(key)
+    
+    def make_decision(self, options: List[str], context: Dict[str, Any]) -> AIResponse:
+        """Make a decision from given options based on context"""
+        start_time = time.time()
+        
+        if not options:
+            return AIResponse(
+                result={'choice': None, 'confidence': 0.0, 'reasoning': 'No options provided'},
+                confidence=0.0,
+                reasoning='No options provided',
+                processing_time=time.time() - start_time
+            )
+        
+        # Use decision engine to evaluate options
+        context_text = json.dumps(context) if context else ""
+        decision_result = self.decision_engine.make_decision(context_text)
+        
+        # Map decision to available options
+        best_option = None
+        best_score = 0.0
+        reasoning = "Rule-based decision making"
+        
+        # Simple keyword matching to select best option
+        for option in options:
+            score = 0.0
+            option_lower = option.lower()
+            
+            # Score based on context keywords
+            if context:
+                context_str = str(context).lower()
+                common_words = set(option_lower.split()) & set(context_str.split())
+                score += len(common_words) * 0.2
+            
+            # Score based on option characteristics
+            if 'error' in context_str and any(word in option_lower for word in ['fix', 'repair', 'resolve']):
+                score += 0.5
+            elif 'success' in context_str and any(word in option_lower for word in ['continue', 'proceed', 'next']):
+                score += 0.5
+            elif any(word in option_lower for word in ['default', 'standard', 'normal']):
+                score += 0.3
+            
+            if score > best_score:
+                best_score = score
+                best_option = option
+                reasoning = f"Selected '{option}' based on context analysis (score: {score:.2f})"
+        
+        # If no clear winner, pick first option
+        if not best_option:
+            best_option = options[0]
+            reasoning = "Default selection (first option)"
+            best_score = 0.5
+        
+        confidence = min(0.95, max(0.3, best_score))
+        
+        return AIResponse(
+            result={
+                'choice': best_option,
+                'confidence': confidence,
+                'reasoning': reasoning,
+                'options_evaluated': len(options),
+                'decision_method': 'rule_based'
+            },
+            confidence=confidence,
+            reasoning=reasoning,
+            processing_time=time.time() - start_time
+        )
 
 # Global AI processor instance
 ai_processor = BuiltinAIProcessor()

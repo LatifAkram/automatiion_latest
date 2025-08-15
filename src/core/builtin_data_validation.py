@@ -194,8 +194,11 @@ class BaseValidator:
                     default=default_value
                 )
     
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate input data"""
+    def validate(self, data: Dict[str, Any], schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Validate input data against schema or class annotations"""
+        if schema:
+            return self.validate_with_schema(data, schema)
+        
         validated_data = {}
         errors = []
         
@@ -215,6 +218,42 @@ class BaseValidator:
         if errors:
             error_messages = [str(e) for e in errors]
             raise ValidationError(f"Validation failed: {'; '.join(error_messages)}")
+        
+        return validated_data
+    
+    def validate_with_schema(self, data: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate data against a provided schema"""
+        validated_data = {}
+        errors = []
+        
+        for field_name, field_schema in schema.items():
+            try:
+                value = data.get(field_name)
+                field_type = field_schema.get('type', str)
+                required = field_schema.get('required', True)
+                default = field_schema.get('default')
+                
+                # Convert string type names to actual types
+                if isinstance(field_type, str):
+                    type_mapping = {
+                        'string': str, 'str': str,
+                        'integer': int, 'int': int,
+                        'float': float,
+                        'boolean': bool, 'bool': bool,
+                        'list': list,
+                        'dict': dict
+                    }
+                    field_type = type_mapping.get(field_type, str)
+                
+                validator = FieldValidator(field_type, required=required, default=default)
+                validated_data[field_name] = validator.validate(value, field_name)
+                
+            except ValidationError as e:
+                errors.append(e)
+        
+        if errors:
+            error_messages = [str(e) for e in errors]
+            raise ValidationError(f"Schema validation failed: {'; '.join(error_messages)}")
         
         return validated_data
     

@@ -540,15 +540,25 @@ class RealTimeDataFabricAI:
         }
         
         # Real-time processing queue
-        self.processing_queue = asyncio.Queue()
+        self.processing_queue = None
         self.is_processing = False
-        
-        # Start background processing
-        asyncio.create_task(self._background_processor())
+        self._background_task = None
+    
+    def _ensure_background_processor(self):
+        """Ensure background processor is running"""
+        if self.processing_queue is None:
+            try:
+                self.processing_queue = asyncio.Queue()
+                if self._background_task is None or self._background_task.done():
+                    self._background_task = asyncio.create_task(self._background_processor())
+            except RuntimeError:
+                # No event loop running, background processing will be disabled
+                pass
     
     async def ingest_data(self, value: Any, data_type: DataType, source: DataSource,
                          source_url: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> str:
         """Ingest new data point for processing"""
+        self._ensure_background_processor()
         data_id = hashlib.md5(f"{value}_{source}_{time.time()}".encode()).hexdigest()
         
         data_point = DataPoint(
@@ -569,7 +579,8 @@ class RealTimeDataFabricAI:
         self.stats['total_data_points'] += 1
         
         # Queue for verification
-        await self.processing_queue.put(data_id)
+        if self.processing_queue:
+            await self.processing_queue.put(data_id)
         
         logger.info(f"📥 Ingested data point: {data_id}")
         return data_id
@@ -749,6 +760,11 @@ class RealTimeDataFabricAI:
         
         while self.is_processing:
             try:
+                # Check if queue is available
+                if not self.processing_queue:
+                    await asyncio.sleep(1.0)
+                    continue
+                
                 # Get next data point to process
                 data_id = await asyncio.wait_for(self.processing_queue.get(), timeout=1.0)
                 
@@ -756,7 +772,8 @@ class RealTimeDataFabricAI:
                 await self.verify_data_point(data_id)
                 
                 # Mark task as done
-                self.processing_queue.task_done()
+                if self.processing_queue:
+                    self.processing_queue.task_done()
                 
             except asyncio.TimeoutError:
                 # No new data to process
@@ -820,7 +837,7 @@ class RealTimeDataFabricAI:
             'avg_verification_time_ms': self.stats['verification_time_avg'],
             'cache_hit_rate': self.stats['cache_hit_rate'] * 100,
             'active_sources': len(self.config.get('verification_sources', {})),
-            'processing_queue_size': self.processing_queue.qsize(),
+            'processing_queue_size': self.processing_queue.qsize() if self.processing_queue else 0,
             'cross_references': len(self.cross_references)
         }
     
