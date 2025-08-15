@@ -1,0 +1,66 @@
+[package]
+name = "super-omega-edge-kernel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tauri = { version = "1.5", features = ["api-all"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+headless_chrome = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Real AI/ML Dependencies
+candle-core = "0.3"
+candle-nn = "0.3"
+candle-transformers = "0.3"
+hf-hub = "0.3"
+safetensors = "0.4"
+
+# Real Computer Vision Dependencies  
+opencv = { version = "0.88", features = ["opencv-4"] }
+image = "0.24"
+tesseract = "0.13"
+
+# Performance and Concurrency
+rayon = "1.8"
+crossbeam = "0.8"
+
+# Real YOLO Implementation
+ort = "1.16"  # ONNX Runtime for YOLOv5
+ndarray = "0.15"
+
+# Audio Processing for Voice OTP
+rodio = "0.17"
+hound = "3.5"
+whisper-rs = "0.10"
+
+# WebAssembly Support for Browser Extension
+web-sys = "0.3"
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+wasm-bindgen-futures = "0.4"
+
+# Real Browser Integration
+webdriver = "0.46"
+fantoccini = "0.19"
+
+# Performance Monitoring
+criterion = { version = "0.5", features = ["html_reports"] }
+pprof = { version = "0.13", features = ["criterion", "flamegraph"] }
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[[bench]]
+name = "performance_benchmarks"
+harness = false
