@@ -497,6 +497,62 @@ class CommercialPlatformRegistry:
         logger.info(f"Retrieved {len(accessibility_selectors)} accessibility-optimized selectors")
         return accessibility_selectors
 
+    def get_all_platforms(self) -> Dict[str, Dict[str, Any]]:
+        """Get all platforms with their selectors and metadata - Fixed: add missing method"""
+        platforms = {}
+        
+        # Group selectors by platform
+        for selector_id, selector in self.selectors_cache.items():
+            platform_name = selector.platform_name.lower()
+            
+            if platform_name not in platforms:
+                platforms[platform_name] = {
+                    'name': selector.platform_name,
+                    'category': selector.platform_category,
+                    'selectors': [],
+                    'action_types': set(),
+                    'total_selectors': 0,
+                    'avg_success_rate': 0.0,
+                    'has_workflows': False,
+                    'has_ai_selectors': False,
+                    'has_mobile_support': False,
+                    'has_accessibility': False
+                }
+            
+            # Add selector info
+            platforms[platform_name]['selectors'].append({
+                'id': selector_id,
+                'selector': selector.selector_value,
+                'action_type': selector.action_type,
+                'success_rate': selector.success_rate,
+                'confidence_score': selector.confidence_score
+            })
+            platforms[platform_name]['action_types'].add(selector.action_type)
+            platforms[platform_name]['total_selectors'] += 1
+            
+            # Update capabilities
+            if selector.workflow_steps:
+                platforms[platform_name]['has_workflows'] = True
+            if selector.ai_selectors:
+                platforms[platform_name]['has_ai_selectors'] = True
+            if selector.mobile_selectors:
+                platforms[platform_name]['has_mobile_support'] = True
+            if selector.accessibility_selectors:
+                platforms[platform_name]['has_accessibility'] = True
+        
+        # Calculate average success rates and finalize
+        for platform_name, platform_data in platforms.items():
+            selectors = platform_data['selectors']
+            if selectors:
+                success_rates = [s['success_rate'] for s in selectors if s['success_rate'] > 0]
+                platform_data['avg_success_rate'] = statistics.mean(success_rates) if success_rates else 0.0
+            
+            # Convert set to list for JSON serialization
+            platform_data['action_types'] = list(platform_data['action_types'])
+        
+        logger.info(f"Retrieved {len(platforms)} platforms with {sum(p['total_selectors'] for p in platforms.values())} total selectors")
+        return platforms
+
     def get_platform_statistics(self) -> Dict[str, Any]:
         """Get comprehensive platform statistics"""
         total_selectors = len(self.selectors_cache)

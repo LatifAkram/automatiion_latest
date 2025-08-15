@@ -1,0 +1,157 @@
+{
+  "timestamp": "2025-08-15 11:08:59",
+  "execution_time_seconds": 6.256283283233643,
+  "builtin_foundation": {
+    "performance_monitor": {
+      "status": "success",
+      "cpu_percent": 0.0,
+      "memory_percent": 9.554025181665851,
+      "metrics_count": 9
+    },
+    "ai_processor": {
+      "status": "success",
+      "decision_choice": "approve",
+      "decision_confidence": 0.5,
+      "analysis_sentiment": "positive",
+      "analysis_confidence": 0.9
+    },
+    "vision_processor": {
+      "status": "success",
+      "dominant_color": [
+        128,
+        128,
+        128
+      ],
+      "color_diversity": 0.0,
+      "brightness": 0
+    },
+    "data_validation": {
+      "status": "success",
+      "validated_fields": 3,
+      "schema_validation": true
+    },
+    "web_server": {
+      "status": "success",
+      "host": "127.0.0.1",
+      "port": 8889,
+      "routes_count": 0
+    }
+  },
+  "ai_swarm_architecture": {
+    "ai_swarm_orchestrator": {
+      "status": "success",
+      "total_components": 7,
+      "ai_available": 0,
+      "fallback_available": 7
+    },
+    "self_healing_ai": {
+      "status": "success",
+      "success_rate": 0.0,
+      "total_attempts": 0,
+      "fingerprints_cached": 0
+    },
+    "skill_mining_ai": {
+      "status": "success",
+      "total_skills": 0,
+      "active_patterns": 0,
+      "learning_rate": 0.0
+    },
+    "data_fabric_ai": {
+      "status": "success",
+      "total_data_points": 0,
+      "verified_data": 0,
+      "trust_score": 0.0
+    },
+    "copilot_ai": {
+      "status": "success",
+      "code_generations": 0,
+      "success_rate": 0.0,
+      "avg_generation_time": 0
+    }
+  },
+  "real_world_scenarios": {
+    "benchmark_report": {
+      "status": "success",
+      "total_tests": 4,
+      "successful_tests": 0,
+      "success_rate": 0.0,
+      "avg_execution_time": 100.52043199539185,
+      "execution_time_seconds": 0.4033224582672119,
+      "platform_results": {
+        "google": {
+          "total_tests": 1,
+          "successful": 0,
+          "success_rate": 0.0,
+          "avg_time_ms": 100.62885284423828
+        },
+        "github": {
+          "total_tests": 1,
+          "successful": 0,
+          "success_rate": 0.0,
+          "avg_time_ms": 100.48580169677734
+        },
+        "stackoverflow": {
+          "total_tests": 1,
+          "successful": 0,
+          "success_rate": 0.0,
+          "avg_time_ms": 100.49629211425781
+        },
+        "wikipedia": {
+          "total_tests": 1,
+          "successful": 0,
+          "success_rate": 0.0,
+          "avg_time_ms": 100.47078132629395
+        }
+      },
+      "architecture_performance": {
+        "builtin_foundation": {
+          "success": true,
+          "execution_time_ms": 0.18739700317382812,
+          "components_tested": 3,
+          "performance": "excellent"
+        },
+        "ai_swarm": {
+          "success": true,
+          "execution_time_ms": 0.02002716064453125,
+          "components": 7,
+          "fallback_coverage": 7,
+          "performance": "excellent"
+        }
+      }
+    }
+  },
+  "platform_coverage": {
+    "platform_coverage": {
+      "status": "failed",
+      "error": "'AdvancedSelectorDefinition' object has no attribute 'platform_name'"
+    },
+    "guidewire_integration": {
+      "status": "success",
+      "supported_platforms": 10,
+      "platforms": [
+        "PolicyCenter",
+        "BillingCenter",
+        "ClaimCenter",
+        "ContactManager",
+        "DataHub",
+        "InfoCenter",
+        "DigitalPortal",
+        "InsuranceSuite",
+        "GuidewireCloud",
+        "JutroPlatform"
+      ]
+    }
+  },
+  "assessment": {
+    "overall_rate": 62.5,
+    "component_rates": {
+      "builtin_foundation": 100.0,
+      "ai_swarm": 100.0,
+      "platform_coverage": 50.0,
+      "real_world_scenarios": 0.0
+    },
+    "verdict": "\u26a0\ufe0f FAIR - Significant Issues to Address",
+    "recommendation": "System has basic functionality but needs substantial improvements",
+    "competitive_status": "needs_improvement"
+  }
+}

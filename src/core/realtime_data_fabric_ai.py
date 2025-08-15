@@ -832,7 +832,9 @@ class RealTimeDataFabricAI:
         return {
             'total_data_points': total_points,
             'verified_data_points': verified_points,
+            'verified_data': verified_points,  # Fixed: add missing verified_data alias
             'verification_rate': (verified_points / max(1, total_points)) * 100,
+            'trust_score': self.stats['trust_distribution'].get('high', 0) / max(1, total_points),  # Fixed: add missing trust_score
             'trust_distribution': dict(self.stats['trust_distribution']),
             'avg_verification_time_ms': self.stats['verification_time_avg'],
             'cache_hit_rate': self.stats['cache_hit_rate'] * 100,

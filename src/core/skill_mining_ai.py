@@ -1027,6 +1027,8 @@ class AutoSkillMiningAI:
             'skills_created': self.stats['skills_created'],
             'skill_usage_count': self.stats['skill_usage_count'],
             'total_skills': len(self.validated_skills),
+            'active_patterns': self.stats['patterns_identified'],  # Fixed: add missing active_patterns
+            'learning_rate': min(1.0, self.stats['skills_created'] / max(1, self.stats['traces_analyzed'])),  # Fixed: add missing learning_rate
             'skill_types': dict(Counter(skill.skill_type.value for skill in self.validated_skills.values())),
             'avg_skill_success_rate': statistics.mean([skill.success_rate for skill in self.validated_skills.values()]) if self.validated_skills else 0.0
         }

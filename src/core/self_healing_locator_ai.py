@@ -835,6 +835,7 @@ class SelfHealingLocatorAI:
         return {
             'total_attempts': self.stats['healing_attempts'],
             'successful_healings': self.stats['successful_healings'],
+            'success_rate': round(success_rate, 2),  # Fixed: use success_rate instead of success_rate_percent
             'success_rate_percent': round(success_rate, 2),
             'avg_recovery_time_ms': self.stats['avg_recovery_time_ms'],
             'method_success_rates': self.stats['method_success_rates'],

@@ -956,6 +956,23 @@ class CopilotCodegenAI:
             'cached_generations': len(self.generation_cache)
         }
     
+    def get_copilot_stats(self) -> Dict[str, Any]:
+        """Get copilot statistics - Fixed: add missing method"""
+        total_requests = self.stats['total_requests']
+        successful_requests = self.stats['successful_generations']
+        
+        return {
+            'code_generations': total_requests,  # Fixed: add missing code_generations
+            'successful_generations': successful_requests,
+            'success_rate': (successful_requests / max(1, total_requests)) * 100,
+            'avg_generation_time': self.stats['avg_generation_time_ms'],  # Fixed: add missing avg_generation_time
+            'cache_hits': self.stats['cache_hits'],
+            'cache_hit_rate': (self.stats['cache_hits'] / max(1, total_requests)) * 100,
+            'code_type_distribution': self.stats['code_type_distribution'],
+            'language_distribution': self.stats['language_distribution'],
+            'cached_generations': len(self.generation_cache)
+        }
+    
     def clear_cache(self):
         """Clear generation cache"""
         self.generation_cache.clear()
