@@ -15,8 +15,26 @@ import threading
 import json
 from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass, asdict
-import resource
 import gc
+
+# Windows compatibility - resource module is Unix/Linux only
+try:
+    import resource
+    HAS_RESOURCE = True
+except ImportError:
+    HAS_RESOURCE = False
+    # Mock resource constants for Windows
+    class MockResource:
+        RUSAGE_SELF = 0
+        def getrusage(self, who):
+            return type('MockUsage', (), {
+                'ru_maxrss': 0,
+                'ru_utime': 0.0,
+                'ru_stime': 0.0,
+                'ru_nvcsw': 0,
+                'ru_nivcsw': 0
+            })()
+    resource = MockResource()
 
 @dataclass
 class SystemMetrics:
