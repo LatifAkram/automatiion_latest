@@ -202,16 +202,47 @@ class BuiltinWebServer:
                 request_handler.wfile.write(static_file['content'].encode('utf-8'))
                 return
             
-            # Handle routes
+            # Handle routes with parameter matching
+            handler = None
+            path_params = {}
+            
+            # First try exact match
             route_key = f"{method} {path}"
             if route_key in self.routes:
                 handler = self.routes[route_key]
-                
+            else:
+                # Try parameter matching
+                for registered_route, route_handler in self.routes.items():
+                    route_method, route_path = registered_route.split(' ', 1)
+                    if route_method == method:
+                        # Check if this route has parameters
+                        if '<' in route_path and '>' in route_path:
+                            # Simple parameter matching
+                            route_parts = route_path.split('/')
+                            path_parts = path.split('/')
+                            
+                            if len(route_parts) == len(path_parts):
+                                match = True
+                                for i, (route_part, path_part) in enumerate(zip(route_parts, path_parts)):
+                                    if route_part.startswith('<') and route_part.endswith('>'):
+                                        # This is a parameter
+                                        param_name = route_part[1:-1]
+                                        path_params[param_name] = path_part
+                                    elif route_part != path_part:
+                                        match = False
+                                        break
+                                
+                                if match:
+                                    handler = route_handler
+                                    break
+            
+            if handler:
                 # Create request context
                 request_context = {
                     'method': method,
                     'path': path,
                     'query_params': query_params,
+                    'path_params': path_params,
                     'headers': dict(headers),
                     'body': None
                 }
@@ -221,7 +252,16 @@ class BuiltinWebServer:
                     content_length = int(headers.get('Content-Length', 0))
                     if content_length > 0:
                         body = request_handler.rfile.read(content_length)
-                        request_context['body'] = body.decode('utf-8')
+                        body_str = body.decode('utf-8')
+                        
+                        # Try to parse JSON body
+                        try:
+                            if headers.get('Content-Type', '').startswith('application/json'):
+                                request_context['body'] = json.loads(body_str)
+                            else:
+                                request_context['body'] = body_str
+                        except json.JSONDecodeError:
+                            request_context['body'] = body_str
                 
                 # Call handler
                 response = handler(request_context)
@@ -619,6 +659,182 @@ class LiveConsoleServer(BuiltinWebServer):
                 "server": "built-in",
                 "connections": len(self.websocket_connections),
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+        
+        @self.route("/api/fixed-super-omega-execute", methods=['POST'])
+        def execute_automation(request):
+            """Execute automation instruction"""
+            try:
+                # Get instruction from request body
+                body = request.get('body', {})
+                instruction = body.get('instruction', '')
+                
+                if not instruction:
+                    return {
+                        "success": False,
+                        "error": "No instruction provided"
+                    }
+                
+                # Execute automation using SUPER-OMEGA system
+                import asyncio
+                import sys
+                import os
+                
+                # Add src to path for imports
+                sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+                
+                try:
+                    from testing.super_omega_live_automation_fixed import get_fixed_super_omega_live_automation, ExecutionMode
+                    
+                    # Create automation session
+                    automation = get_fixed_super_omega_live_automation({
+                        'headless': False,
+                        'record_video': True,
+                        'capture_screenshots': True
+                    })
+                    
+                    # Execute the instruction
+                    session_id = f"ui_session_{int(time.time())}"
+                    
+                    async def run_automation():
+                        try:
+                            # Create session
+                            session_result = await automation.create_super_omega_session(
+                                session_id=session_id,
+                                url="about:blank",
+                                mode=ExecutionMode.HYBRID
+                            )
+                            
+                            if not session_result.get('success'):
+                                return {
+                                    "success": False,
+                                    "error": f"Session creation failed: {session_result.get('error')}"
+                                }
+                            
+                            # Parse instruction and execute basic automation
+                            steps_executed = []
+                            
+                            # Simple instruction parsing
+                            if "navigate" in instruction.lower() and "http" in instruction.lower():
+                                # Extract URL from instruction
+                                import re
+                                url_match = re.search(r'https?://[^\s]+', instruction)
+                                if url_match:
+                                    url = url_match.group()
+                                    nav_result = await automation.super_omega_navigate(session_id, url)
+                                    steps_executed.append({
+                                        "action": "navigate",
+                                        "target": url,
+                                        "success": nav_result.get('success', False),
+                                        "time": time.strftime("%H:%M:%S")
+                                    })
+                            
+                            elif "search" in instruction.lower():
+                                # Simulate search action
+                                search_result = await automation.super_omega_find_element(
+                                    session_id, 
+                                    "input[type='search'], input[name*='search'], #search"
+                                )
+                                steps_executed.append({
+                                    "action": "search",
+                                    "success": search_result.get('success', False),
+                                    "time": time.strftime("%H:%M:%S")
+                                })
+                            
+                            else:
+                                # Default: navigate to example.com for demonstration
+                                nav_result = await automation.super_omega_navigate(session_id, "https://example.com")
+                                steps_executed.append({
+                                    "action": "navigate",
+                                    "target": "https://example.com",
+                                    "success": nav_result.get('success', False),
+                                    "time": time.strftime("%H:%M:%S")
+                                })
+                            
+                            # Close session
+                            await automation.close_super_omega_session(session_id)
+                            
+                            return {
+                                "success": True,
+                                "session_id": session_id,
+                                "instruction": instruction,
+                                "steps": steps_executed,
+                                "evidence": [f"session_{session_id}_evidence"],
+                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            
+                        except Exception as e:
+                            return {
+                                "success": False,
+                                "error": str(e),
+                                "session_id": session_id
+                            }
+                    
+                    # Run async automation
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    result = loop.run_until_complete(run_automation())
+                    loop.close()
+                    
+                    return result
+                    
+                except ImportError as e:
+                    return {
+                        "success": False,
+                        "error": f"Automation system not available: {e}",
+                        "fallback": True
+                    }
+                    
+            except Exception as e:
+                return {
+                    "success": False,
+                    "error": str(e)
+                }
+        
+        @self.route("/api/session-status/<session_id>")
+        def get_session_status(request):
+            """Get session status"""
+            session_id = request.get('path_params', {}).get('session_id', '')
+            
+            # Check if session directory exists
+            session_path = Path(f"runs/{session_id}")
+            if session_path.exists():
+                return {
+                    "success": True,
+                    "session_id": session_id,
+                    "status": "completed",
+                    "evidence_available": True
+                }
+            else:
+                return {
+                    "success": False,
+                    "session_id": session_id,
+                    "status": "not_found"
+                }
+        
+        @self.route("/api/session-evidence/<session_id>")
+        def get_session_evidence(request):
+            """Get session evidence"""
+            session_id = request.get('path_params', {}).get('session_id', '')
+            
+            evidence = []
+            session_path = Path(f"runs/{session_id}")
+            
+            if session_path.exists():
+                # Look for evidence files
+                for evidence_file in session_path.glob("**/*"):
+                    if evidence_file.is_file():
+                        evidence.append({
+                            "type": "file",
+                            "name": evidence_file.name,
+                            "path": str(evidence_file.relative_to(session_path)),
+                            "size": evidence_file.stat().st_size
+                        })
+            
+            return {
+                "success": True,
+                "session_id": session_id,
+                "evidence": evidence
             }
         
         @self.websocket("/ws")
