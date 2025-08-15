@@ -1,0 +1,27 @@
+{
+  "session_id": "evidence_test_1755266473",
+  "start_time": "2025-08-15T14:01:13.715313",
+  "end_time": "2025-08-15T14:01:13.715789",
+  "duration_seconds": 0.000467,
+  "actions_performed": 0,
+  "errors_encountered": 0,
+  "success_rate": 0.0,
+  "healing_attempts": 0,
+  "successful_healings": 0,
+  "healing_success_rate": 0,
+  "evidence_collected": {
+    "screenshots": 0,
+    "dom_snapshots": 0,
+    "videos": 0
+  },
+  "super_omega_components": {
+    "semantic_dom": true,
+    "shadow_simulator": true,
+    "micro_planner": true,
+    "edge_kernel": true
+  },
+  "skills_discovered": 0,
+  "patterns_identified": 0,
+  "performance_metrics": {},
+  "dependency_free": true
+}
