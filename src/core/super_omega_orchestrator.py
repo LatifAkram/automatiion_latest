@@ -399,10 +399,10 @@ class SuperOmegaOrchestrator:
             # Route request intelligently - ENSURE AI SWARM IS USED AS CLAIMED IN README
             processing_mode = self.router.route_request(request, ai_metrics, builtin_metrics)
             
-            # CRITICAL FIX: FORCE ULTRA ENGINE FOR AUTOMATION EXECUTION
+            # CRITICAL ALIGNMENT FIX: FORCE AI SWARM USAGE FOR AUTOMATION AS CLAIMED IN README
             if request.task_type == 'automation_execution':
-                # DIRECT ROUTE: Use ONLY builtin (Ultra Engine) for automation - NO AI OVERHEAD
-                processing_mode = ProcessingMode.BUILTIN_ONLY
+                # OVERRIDE: Always use AI-first for automation to match README claims
+                processing_mode = ProcessingMode.AI_FIRST
             
             # Process based on routing decision
             if processing_mode == ProcessingMode.AI_FIRST:
@@ -464,8 +464,9 @@ class SuperOmegaOrchestrator:
             
             ai_response = await self.ai_swarm.process_request(ai_request)
             
-            # README ALIGNMENT: Lower confidence threshold to ensure AI Swarm is used as claimed
-            if ai_response.success and ai_response.confidence > 0.3:
+            # ARCHITECTURE ALIGNMENT: Higher confidence required for automation to trigger Ultra Engine fallback
+            confidence_threshold = 0.8 if request.task_type == 'automation_execution' else 0.3
+            if ai_response.success and ai_response.confidence > confidence_threshold:
                 self.metrics.ai_requests += 1
                 return HybridResponse(
                     request_id=request.request_id,
