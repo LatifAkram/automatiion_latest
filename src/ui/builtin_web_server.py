@@ -844,21 +844,27 @@ class LiveConsoleServer(BuiltinWebServer):
                                 "session_id": session_id,
                                 "automation_id": session_id,  # Add automation_id that frontend expects
                                 "instruction": instruction,
+                                "aiInterpretation": ai_interpretation,  # Frontend expects camelCase
+                                "aiProvider": ai_provider,  # Frontend expects camelCase
+                                "processingPath": response.processing_path,  # Frontend expects camelCase
+                                "confidence": response.confidence,
+                                "processingTime": response.processing_time,  # Frontend expects camelCase
+                                "fallbackUsed": getattr(response, 'fallback_used', False),  # Frontend expects camelCase
+                                "evidence": response.evidence or [f"session_{session_id}_evidence"],
+                                "result": response.result,
+                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                                "system": "SUPER-OMEGA Hybrid Intelligence with Real AI",
+                                # Also include snake_case for compatibility
                                 "ai_interpretation": ai_interpretation,
                                 "ai_provider": ai_provider,
                                 "processing_path": response.processing_path,
-                                "confidence": response.confidence,
                                 "processing_time": response.processing_time,
-                                "evidence": response.evidence or [f"session_{session_id}_evidence"],
-                                "fallback_used": response.fallback_used,
-                                "result": response.result,
-                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                                "system": "SUPER-OMEGA Hybrid Intelligence with Real AI"
+                                "fallback_used": getattr(response, 'fallback_used', False)
                             }
                             
                             # Add enhanced parsing information if available
                             if parsing_result:
-                                api_response["enhanced_parsing"] = {
+                                enhanced_parsing_data = {
                                     "instruction_type": parsing_result.instruction_type.value,
                                     "intent_category": parsing_result.intent_category.value,
                                     "complexity_level": parsing_result.complexity_level.name,
@@ -869,6 +875,9 @@ class LiveConsoleServer(BuiltinWebServer):
                                     "preprocessing_applied": parsing_result.preprocessing_applied,
                                     "metadata": parsing_result.metadata
                                 }
+                                # Add both camelCase and snake_case for compatibility
+                                api_response["enhancedParsing"] = enhanced_parsing_data  # Frontend expects camelCase
+                                api_response["enhanced_parsing"] = enhanced_parsing_data  # Backend compatibility
                                 
                                 # Use enhanced complexity if available
                                 if parsing_result.complexity_level.name != "MODERATE":
