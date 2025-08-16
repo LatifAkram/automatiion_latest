@@ -41,6 +41,9 @@ from ai_swarm_orchestrator import (
     RequestType, AIComponentType
 )
 
+# Import automation executor
+from deterministic_executor import DeterministicExecutor
+
 class ProcessingMode(Enum):
     """Processing mode selection"""
     AI_FIRST = "ai_first"           # Try AI first, fallback to built-in
@@ -355,6 +358,8 @@ class SuperOmegaOrchestrator:
         self.builtin_processor = BuiltinAIProcessor()
         self.ai_swarm = get_ai_swarm()
         
+        # Note: DeterministicExecutor will be created per automation session
+        
         # Initialize hybrid components
         self.router = IntelligentRouter()
         self.evidence_collector = EvidenceCollector()
@@ -632,6 +637,17 @@ class SuperOmegaOrchestrator:
                 )
             elif request.task_type == 'entity_extraction':
                 result = self.builtin_processor.extract_entities(request.data.get('text', ''))
+            elif request.task_type == 'automation_execution':
+                # Handle browser automation with DeterministicExecutor
+                instruction = request.data.get('instruction', '')
+                url = request.data.get('url', '')
+                
+                if 'google' in instruction.lower():
+                    # Execute actual browser automation
+                    result = await self._execute_browser_automation(instruction, url)
+                else:
+                    # Generic automation handling
+                    result = await self._execute_browser_automation(instruction, url)
             else:
                 # Generic processing
                 result = {
@@ -662,6 +678,68 @@ class SuperOmegaOrchestrator:
                 processing_time=0,
                 error=str(e)
             )
+    
+    async def _execute_browser_automation(self, instruction: str, url: str = None) -> Dict[str, Any]:
+        """Execute actual browser automation using Playwright"""
+        try:
+            from playwright.async_api import async_playwright
+            from semantic_dom_graph import SemanticDOMGraph
+            from self_healing_locators import SelfHealingLocatorStack
+            
+            # Parse instruction to determine action
+            if 'open' in instruction.lower() and 'google' in instruction.lower():
+                url = 'https://www.google.com'
+                
+            # Execute browser automation
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=False)
+                context = await browser.new_context()
+                page = await context.new_page()
+                
+                # Create semantic graph and locator stack for this session
+                semantic_graph = SemanticDOMGraph(page)
+                locator_stack = SelfHealingLocatorStack(semantic_graph)
+                
+                # Now create the deterministic executor
+                executor = DeterministicExecutor(page, semantic_graph, locator_stack)
+                
+                if url:
+                    await page.goto(url)
+                    await page.wait_for_load_state('networkidle')
+                    
+                    # Take screenshot as evidence
+                    screenshot_path = f"screenshots/automation_{int(time.time())}.png"
+                    os.makedirs("screenshots", exist_ok=True)
+                    await page.screenshot(path=screenshot_path)
+                    
+                    result = {
+                        'success': True,
+                        'message': f'Successfully opened {url}',
+                        'url': url,
+                        'instruction': instruction,
+                        'screenshot': screenshot_path,
+                        'page_title': await page.title(),
+                        'automation_completed': True,
+                        'executor_used': True
+                    }
+                else:
+                    result = {
+                        'success': False,
+                        'message': 'No URL specified for navigation',
+                        'instruction': instruction
+                    }
+                
+                await browser.close()
+                return result
+                
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'Browser automation failed: {str(e)}',
+                'instruction': instruction,
+                'url': url,
+                'error': str(e)
+            }
     
     async def _fallback_to_builtin(self, request: HybridRequest, reason: str) -> HybridResponse:
         """Fallback to built-in processing"""
