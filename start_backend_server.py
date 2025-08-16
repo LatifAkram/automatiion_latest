@@ -48,10 +48,10 @@ def start_backend_server():
     print(f"✅ Using port: {port}")
     
     try:
-        from builtin_web_server import BuiltinWebServer
+        from builtin_web_server import LiveConsoleServer
         
         print("🌐 Creating server instance...")
-        server = BuiltinWebServer(port=port)
+        server = LiveConsoleServer(host="localhost", port=port)
         
         print(f"""
 🎉 BACKEND SERVER READY!
@@ -78,8 +78,24 @@ export NEXT_PUBLIC_BACKEND_URL=http://localhost:{port}
 🚀 Starting server... (Press Ctrl+C to stop)
 """)
         
-        # Start the server
-        server.start()
+        # Start the server and keep it running
+        if server.start():
+            print(f"✅ Server running at http://localhost:{port}")
+            print("🔗 Server is ready to handle requests!")
+            print("📡 All API endpoints are active")
+            print("Press Ctrl+C to stop...")
+            
+            try:
+                while server.running:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print("\n🛑 Stopping server...")
+                server.stop()
+                print("✅ Server stopped successfully!")
+        else:
+            print("❌ Failed to start server")
+            return False
+            
         return True
         
     except KeyboardInterrupt:
