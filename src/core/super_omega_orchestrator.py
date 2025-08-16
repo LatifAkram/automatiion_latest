@@ -479,18 +479,47 @@ class SuperOmegaOrchestrator:
                 # CRITICAL FIX: For automation_execution, ALSO execute the actual browser automation
                 if request.task_type == 'automation_execution':
                     try:
-                        # Execute actual browser automation using Zero-Bottleneck Ultra Engine
-                        from zero_bottleneck_ultra_engine import execute_anything
-                        
+                        # Execute actual browser automation with fallback strategy
                         instruction = request.data.get('instruction', '')
                         print(f"🚀 AI SWARM + BROWSER AUTOMATION: Executing {instruction}")
                         
-                        # Execute with UNLIMITED capabilities and ZERO bottlenecks
-                        browser_result = await execute_anything(
-                            instruction=instruction,
-                            platform=request.data.get('platform', 'auto-detect'),
-                            complexity="high"
-                        )
+                        try:
+                            # Try Zero-Bottleneck Ultra Engine first with timeout
+                            from zero_bottleneck_ultra_engine import execute_anything
+                            
+                            browser_result = await asyncio.wait_for(
+                                execute_anything(
+                                    instruction=instruction,
+                                    platform=request.data.get('platform', 'auto-detect'),
+                                    complexity="high"
+                                ),
+                                timeout=90.0  # 90 second timeout for Ultra Engine
+                            )
+                            print("✅ Ultra Engine completed successfully")
+                            
+                        except (asyncio.TimeoutError, Exception) as ultra_error:
+                            print(f"⚠️ Ultra Engine failed/timed out: {ultra_error}")
+                            print("🔄 Falling back to Simple Browser Executor...")
+                            
+                            # Fallback to Simple Browser Executor
+                            from simple_browser_executor import execute_simple_automation
+                            
+                            simple_result = await execute_simple_automation(instruction)
+                            
+                            # Convert simple result to Ultra Engine format
+                            browser_result = type('UltraResult', (), {
+                                'success': simple_result['success'],
+                                'platform_detected': simple_result.get('platform_detected', 'unknown'),
+                                'execution_time': simple_result.get('execution_time', 0),
+                                'confidence': 0.8 if simple_result['success'] else 0.2,
+                                'actions_performed': simple_result.get('actions_performed', []),
+                                'screenshots': simple_result.get('screenshots', []),
+                                'selectors_used': [],
+                                'self_healing_count': 0,
+                                'fallbacks_triggered': 1,
+                                'result': simple_result
+                            })()
+                            print("✅ Simple Browser Executor completed")
                         
                         # Combine AI analysis with browser execution results
                         combined_result = {
