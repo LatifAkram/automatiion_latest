@@ -531,7 +531,30 @@ class SuperOmegaOrchestrator:
     async def _process_hybrid(self, request: HybridRequest) -> HybridResponse:
         """Process with both systems and combine results"""
         try:
-            # Start both processes concurrently
+            # Special handling for automation tasks that need more time
+            if request.task_type == 'automation_execution':
+                # For browser automation, prioritize built-in execution with longer timeout
+                builtin_result = await self._process_with_builtin(request)
+                
+                # If successful, return immediately without waiting for AI
+                if builtin_result.success:
+                    self.metrics.hybrid_requests += 1
+                    return builtin_result
+                
+                # If failed, try AI as fallback
+                ai_request = AIRequest(
+                    request_id=f"{request.request_id}_ai",
+                    request_type=self._map_task_to_request_type(request.task_type),
+                    data=request.data,
+                    timeout=request.timeout * 0.5
+                )
+                ai_result = await self.ai_swarm.process_request(ai_request)
+                combined_result = self._combine_results(builtin_result, ai_result, request)
+                
+                self.metrics.hybrid_requests += 1
+                return combined_result
+            
+            # Standard hybrid processing for non-automation tasks
             builtin_task = asyncio.create_task(self._process_with_builtin(request))
             
             ai_request = AIRequest(
@@ -681,6 +704,7 @@ class SuperOmegaOrchestrator:
     
     async def _execute_browser_automation(self, instruction: str, url: str = None) -> Dict[str, Any]:
         """Execute actual browser automation using Playwright"""
+        browser = None
         try:
             from playwright.async_api import async_playwright
             from semantic_dom_graph import SemanticDOMGraph
@@ -690,49 +714,79 @@ class SuperOmegaOrchestrator:
             if 'open' in instruction.lower() and 'google' in instruction.lower():
                 url = 'https://www.google.com'
                 
-            # Execute browser automation
+            # Execute browser automation with proper error handling
             async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=False)
-                context = await browser.new_context()
-                page = await context.new_page()
-                
-                # Create semantic graph and locator stack for this session
-                semantic_graph = SemanticDOMGraph(page)
-                locator_stack = SelfHealingLocatorStack(semantic_graph)
-                
-                # Now create the deterministic executor
-                executor = DeterministicExecutor(page, semantic_graph, locator_stack)
-                
-                if url:
-                    await page.goto(url)
-                    await page.wait_for_load_state('networkidle')
+                try:
+                    browser = await p.chromium.launch(headless=False)
+                    context = await browser.new_context()
+                    page = await context.new_page()
                     
-                    # Take screenshot as evidence
-                    screenshot_path = f"screenshots/automation_{int(time.time())}.png"
-                    os.makedirs("screenshots", exist_ok=True)
-                    await page.screenshot(path=screenshot_path)
+                    # Create semantic graph and locator stack for this session
+                    semantic_graph = SemanticDOMGraph(page)
+                    locator_stack = SelfHealingLocatorStack(semantic_graph)
                     
-                    result = {
-                        'success': True,
-                        'message': f'Successfully opened {url}',
-                        'url': url,
-                        'instruction': instruction,
-                        'screenshot': screenshot_path,
-                        'page_title': await page.title(),
-                        'automation_completed': True,
-                        'executor_used': True
-                    }
-                else:
-                    result = {
+                    # Now create the deterministic executor
+                    executor = DeterministicExecutor(page, semantic_graph, locator_stack)
+                    
+                    if url:
+                        await asyncio.wait_for(page.goto(url), timeout=15.0)
+                        await asyncio.wait_for(page.wait_for_load_state('networkidle'), timeout=10.0)
+                        
+                        # Take screenshot as evidence
+                        screenshot_path = f"screenshots/automation_{int(time.time())}.png"
+                        os.makedirs("screenshots", exist_ok=True)
+                        await page.screenshot(path=screenshot_path)
+                        
+                        result = {
+                            'success': True,
+                            'message': f'Successfully opened {url}',
+                            'url': url,
+                            'instruction': instruction,
+                            'screenshot': screenshot_path,
+                            'page_title': await page.title(),
+                            'automation_completed': True,
+                            'executor_used': True
+                        }
+                    else:
+                        result = {
+                            'success': False,
+                            'message': 'No URL specified for navigation',
+                            'instruction': instruction
+                        }
+                    
+                    return result
+                    
+                except asyncio.CancelledError:
+                    return {
                         'success': False,
-                        'message': 'No URL specified for navigation',
-                        'instruction': instruction
+                        'message': 'Browser automation was cancelled',
+                        'instruction': instruction,
+                        'url': url,
+                        'error': 'Operation cancelled'
                     }
-                
-                await browser.close()
-                return result
+                except asyncio.TimeoutError:
+                    return {
+                        'success': False,
+                        'message': 'Browser automation timed out',
+                        'instruction': instruction,
+                        'url': url,
+                        'error': 'Timeout exceeded'
+                    }
+                finally:
+                    if browser:
+                        try:
+                            await browser.close()
+                        except:
+                            pass  # Ignore close errors
                 
         except Exception as e:
+            # Clean up browser if it exists
+            if browser:
+                try:
+                    await browser.close()
+                except:
+                    pass
+                    
             return {
                 'success': False,
                 'message': f'Browser automation failed: {str(e)}',
