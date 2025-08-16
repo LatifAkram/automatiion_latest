@@ -989,10 +989,18 @@ class ZeroBottleneckUltraEngine:
         ]
         
         # First, try the main comprehensive database directly
-        if os.path.exists('comprehensive_commercial_selectors.db'):
+        db_path = 'comprehensive_commercial_selectors.db'
+        print(f"🔍 DEBUG: Checking if database exists: {db_path} -> {os.path.exists(db_path)}")
+        if os.path.exists(db_path):
+            print(f"🔍 DEBUG: Querying comprehensive database for platform '{platform}' and actions {search_actions}")
             matching_selectors = await self.query_comprehensive_database(platform, search_actions, target, complexity)
+            print(f"🔍 DEBUG: Comprehensive database returned {len(matching_selectors)} selectors")
             if matching_selectors:
                 all_selectors.append(matching_selectors)
+            else:
+                print("❌ DEBUG: No selectors returned from comprehensive database")
+        else:
+            print("❌ DEBUG: Comprehensive database file not found")
         
         for db_name in relevant_databases:
             # Load database on demand
