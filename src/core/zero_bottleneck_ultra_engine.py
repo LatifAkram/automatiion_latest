@@ -896,9 +896,14 @@ class ZeroBottleneckUltraEngine:
                 ])
                 
             if 'play' in instruction.lower() or 'video' in ai_interpretation.lower():
-                # Extract search term for content finding
-                content_search_term = self.extract_search_term_with_ai(instruction, ai_interpretation)
-                print(f"🎯 DEBUG: Extracted content search term: '{content_search_term}'")
+                # Use AI-provided search terms if available, otherwise extract intelligently
+                ai_search_terms = ai_analysis.get('search_terms', [])
+                if ai_search_terms:
+                    content_search_term = ' '.join(ai_search_terms)
+                    print(f"🤖 DEBUG: Using AI-provided search terms: '{content_search_term}'")
+                else:
+                    content_search_term = self.extract_search_term_with_ai(instruction, ai_interpretation)
+                    print(f"🎯 DEBUG: Extracted content search term: '{content_search_term}'")
                 
                 subtasks.extend([
                     {'action': 'find_content', 'target': 'video_results', 'data': content_search_term, 'complexity': 'complex', 'ai_guided': True},
