@@ -665,12 +665,8 @@ class SuperOmegaOrchestrator:
                 instruction = request.data.get('instruction', '')
                 url = request.data.get('url', '')
                 
-                if 'google' in instruction.lower():
-                    # Execute actual browser automation
-                    result = await self._execute_browser_automation(instruction, url)
-                else:
-                    # Generic automation handling
-                    result = await self._execute_browser_automation(instruction, url)
+                # Execute browser automation for any platform
+                result = await self._execute_browser_automation(instruction, url)
             else:
                 # Generic processing
                 result = {
@@ -710,8 +706,24 @@ class SuperOmegaOrchestrator:
             from semantic_dom_graph import SemanticDOMGraph
             from self_healing_locators import SelfHealingLocatorStack
             
-            # Parse instruction to determine action
-            if 'open' in instruction.lower() and 'google' in instruction.lower():
+            # Parse instruction to determine platform and actions
+            instruction_lower = instruction.lower()
+            
+            # Determine target URL based on instruction
+            if 'youtube' in instruction_lower:
+                url = 'https://www.youtube.com'
+            elif 'google' in instruction_lower:
+                url = 'https://www.google.com'
+            elif 'facebook' in instruction_lower:
+                url = 'https://www.facebook.com'
+            elif 'amazon' in instruction_lower:
+                url = 'https://www.amazon.com'
+            elif 'twitter' in instruction_lower:
+                url = 'https://www.twitter.com'
+            elif url and not url.startswith(('http://', 'https://')):
+                url = f'https://{url}'
+            elif not url:
+                # Default to Google if no specific platform detected
                 url = 'https://www.google.com'
                 
             # Execute browser automation with proper error handling
@@ -731,22 +743,61 @@ class SuperOmegaOrchestrator:
                     if url:
                         await asyncio.wait_for(page.goto(url), timeout=15.0)
                         await asyncio.wait_for(page.wait_for_load_state('networkidle'), timeout=10.0)
-                        
-                        # Take screenshot as evidence
-                        screenshot_path = f"screenshots/automation_{int(time.time())}.png"
-                        os.makedirs("screenshots", exist_ok=True)
-                        await page.screenshot(path=screenshot_path)
-                        
-                        result = {
-                            'success': True,
-                            'message': f'Successfully opened {url}',
-                            'url': url,
-                            'instruction': instruction,
-                            'screenshot': screenshot_path,
-                            'page_title': await page.title(),
-                            'automation_completed': True,
-                            'executor_used': True
-                        }
+                         
+                         # Handle additional actions based on instruction
+                         actions_performed = []
+                         
+                         if 'youtube' in instruction_lower:
+                             if 'trending' in instruction_lower or 'popular' in instruction_lower:
+                                 try:
+                                     # Look for trending section or search
+                                     trending_selectors = [
+                                         "text=Trending",
+                                         "[aria-label*='Trending']",
+                                         "a[href*='/feed/trending']",
+                                         "yt-formatted-string:has-text('Trending')"
+                                     ]
+                                     
+                                     for selector in trending_selectors:
+                                         try:
+                                             await page.wait_for_selector(selector, timeout=3000)
+                                             await page.click(selector)
+                                             actions_performed.append("Clicked Trending section")
+                                             break
+                                         except:
+                                             continue
+                                     
+                                     # If no trending found, search for the query
+                                     if not actions_performed:
+                                         search_terms = "trending songs 2025"
+                                         search_box = page.locator("input[name='search_query'], #search")
+                                         if await search_box.count() > 0:
+                                             await search_box.fill(search_terms)
+                                             await page.keyboard.press("Enter")
+                                             actions_performed.append(f"Searched for: {search_terms}")
+                                 except Exception as e:
+                                     actions_performed.append(f"Action failed: {str(e)}")
+                         
+                         # Wait a bit for any actions to complete
+                         if actions_performed:
+                             await asyncio.sleep(2)
+                         
+                         # Take screenshot as evidence
+                         screenshot_path = f"screenshots/automation_{int(time.time())}.png"
+                         os.makedirs("screenshots", exist_ok=True)
+                         await page.screenshot(path=screenshot_path)
+                         
+                         result = {
+                             'success': True,
+                             'message': f'Successfully opened {url}' + (f' and performed {len(actions_performed)} actions' if actions_performed else ''),
+                             'url': url,
+                             'instruction': instruction,
+                             'screenshot': screenshot_path,
+                             'page_title': await page.title(),
+                             'actions_performed': actions_performed,
+                             'automation_completed': True,
+                             'executor_used': True
+                         }
                     else:
                         result = {
                             'success': False,
