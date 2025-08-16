@@ -11,6 +11,9 @@ import sys
 import os
 from pathlib import Path
 
+# Fix protobuf compatibility issue on Windows
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+
 # Add src to Python path
 current_dir = Path(__file__).parent
 src_dir = current_dir / 'src'
