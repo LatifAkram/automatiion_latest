@@ -409,6 +409,8 @@ class ZeroBottleneckUltraEngine:
             
             # Phase 3: AI-Guided Task Decomposition and Execution
             ai_analysis = task.metadata.get('ai_analysis') if task.metadata else None
+            print(f"🔍 DEBUG: AI analysis received: {ai_analysis}")
+            print(f"🔍 DEBUG: Task metadata: {task.metadata}")
             subtasks = await self.decompose_ultra_task(task.instruction, detected_platform, ai_analysis)
             print(f"📋 Decomposed into {len(subtasks)} AI-guided subtasks")
             
@@ -429,14 +431,19 @@ class ZeroBottleneckUltraEngine:
                             selectors_used.append(selector['selector'])
                             
                             # Execute the action with ultra robustness
+                            print(f"🔧 DEBUG: Executing action '{subtask['action']}' with selector '{selector['selector']}'")
                             action_result = await self.execute_ultra_action(
                                 page, subtask['action'], selector, subtask.get('data', '')
                             )
+                            print(f"🔧 DEBUG: Action result: {action_result}")
                             
                             if action_result['success']:
                                 actions_performed.append(f"{subtask['action']}: {action_result['message']}")
                                 subtask_success = True
+                                print(f"✅ DEBUG: Action '{subtask['action']}' succeeded")
                                 break
+                            else:
+                                print(f"❌ DEBUG: Action '{subtask['action']}' failed: {action_result['message']}")
                         except Exception as e:
                             logger.debug(f"Selector failed: {selector['selector']}, Error: {e}")
                             continue
