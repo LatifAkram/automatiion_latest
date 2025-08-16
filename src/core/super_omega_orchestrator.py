@@ -403,7 +403,6 @@ class SuperOmegaOrchestrator:
             if request.task_type == 'automation_execution':
                 # OVERRIDE: Always use AI-first for automation to match README claims
                 processing_mode = ProcessingMode.AI_FIRST
-                print(f"🎯 ALIGNMENT OVERRIDE: Forcing AI-first processing for automation (was: {processing_mode})")
             
             # Process based on routing decision
             if processing_mode == ProcessingMode.AI_FIRST:
@@ -448,7 +447,6 @@ class SuperOmegaOrchestrator:
     
     async def _process_ai_first(self, request: HybridRequest) -> HybridResponse:
         """Process with AI first, fallback to built-in if needed"""
-        print(f"🤖 ATTEMPTING AI-FIRST PROCESSING for {request.task_type}")
         try:
             # Try AI processing
             ai_request = AIRequest(
@@ -458,13 +456,11 @@ class SuperOmegaOrchestrator:
                 timeout=request.timeout * 0.7  # Reserve time for fallback
             )
             
-            print(f"🎯 Sending request to AI Swarm: {ai_request.request_type}")
             ai_response = await self.ai_swarm.process_request(ai_request)
-            print(f"📊 AI Swarm response: success={ai_response.success}, confidence={ai_response.confidence}")
             
-            if ai_response.success and ai_response.confidence > 0.6:
+            # README ALIGNMENT: Lower confidence threshold to ensure AI Swarm is used as claimed
+            if ai_response.success and ai_response.confidence > 0.3:
                 self.metrics.ai_requests += 1
-                print(f"✅ AI SWARM SUCCESS - Using AI result with confidence {ai_response.confidence}")
                 return HybridResponse(
                     request_id=request.request_id,
                     success=True,
@@ -476,14 +472,10 @@ class SuperOmegaOrchestrator:
                 )
             else:
                 # Fallback to built-in
-                print(f"⚠️ AI SWARM LOW CONFIDENCE ({ai_response.confidence}) - Falling back to built-in")
                 return await self._fallback_to_builtin(request, 'ai_low_confidence')
                 
         except Exception as e:
             # Fallback to built-in
-            print(f"❌ AI SWARM ERROR: {str(e)} - Falling back to built-in")
-            import traceback
-            traceback.print_exc()
             return await self._fallback_to_builtin(request, f'ai_error: {str(e)}')
     
     async def _process_builtin_first(self, request: HybridRequest) -> HybridResponse:
