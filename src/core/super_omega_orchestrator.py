@@ -36,9 +36,13 @@ from pathlib import Path
 
 # Import our dual architectures
 from builtin_ai_processor import BuiltinAIProcessor
+from true_ai_swarm_system import (
+    get_true_ai_swarm, AIRequest, AIResponse, 
+    AIProvider, AIComponentType
+)
+# Keep legacy import for compatibility
 from ai_swarm_orchestrator import (
-    AISwarmOrchestrator, get_ai_swarm, AIRequest, AIResponse, 
-    RequestType, AIComponentType
+    RequestType
 )
 
 # Import automation executor
@@ -354,9 +358,9 @@ class SuperOmegaOrchestrator:
     """The Ultimate Hybrid Intelligence System"""
     
     def __init__(self):
-        # Initialize dual architectures
+        # Initialize dual architectures with TRUE AI
         self.builtin_processor = BuiltinAIProcessor()
-        self.ai_swarm = get_ai_swarm()
+        self.ai_swarm = get_true_ai_swarm()
         
         # Note: DeterministicExecutor will be created per automation session
         
@@ -454,11 +458,14 @@ class SuperOmegaOrchestrator:
     async def _process_ai_first(self, request: HybridRequest) -> HybridResponse:
         """Process with AI first, fallback to built-in if needed"""
         try:
-            # Try AI processing
+            # Try TRUE AI processing
             ai_request = AIRequest(
                 request_id=request.request_id,
-                request_type=self._map_task_to_request_type(request.task_type),
+                component_type=self._map_task_to_ai_component(request.task_type),
+                task_type=request.task_type,
                 data=request.data,
+                preferred_provider=AIProvider.GOOGLE_GEMINI,  # Use Gemini as default
+                require_real_ai=True,
                 timeout=request.timeout * 0.7  # Reserve time for fallback
             )
             
@@ -1121,6 +1128,22 @@ class SuperOmegaOrchestrator:
         }
         
         return mapping.get(task_type, RequestType.GENERAL_AI)
+    
+    def _map_task_to_ai_component(self, task_type: str) -> AIComponentType:
+        """Map task type to TRUE AI component"""
+        mapping = {
+            'text_analysis': AIComponentType.DECISION_ENGINE,
+            'decision_making': AIComponentType.DECISION_ENGINE,
+            'pattern_learning': AIComponentType.SKILL_MINING,
+            'pattern_recognition': AIComponentType.SKILL_MINING,
+            'data_validation': AIComponentType.DATA_FABRIC,
+            'entity_extraction': AIComponentType.DATA_FABRIC,
+            'automation_execution': AIComponentType.SELF_HEALING,  # Use self-healing for automation
+            'selector_healing': AIComponentType.SELF_HEALING,
+            'code_generation': AIComponentType.COPILOT,
+            'visual_analysis': AIComponentType.VISION_INTELLIGENCE
+        }
+        return mapping.get(task_type, AIComponentType.DECISION_ENGINE)
     
     def _calculate_builtin_confidence(self, result: Any, task_type: str) -> float:
         """Calculate confidence for built-in processing result"""
