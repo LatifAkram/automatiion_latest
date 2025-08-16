@@ -37,7 +37,7 @@ except ImportError:
 # Import built-in fallbacks
 from builtin_ai_processor import BuiltinAIProcessor
 from builtin_vision_processor import BuiltinVisionProcessor
-from builtin_performance_monitor import get_system_metrics
+from .builtin_performance_monitor import get_system_metrics
 
 logger = logging.getLogger(__name__)
 

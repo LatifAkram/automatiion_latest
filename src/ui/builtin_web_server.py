@@ -734,6 +734,8 @@ class LiveConsoleServer(BuiltinWebServer):
                 if enhanced_parsing_enabled:
                     try:
                         # Import enhanced parser
+                        import sys
+                        import os
                         sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'core'))
                         from enhanced_instruction_parser import parse_instruction_enhanced
                         

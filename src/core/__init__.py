@@ -7,10 +7,10 @@ Core functionality using only built-in Python libraries.
 """
 
 # Import built-in systems first
-from builtin_performance_monitor import get_system_metrics, builtin_monitor
-from builtin_data_validation import BaseValidator, ValidationError
-from builtin_ai_processor import BuiltinAIProcessor
-from builtin_vision_processor import process_image, analyze_screenshot, vision_processor
+from .builtin_performance_monitor import get_system_metrics, builtin_monitor
+from .builtin_data_validation import BaseValidator, ValidationError
+from .builtin_ai_processor import BuiltinAIProcessor
+from .builtin_vision_processor import process_image, analyze_screenshot, vision_processor
 
 # Import configuration (now dependency-free)
 from config import Config, get_config, load_config, save_config
