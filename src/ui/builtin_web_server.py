@@ -749,7 +749,7 @@ class LiveConsoleServer(BuiltinWebServer):
                     except Exception as automation_error:
                         logger.error(f"Automation system error: {automation_error}")
                         # Fallback to simple Playwright automation
-                        return await self._simple_playwright_automation(instruction)
+                        return asyncio.run(self._simple_playwright_automation(instruction))
                     
                     # Execute the instruction
                     session_id = f"ui_session_{int(time.time())}"
