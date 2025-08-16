@@ -715,7 +715,7 @@ class LiveConsoleServer(BuiltinWebServer):
         
         @self.route("/api/fixed-super-omega-execute", methods=['POST'])
         def execute_automation(request):
-            """Execute automation instruction"""
+            """Execute automation instruction using complete SUPER-OMEGA hybrid system"""
             try:
                 # Get instruction from request body
                 body = request.get('body', {})
@@ -726,49 +726,111 @@ class LiveConsoleServer(BuiltinWebServer):
                         "success": False,
                         "error": "No instruction provided"
                     }
-                
-                # Execute automation using SUPER-OMEGA system
+
+                # Execute automation using complete hybrid system
                 import asyncio
                 import sys
                 import os
+                import time
                 
                 # Add src to path for imports
                 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
                 
+                session_id = f"ui_session_{int(time.time())}"
+                
                 try:
-                    # Try to import the automation system
+                    # Try to import and use the complete hybrid system
+                    from core.super_omega_orchestrator import get_super_omega, HybridRequest, ProcessingMode, ComplexityLevel
+                    
+                    # Get the SuperOmega orchestrator
+                    orchestrator = get_super_omega()
+                    
+                    # Determine complexity based on instruction
+                    complexity = ComplexityLevel.MODERATE
+                    if any(word in instruction.lower() for word in ['complex', 'multi', 'workflow', 'advanced']):
+                        complexity = ComplexityLevel.COMPLEX
+                    elif any(word in instruction.lower() for word in ['ultra', 'intelligent', 'orchestrate']):
+                        complexity = ComplexityLevel.ULTRA_COMPLEX
+                    elif any(word in instruction.lower() for word in ['simple', 'basic', 'easy']):
+                        complexity = ComplexityLevel.SIMPLE
+                    
+                    # Create hybrid request
+                    hybrid_request = HybridRequest(
+                        request_id=session_id,
+                        task_type='automation_execution',
+                        data={
+                            'instruction': instruction, 
+                            'url': 'https://www.google.com',
+                            'session_id': session_id
+                        },
+                        complexity=complexity,
+                        mode=ProcessingMode.HYBRID,
+                        timeout=30.0,
+                        require_evidence=True
+                    )
+                    
+                    # Execute with hybrid intelligence
+                    async def run_hybrid_automation():
+                        try:
+                            response = await orchestrator.process_request(hybrid_request)
+                            
+                            # Format response for API
+                            return {
+                                "success": response.success,
+                                "session_id": session_id,
+                                "instruction": instruction,
+                                "processing_path": response.processing_path,
+                                "confidence": response.confidence,
+                                "processing_time": response.processing_time,
+                                "evidence": response.evidence or [f"session_{session_id}_evidence"],
+                                "fallback_used": response.fallback_used,
+                                "result": response.result,
+                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                                "system": "SUPER-OMEGA Hybrid Intelligence"
+                            }
+                            
+                        except Exception as hybrid_error:
+                            logger.error(f"Hybrid system error: {hybrid_error}")
+                            return {
+                                "success": False,
+                                "error": f"Hybrid automation failed: {str(hybrid_error)}",
+                                "session_id": session_id,
+                                "processing_path": "hybrid_error"
+                            }
+                    
+                    # Run hybrid automation
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    result = loop.run_until_complete(run_hybrid_automation())
+                    loop.close()
+                    
+                    # If hybrid system worked, return its result
+                    if result.get('success') or 'processing_path' in result:
+                        return result
+                    
+                except ImportError as hybrid_import_error:
+                    logger.warning(f"Hybrid system not available: {hybrid_import_error}")
+                except Exception as hybrid_error:
+                    logger.error(f"Hybrid system failed: {hybrid_error}")
+                
+                # Fallback to existing SUPER-OMEGA system
+                try:
                     from testing.super_omega_live_automation_fixed import get_fixed_super_omega_live_automation, ExecutionMode
                     
-                    # Create automation session with fallback
-                    try:
-                        automation = get_fixed_super_omega_live_automation({
-                            'headless': False,
-                            'record_video': True,
-                            'capture_screenshots': True
-                        })
-                    except Exception as automation_error:
-                        logger.error(f"Automation system error: {automation_error}")
-                        # Fallback to simple Playwright automation
-                        return asyncio.run(self._simple_playwright_automation(instruction))
+                    automation = get_fixed_super_omega_live_automation({
+                        'headless': False,
+                        'record_video': True,
+                        'capture_screenshots': True
+                    })
                     
-                    # Execute the instruction
-                    session_id = f"ui_session_{int(time.time())}"
-                    
-                    async def run_automation():
+                    async def run_super_omega_automation():
                         try:
-                            # Create session with error handling
-                            try:
-                                session_result = await automation.create_super_omega_session(
-                                    session_id=session_id,
-                                    url="about:blank",
-                                    mode=ExecutionMode.HYBRID
-                                )
-                            except Exception as session_error:
-                                logger.error(f"Session creation error: {session_error}")
-                                return {
-                                    "success": False,
-                                    "error": f"Session creation failed: {str(session_error)}"
-                                }
+                            # Create session
+                            session_result = await automation.create_super_omega_session(
+                                session_id=session_id,
+                                url="about:blank",
+                                mode=ExecutionMode.HYBRID
+                            )
                             
                             if not session_result.get('success'):
                                 return {
@@ -776,12 +838,10 @@ class LiveConsoleServer(BuiltinWebServer):
                                     "error": f"Session creation failed: {session_result.get('error')}"
                                 }
                             
-                            # Parse instruction and execute basic automation
+                            # Execute instruction with enhanced parsing
                             steps_executed = []
                             
-                            # Simple instruction parsing
                             if "navigate" in instruction.lower() and "http" in instruction.lower():
-                                # Extract URL from instruction
                                 import re
                                 url_match = re.search(r'https?://[^\s]+', instruction)
                                 if url_match:
@@ -794,24 +854,39 @@ class LiveConsoleServer(BuiltinWebServer):
                                         "time": time.strftime("%H:%M:%S")
                                     })
                             
-                            elif "search" in instruction.lower():
-                                # Simulate search action
+                            elif "youtube" in instruction.lower() and "search" in instruction.lower():
+                                # Navigate to YouTube first
+                                nav_result = await automation.super_omega_navigate(session_id, "https://www.youtube.com")
+                                steps_executed.append({
+                                    "action": "navigate",
+                                    "target": "https://www.youtube.com",
+                                    "success": nav_result.get('success', False),
+                                    "time": time.strftime("%H:%M:%S")
+                                })
+                                
+                                # Find and interact with search
                                 search_result = await automation.super_omega_find_element(
                                     session_id, 
-                                    "input[type='search'], input[name*='search'], #search"
+                                    "input[name='search_query'], #search"
                                 )
                                 steps_executed.append({
-                                    "action": "search",
+                                    "action": "find_search",
                                     "success": search_result.get('success', False),
                                     "time": time.strftime("%H:%M:%S")
                                 })
-                            
+                                
                             else:
-                                # Default: navigate to example.com for demonstration
-                                nav_result = await automation.super_omega_navigate(session_id, "https://example.com")
+                                # Default enhanced navigation
+                                target_url = "https://www.google.com"
+                                if "youtube" in instruction.lower():
+                                    target_url = "https://www.youtube.com"
+                                elif "github" in instruction.lower():
+                                    target_url = "https://www.github.com"
+                                
+                                nav_result = await automation.super_omega_navigate(session_id, target_url)
                                 steps_executed.append({
                                     "action": "navigate",
-                                    "target": "https://example.com",
+                                    "target": target_url,
                                     "success": nav_result.get('success', False),
                                     "time": time.strftime("%H:%M:%S")
                                 })
@@ -825,35 +900,112 @@ class LiveConsoleServer(BuiltinWebServer):
                                 "instruction": instruction,
                                 "steps": steps_executed,
                                 "evidence": [f"session_{session_id}_evidence"],
-                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                                "processing_path": "super_omega_fallback",
+                                "system": "SUPER-OMEGA Live Automation"
                             }
                             
                         except Exception as e:
                             return {
                                 "success": False,
                                 "error": str(e),
-                                "session_id": session_id
+                                "session_id": session_id,
+                                "processing_path": "super_omega_error"
                             }
                     
-                    # Run async automation
+                    # Run SUPER-OMEGA automation
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-                    result = loop.run_until_complete(run_automation())
+                    result = loop.run_until_complete(run_super_omega_automation())
                     loop.close()
                     
                     return result
                     
-                except ImportError as e:
+                except ImportError as super_omega_import_error:
+                    logger.warning(f"SUPER-OMEGA system not available: {super_omega_import_error}")
+                except Exception as super_omega_error:
+                    logger.error(f"SUPER-OMEGA system failed: {super_omega_error}")
+                
+                # Final fallback to simple Playwright automation
+                try:
+                    async def run_simple_automation():
+                        try:
+                            from playwright.async_api import async_playwright
+                            
+                            async with async_playwright() as p:
+                                browser = await p.chromium.launch(headless=False)
+                                page = await browser.new_page()
+                                
+                                try:
+                                    # Determine target URL from instruction
+                                    target_url = "https://www.google.com"
+                                    if "youtube" in instruction.lower():
+                                        target_url = "https://www.youtube.com"
+                                    elif "github" in instruction.lower():
+                                        target_url = "https://www.github.com"
+                                    elif "http" in instruction.lower():
+                                        import re
+                                        url_match = re.search(r'https?://[^\s]+', instruction)
+                                        if url_match:
+                                            target_url = url_match.group()
+                                    
+                                    # Navigate to target
+                                    await page.goto(target_url)
+                                    await page.wait_for_load_state('networkidle')
+                                    
+                                    # Take screenshot for evidence
+                                    screenshot_path = f"runs/{session_id}/screenshot.png"
+                                    os.makedirs(f"runs/{session_id}", exist_ok=True)
+                                    await page.screenshot(path=screenshot_path)
+                                    
+                                    return {
+                                        "success": True,
+                                        "session_id": session_id,
+                                        "instruction": instruction,
+                                        "steps": [{
+                                            "action": "navigate",
+                                            "target": target_url,
+                                            "success": True,
+                                            "time": time.strftime("%H:%M:%S")
+                                        }],
+                                        "evidence": [screenshot_path],
+                                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                                        "processing_path": "simple_playwright_fallback",
+                                        "system": "Simple Playwright Automation"
+                                    }
+                                    
+                                finally:
+                                    await browser.close()
+                                    
+                        except Exception as e:
+                            return {
+                                "success": False,
+                                "error": f"Simple automation failed: {str(e)}",
+                                "session_id": session_id,
+                                "processing_path": "simple_error"
+                            }
+                    
+                    # Run simple automation
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    result = loop.run_until_complete(run_simple_automation())
+                    loop.close()
+                    
+                    return result
+                    
+                except Exception as simple_error:
                     return {
                         "success": False,
-                        "error": f"Automation system not available: {e}",
-                        "fallback": True
+                        "error": f"All automation systems failed. Simple error: {str(simple_error)}",
+                        "session_id": session_id,
+                        "processing_path": "complete_failure"
                     }
                     
             except Exception as e:
                 return {
                     "success": False,
-                    "error": str(e)
+                    "error": f"Automation request processing failed: {str(e)}",
+                    "processing_path": "request_error"
                 }
         
         @self.route("/api/session-status/<session_id>")

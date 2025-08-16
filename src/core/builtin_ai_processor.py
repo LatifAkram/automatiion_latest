@@ -1,551 +1,601 @@
 #!/usr/bin/env python3
 """
-Built-in AI Processor - 100% Dependency-Free
-============================================
+Built-in AI Processor - 100% Zero Dependencies
+===============================================
 
-Complete AI/ML processing system using only Python standard library.
-Provides intelligent text processing, pattern recognition, and decision making.
+Advanced AI processing using only Python standard library.
+Provides text analysis, decision making, pattern recognition, and entity extraction
+without any external dependencies.
+
+✅ FEATURES:
+- Text Analysis: Sentiment analysis, keyword extraction
+- Decision Making: Multi-option decision with confidence scoring  
+- Pattern Recognition: Learning from examples
+- Entity Extraction: Email, phone, URL detection
 """
 
 import re
-import math
 import json
-import random
+import math
 import statistics
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional, Tuple, Union
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+import string
+import random
+from datetime import datetime
 import hashlib
-import time
 
-@dataclass
-class AIResponse:
-    """AI processing response"""
-    confidence: float
-    result: Any
-    reasoning: str
-    processing_time: float
-
-class TextProcessor:
-    """Advanced text processing and analysis"""
+class BuiltinAIProcessor:
+    """Advanced AI processor with zero external dependencies"""
     
     def __init__(self):
-        self.common_words = {
-            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-            'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during',
-            'before', 'after', 'above', 'below', 'between', 'among', 'is', 'are',
-            'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does',
-            'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can'
+        self.patterns_learned = {}
+        self.decision_history = []
+        self.sentiment_keywords = {
+            'positive': [
+                'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 
+                'awesome', 'perfect', 'love', 'like', 'happy', 'pleased', 'satisfied',
+                'success', 'successful', 'win', 'winner', 'best', 'better', 'improve',
+                'beautiful', 'brilliant', 'outstanding', 'superb', 'magnificent'
+            ],
+            'negative': [
+                'bad', 'terrible', 'awful', 'horrible', 'disgusting', 'hate', 'dislike',
+                'angry', 'frustrated', 'disappointed', 'fail', 'failure', 'worst', 'worse',
+                'problem', 'issue', 'error', 'broken', 'wrong', 'difficult', 'hard',
+                'impossible', 'useless', 'stupid', 'ridiculous', 'annoying'
+            ],
+            'neutral': [
+                'okay', 'fine', 'normal', 'average', 'standard', 'typical', 'usual',
+                'regular', 'common', 'ordinary', 'moderate', 'medium', 'fair'
+            ]
         }
         
-        self.sentiment_positive = {
-            'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic',
-            'awesome', 'love', 'like', 'enjoy', 'happy', 'pleased', 'satisfied',
-            'perfect', 'best', 'brilliant', 'outstanding', 'superb', 'magnificent'
+        # Entity extraction patterns
+        self.entity_patterns = {
+            'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+            'phone': r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',
+            'url': r'https?://[^\s<>"{}|\\^`[\]]+',
+            'ip': r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b',
+            'date': r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b',
+            'time': r'\b\d{1,2}:\d{2}(?::\d{2})?\s?(?:AM|PM|am|pm)?\b',
+            'currency': r'\$\d+(?:\.\d{2})?|\d+(?:\.\d{2})?\s?(?:USD|EUR|GBP|INR)',
+            'credit_card': r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b'
         }
+
+    def analyze_text(self, text: str) -> Dict[str, Any]:
+        """
+        Comprehensive text analysis including sentiment, keywords, and entities
         
-        self.sentiment_negative = {
-            'bad', 'terrible', 'awful', 'horrible', 'hate', 'dislike', 'angry',
-            'frustrated', 'disappointed', 'worst', 'poor', 'useless', 'broken',
-            'failed', 'error', 'problem', 'issue', 'wrong', 'difficult'
+        Args:
+            text: Input text to analyze
+            
+        Returns:
+            Dictionary with analysis results
+        """
+        if not text or not isinstance(text, str):
+            return {
+                'sentiment': {'score': 0.0, 'label': 'neutral', 'confidence': 0.0},
+                'keywords': [],
+                'entities': {},
+                'statistics': {},
+                'language_features': {}
+            }
+        
+        # Clean and prepare text
+        cleaned_text = self._clean_text(text)
+        words = self._tokenize(cleaned_text)
+        
+        # Sentiment analysis
+        sentiment = self._analyze_sentiment(words)
+        
+        # Keyword extraction
+        keywords = self._extract_keywords(words, text)
+        
+        # Entity extraction
+        entities = self._extract_entities(text)
+        
+        # Text statistics
+        statistics_data = self._calculate_statistics(text, words)
+        
+        # Language features
+        language_features = self._analyze_language_features(text, words)
+        
+        return {
+            'sentiment': sentiment,
+            'keywords': keywords,
+            'entities': entities,
+            'statistics': statistics_data,
+            'language_features': language_features,
+            'processing_timestamp': datetime.now().isoformat()
         }
-    
-    def tokenize(self, text: str) -> List[str]:
-        """Tokenize text into words"""
-        # Remove punctuation and convert to lowercase
-        cleaned = re.sub(r'[^\w\s]', ' ', text.lower())
-        return [word for word in cleaned.split() if word]
-    
-    def extract_keywords(self, text: str, top_k: int = 10) -> List[Tuple[str, float]]:
-        """Extract keywords with TF-IDF-like scoring"""
-        tokens = self.tokenize(text)
+
+    def make_decision(self, options: List[str], context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """
+        AI-powered decision making with confidence scoring
         
-        # Remove common words
-        filtered_tokens = [token for token in tokens if token not in self.common_words]
+        Args:
+            options: List of available options
+            context: Additional context for decision making
+            
+        Returns:
+            Decision result with confidence and reasoning
+        """
+        if not options:
+            return {
+                'decision': None,
+                'confidence': 0.0,
+                'reasoning': 'No options provided',
+                'scores': {}
+            }
         
-        # Calculate term frequency
-        term_freq = Counter(filtered_tokens)
-        total_terms = len(filtered_tokens)
+        context = context or {}
         
-        # Simple TF-IDF approximation
-        keyword_scores = {}
-        for term, freq in term_freq.items():
-            tf = freq / total_terms
-            # Simple IDF approximation (longer words get higher scores)
-            idf = math.log(len(term) + 1)
-            keyword_scores[term] = tf * idf
+        # Score each option based on multiple factors
+        scores = {}
+        reasoning_factors = []
         
-        # Return top keywords
-        return sorted(keyword_scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
-    
-    def analyze_sentiment(self, text: str) -> Tuple[str, float]:
-        """Analyze sentiment of text"""
-        tokens = self.tokenize(text)
+        for option in options:
+            score = self._score_option(option, context)
+            scores[option] = score
+            
+        # Find best option
+        best_option = max(scores.keys(), key=lambda x: scores[x])
+        best_score = scores[best_option]
         
-        positive_score = sum(1 for token in tokens if token in self.sentiment_positive)
-        negative_score = sum(1 for token in tokens if token in self.sentiment_negative)
+        # Calculate confidence based on score distribution
+        confidence = self._calculate_decision_confidence(scores)
         
-        if positive_score > negative_score:
-            sentiment = "positive"
-            confidence = min(0.9, (positive_score - negative_score) / len(tokens) * 10)
-        elif negative_score > positive_score:
-            sentiment = "negative"
-            confidence = min(0.9, (negative_score - positive_score) / len(tokens) * 10)
-        else:
-            sentiment = "neutral"
-            confidence = 0.5
+        # Generate reasoning
+        reasoning = self._generate_decision_reasoning(best_option, scores, context)
         
-        return sentiment, confidence
-    
+        # Store decision history for learning
+        decision_record = {
+            'options': options,
+            'decision': best_option,
+            'confidence': confidence,
+            'context': context,
+            'timestamp': datetime.now().isoformat()
+        }
+        self.decision_history.append(decision_record)
+        
+        return {
+            'decision': best_option,
+            'confidence': confidence,
+            'reasoning': reasoning,
+            'scores': scores,
+            'all_options': options
+        }
+
+    def recognize_patterns(self, examples: List[Dict[str, Any]], 
+                          new_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Pattern recognition and classification based on examples
+        
+        Args:
+            examples: List of example data with labels
+            new_data: New data to classify
+            
+        Returns:
+            Classification result with confidence
+        """
+        if not examples:
+            return {
+                'classification': 'unknown',
+                'confidence': 0.0,
+                'similar_examples': [],
+                'pattern_features': {}
+            }
+        
+        # Extract features from examples
+        pattern_features = self._extract_pattern_features(examples)
+        
+        # Extract features from new data
+        new_features = self._extract_features(new_data)
+        
+        # Find most similar examples
+        similarities = []
+        for example in examples:
+            example_features = self._extract_features(example)
+            similarity = self._calculate_similarity(new_features, example_features)
+            similarities.append({
+                'example': example,
+                'similarity': similarity,
+                'label': example.get('label', 'unknown')
+            })
+        
+        # Sort by similarity
+        similarities.sort(key=lambda x: x['similarity'], reverse=True)
+        
+        # Classify based on most similar examples
+        classification = self._classify_by_similarity(similarities)
+        
+        return {
+            'classification': classification['label'],
+            'confidence': classification['confidence'],
+            'similar_examples': similarities[:3],
+            'pattern_features': pattern_features,
+            'feature_match_score': classification.get('feature_score', 0.0)
+        }
+
     def extract_entities(self, text: str) -> Dict[str, List[str]]:
-        """Extract named entities using pattern matching"""
-        entities = {
-            'emails': re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', text),
-            'urls': re.findall(r'https?://(?:[-\w.])+(?:[:\d]+)?(?:/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:\w*))?)?', text),
-            'phone_numbers': re.findall(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', text),
-            'dates': re.findall(r'\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b', text),
-            'numbers': re.findall(r'\b\d+(?:\.\d+)?\b', text),
-            'capitalized_words': re.findall(r'\b[A-Z][a-z]+\b', text)
+        """
+        Extract various entities from text (emails, phones, URLs, etc.)
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Dictionary of entity types and found entities
+        """
+        return self._extract_entities(text)
+
+    def learn_from_feedback(self, decision_id: str, outcome: str, 
+                           feedback_score: float) -> bool:
+        """
+        Learn from decision outcomes to improve future decisions
+        
+        Args:
+            decision_id: ID of the decision
+            outcome: Outcome description
+            feedback_score: Score from 0.0 to 1.0
+            
+        Returns:
+            Success status
+        """
+        try:
+            # Find the decision in history
+            for decision in self.decision_history:
+                decision_hash = hashlib.md5(
+                    json.dumps(decision, sort_keys=True).encode()
+                ).hexdigest()[:8]
+                
+                if decision_hash == decision_id:
+                    decision['outcome'] = outcome
+                    decision['feedback_score'] = feedback_score
+                    decision['learned'] = True
+                    
+                    # Update patterns learned
+                    self._update_learned_patterns(decision)
+                    return True
+            
+            return False
+        except Exception:
+            return False
+
+    def get_processing_stats(self) -> Dict[str, Any]:
+        """Get processing statistics and performance metrics"""
+        total_decisions = len(self.decision_history)
+        successful_decisions = len([d for d in self.decision_history 
+                                  if d.get('feedback_score', 0) > 0.7])
+        
+        avg_confidence = 0.0
+        if self.decision_history:
+            avg_confidence = statistics.mean([d['confidence'] for d in self.decision_history])
+        
+        return {
+            'total_decisions': total_decisions,
+            'successful_decisions': successful_decisions,
+            'success_rate': successful_decisions / max(total_decisions, 1),
+            'average_confidence': avg_confidence,
+            'patterns_learned': len(self.patterns_learned),
+            'entity_types_supported': len(self.entity_patterns),
+            'sentiment_keywords': sum(len(words) for words in self.sentiment_keywords.values())
         }
+
+    # Private helper methods
+    
+    def _clean_text(self, text: str) -> str:
+        """Clean and normalize text"""
+        # Remove extra whitespace
+        text = ' '.join(text.split())
+        # Convert to lowercase for processing
+        return text.lower()
+    
+    def _tokenize(self, text: str) -> List[str]:
+        """Tokenize text into words"""
+        # Remove punctuation and split
+        translator = str.maketrans('', '', string.punctuation)
+        cleaned = text.translate(translator)
+        return cleaned.split()
+    
+    def _analyze_sentiment(self, words: List[str]) -> Dict[str, Any]:
+        """Analyze sentiment of text"""
+        positive_score = 0
+        negative_score = 0
+        neutral_score = 0
+        
+        for word in words:
+            if word in self.sentiment_keywords['positive']:
+                positive_score += 1
+            elif word in self.sentiment_keywords['negative']:
+                negative_score += 1
+            elif word in self.sentiment_keywords['neutral']:
+                neutral_score += 1
+        
+        total_sentiment_words = positive_score + negative_score + neutral_score
+        
+        if total_sentiment_words == 0:
+            return {'score': 0.0, 'label': 'neutral', 'confidence': 0.0}
+        
+        # Calculate sentiment score (-1 to 1)
+        sentiment_score = (positive_score - negative_score) / len(words)
+        
+        # Determine label
+        if sentiment_score > 0.1:
+            label = 'positive'
+        elif sentiment_score < -0.1:
+            label = 'negative'
+        else:
+            label = 'neutral'
+        
+        # Calculate confidence
+        confidence = total_sentiment_words / len(words)
+        confidence = min(confidence, 1.0)
+        
+        return {
+            'score': sentiment_score,
+            'label': label,
+            'confidence': confidence,
+            'word_counts': {
+                'positive': positive_score,
+                'negative': negative_score,
+                'neutral': neutral_score
+            }
+        }
+    
+    def _extract_keywords(self, words: List[str], original_text: str) -> List[Dict[str, Any]]:
+        """Extract important keywords from text"""
+        # Count word frequencies
+        word_freq = Counter(words)
+        
+        # Remove common stop words
+        stop_words = {
+            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+            'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have',
+            'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
+            'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i',
+            'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them'
+        }
+        
+        keywords = []
+        for word, freq in word_freq.most_common(10):
+            if word not in stop_words and len(word) > 2:
+                # Calculate importance score
+                importance = freq / len(words)
+                keywords.append({
+                    'word': word,
+                    'frequency': freq,
+                    'importance': importance,
+                    'positions': [i for i, w in enumerate(words) if w == word]
+                })
+        
+        return keywords
+    
+    def _extract_entities(self, text: str) -> Dict[str, List[str]]:
+        """Extract entities using regex patterns"""
+        entities = {}
+        
+        for entity_type, pattern in self.entity_patterns.items():
+            matches = re.findall(pattern, text)
+            if matches:
+                entities[entity_type] = list(set(matches))  # Remove duplicates
         
         return entities
     
-    def calculate_similarity(self, text1: str, text2: str) -> float:
-        """Calculate text similarity using Jaccard coefficient"""
-        tokens1 = set(self.tokenize(text1))
-        tokens2 = set(self.tokenize(text2))
+    def _calculate_statistics(self, text: str, words: List[str]) -> Dict[str, Any]:
+        """Calculate text statistics"""
+        sentences = text.split('.')
+        sentences = [s.strip() for s in sentences if s.strip()]
         
-        if not tokens1 and not tokens2:
-            return 1.0
-        
-        intersection = len(tokens1.intersection(tokens2))
-        union = len(tokens1.union(tokens2))
-        
-        return intersection / union if union > 0 else 0.0
-
-class PatternRecognizer:
-    """Pattern recognition and classification"""
-    
-    def __init__(self):
-        self.learned_patterns = {}
-        self.classification_rules = {}
-    
-    def learn_pattern(self, pattern_name: str, examples: List[str]):
-        """Learn a pattern from examples"""
-        # Extract common features from examples
-        features = []
-        for example in examples:
-            features.append(self._extract_features(example))
-        
-        # Find common patterns
-        common_features = self._find_common_features(features)
-        self.learned_patterns[pattern_name] = common_features
-    
-    def _extract_features(self, text: str) -> Dict[str, Any]:
-        """Extract features from text"""
         return {
-            'length': len(text),
-            'word_count': len(text.split()),
-            'has_numbers': bool(re.search(r'\d', text)),
-            'has_uppercase': bool(re.search(r'[A-Z]', text)),
-            'has_special_chars': bool(re.search(r'[!@#$%^&*(),.?":{}|<>]', text)),
-            'starts_with_capital': text[0].isupper() if text else False,
-            'ends_with_punctuation': text[-1] in '.!?' if text else False,
-            'avg_word_length': statistics.mean([len(word) for word in text.split()]) if text.split() else 0
+            'character_count': len(text),
+            'word_count': len(words),
+            'sentence_count': len(sentences),
+            'avg_word_length': statistics.mean([len(word) for word in words]) if words else 0,
+            'avg_sentence_length': len(words) / len(sentences) if sentences else 0,
+            'unique_words': len(set(words)),
+            'vocabulary_diversity': len(set(words)) / len(words) if words else 0
         }
     
-    def _find_common_features(self, features_list: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Find common features across examples"""
-        if not features_list:
-            return {}
+    def _analyze_language_features(self, text: str, words: List[str]) -> Dict[str, Any]:
+        """Analyze language features and complexity"""
+        # Count different types of words
+        capitalized_words = len([w for w in text.split() if w[0].isupper()])
+        question_marks = text.count('?')
+        exclamation_marks = text.count('!')
         
-        common = {}
-        for key in features_list[0]:
-            values = [f[key] for f in features_list]
+        # Readability metrics (simplified)
+        avg_sentence_length = len(words) / max(text.count('.'), 1)
+        complex_words = len([w for w in words if len(w) > 6])
+        
+        return {
+            'capitalized_words': capitalized_words,
+            'question_count': question_marks,
+            'exclamation_count': exclamation_marks,
+            'avg_sentence_length': avg_sentence_length,
+            'complex_words': complex_words,
+            'complexity_ratio': complex_words / len(words) if words else 0,
+            'punctuation_density': (question_marks + exclamation_marks) / len(text) if text else 0
+        }
+    
+    def _score_option(self, option: str, context: Dict[str, Any]) -> float:
+        """Score an option based on context and learned patterns"""
+        base_score = 0.5  # Neutral starting point
+        
+        # Score based on context
+        if context:
+            # Check for positive indicators in context
+            score_value = context.get('score', 0)
+            if isinstance(score_value, (int, float)):
+                base_score += score_value * 0.3
             
-            if isinstance(values[0], bool):
-                # For boolean features, use majority vote
-                common[key] = sum(values) > len(values) / 2
-            elif isinstance(values[0], (int, float)):
-                # For numeric features, use average with tolerance
-                common[key] = {
+            # Check for priority indicators
+            priority = context.get('priority', 'medium')
+            if priority == 'high':
+                base_score += 0.2
+            elif priority == 'low':
+                base_score -= 0.1
+            
+            # Check for historical success
+            if option in context.get('successful_options', []):
+                base_score += 0.3
+            
+            # Check for failure history
+            if option in context.get('failed_options', []):
+                base_score -= 0.2
+        
+        # Score based on learned patterns
+        if option in self.patterns_learned:
+            pattern_score = self.patterns_learned[option].get('success_rate', 0.5)
+            base_score = (base_score + pattern_score) / 2
+        
+        # Ensure score is between 0 and 1
+        return max(0.0, min(1.0, base_score))
+    
+    def _calculate_decision_confidence(self, scores: Dict[str, float]) -> float:
+        """Calculate confidence based on score distribution"""
+        if not scores:
+            return 0.0
+        
+        score_values = list(scores.values())
+        if len(score_values) == 1:
+            return score_values[0]
+        
+        # Higher confidence if there's a clear winner
+        max_score = max(score_values)
+        second_max = sorted(score_values, reverse=True)[1]
+        
+        # Confidence based on gap between best and second best
+        confidence = max_score - ((max_score - second_max) * 0.5)
+        return min(1.0, max(0.0, confidence))
+    
+    def _generate_decision_reasoning(self, decision: str, scores: Dict[str, float], 
+                                   context: Dict[str, Any]) -> str:
+        """Generate human-readable reasoning for decision"""
+        reasoning_parts = []
+        
+        reasoning_parts.append(f"Selected '{decision}' with score {scores[decision]:.2f}")
+        
+        # Compare with other options
+        other_scores = {k: v for k, v in scores.items() if k != decision}
+        if other_scores:
+            avg_other = statistics.mean(other_scores.values())
+            if scores[decision] > avg_other:
+                reasoning_parts.append(f"outperformed other options by {scores[decision] - avg_other:.2f}")
+        
+        # Context-based reasoning
+        if context:
+            if context.get('priority') == 'high':
+                reasoning_parts.append("high priority context")
+            if decision in context.get('successful_options', []):
+                reasoning_parts.append("historically successful option")
+        
+        return "; ".join(reasoning_parts)
+    
+    def _extract_pattern_features(self, examples: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Extract common features from examples"""
+        features = defaultdict(list)
+        
+        for example in examples:
+            for key, value in example.items():
+                if key != 'label':
+                    features[key].append(value)
+        
+        # Calculate feature statistics
+        pattern_features = {}
+        for feature, values in features.items():
+            if all(isinstance(v, (int, float)) for v in values):
+                pattern_features[feature] = {
+                    'type': 'numeric',
                     'mean': statistics.mean(values),
                     'std': statistics.stdev(values) if len(values) > 1 else 0,
                     'min': min(values),
                     'max': max(values)
                 }
-        
-        return common
-    
-    def classify(self, text: str) -> Tuple[str, float]:
-        """Classify text against learned patterns"""
-        if not self.learned_patterns:
-            return "unknown", 0.0
-        
-        features = self._extract_features(text)
-        best_match = None
-        best_score = 0.0
-        
-        for pattern_name, pattern_features in self.learned_patterns.items():
-            score = self._calculate_pattern_match(features, pattern_features)
-            if score > best_score:
-                best_score = score
-                best_match = pattern_name
-        
-        return best_match or "unknown", best_score
-    
-    def _calculate_pattern_match(self, features: Dict[str, Any], pattern: Dict[str, Any]) -> float:
-        """Calculate how well features match a pattern"""
-        matches = 0
-        total = 0
-        
-        for key, pattern_value in pattern.items():
-            if key not in features:
-                continue
-            
-            total += 1
-            feature_value = features[key]
-            
-            if isinstance(pattern_value, bool):
-                if feature_value == pattern_value:
-                    matches += 1
-            elif isinstance(pattern_value, dict) and 'mean' in pattern_value:
-                # Numeric feature with statistics
-                mean = pattern_value['mean']
-                std = pattern_value['std']
-                tolerance = std + 0.1  # Add small tolerance
-                
-                if abs(feature_value - mean) <= tolerance:
-                    matches += 1
-        
-        return matches / total if total > 0 else 0.0
-
-class DecisionEngine:
-    """Intelligent decision making engine"""
-    
-    def __init__(self):
-        self.decision_tree = {}
-        self.rules = []
-        self.weights = {}
-    
-    def add_rule(self, condition: str, action: str, weight: float = 1.0):
-        """Add decision rule"""
-        self.rules.append({
-            'condition': condition,
-            'action': action,
-            'weight': weight
-        })
-    
-    def evaluate_condition(self, condition: str, context: Dict[str, Any]) -> bool:
-        """Evaluate a condition against context"""
-        try:
-            # Simple condition evaluation
-            # Replace variables in condition with context values
-            for key, value in context.items():
-                condition = condition.replace(f'${key}', str(value))
-            
-            # Evaluate simple expressions
-            if '>' in condition:
-                left, right = condition.split('>')
-                return float(left.strip()) > float(right.strip())
-            elif '<' in condition:
-                left, right = condition.split('<')
-                return float(left.strip()) < float(right.strip())
-            elif '==' in condition:
-                left, right = condition.split('==')
-                return left.strip() == right.strip()
-            elif 'contains' in condition:
-                left, right = condition.split('contains')
-                return right.strip().strip('"\'') in left.strip()
-            
-            return False
-        except:
-            return False
-    
-    def make_decision(self, context: Dict[str, Any]) -> Tuple[str, float, str]:
-        """Make decision based on rules and context"""
-        applicable_rules = []
-        
-        for rule in self.rules:
-            if self.evaluate_condition(rule['condition'], context):
-                applicable_rules.append(rule)
-        
-        if not applicable_rules:
-            return "no_action", 0.0, "No applicable rules found"
-        
-        # Weight rules and select best action
-        action_scores = defaultdict(float)
-        for rule in applicable_rules:
-            action_scores[rule['action']] += rule['weight']
-        
-        best_action = max(action_scores, key=action_scores.get)
-        confidence = min(1.0, action_scores[best_action] / len(self.rules))
-        
-        reasoning = f"Applied {len(applicable_rules)} rules, best action: {best_action}"
-        
-        return best_action, confidence, reasoning
-
-class BuiltinAIProcessor:
-    """Main AI processor combining all capabilities"""
-    
-    def __init__(self):
-        self.text_processor = TextProcessor()
-        self.pattern_recognizer = PatternRecognizer()
-        self.decision_engine = DecisionEngine()
-        self.memory = {}
-        
-        # Setup default rules
-        self._setup_default_rules()
-    
-    def _setup_default_rules(self):
-        """Setup default decision rules"""
-        self.decision_engine.add_rule(
-            "$confidence > 0.8",
-            "high_confidence_action",
-            2.0
-        )
-        
-        self.decision_engine.add_rule(
-            "$sentiment == positive",
-            "positive_response",
-            1.5
-        )
-        
-        self.decision_engine.add_rule(
-            "$error_count > 3",
-            "error_handling",
-            3.0
-        )
-    
-    def process_text(self, text: str, task: str = "analyze") -> AIResponse:
-        """Process text with AI capabilities"""
-        start_time = time.time()
-        
-        try:
-            if task == "analyze":
-                result = self._analyze_text(text)
-            elif task == "classify":
-                result = self._classify_text(text)
-            elif task == "extract":
-                result = self._extract_information(text)
-            elif task == "decide":
-                result = self._make_decision(text)
             else:
-                result = {"error": f"Unknown task: {task}"}
-            
-            processing_time = time.time() - start_time
-            confidence = result.get('confidence', 0.8)
-            reasoning = result.get('reasoning', f"Processed with task: {task}")
-            
-            return AIResponse(
-                confidence=confidence,
-                result=result,
-                reasoning=reasoning,
-                processing_time=processing_time
-            )
-            
-        except Exception as e:
-            processing_time = time.time() - start_time
-            return AIResponse(
-                confidence=0.0,
-                result={"error": str(e)},
-                reasoning=f"Processing failed: {e}",
-                processing_time=processing_time
-            )
+                pattern_features[feature] = {
+                    'type': 'categorical',
+                    'values': list(set(str(v) for v in values)),
+                    'most_common': Counter(str(v) for v in values).most_common(1)[0][0]
+                }
+        
+        return pattern_features
     
-    def _analyze_text(self, text: str) -> Dict[str, Any]:
-        """Comprehensive text analysis"""
-        keywords = self.text_processor.extract_keywords(text)
-        sentiment, sentiment_confidence = self.text_processor.analyze_sentiment(text)
-        entities = self.text_processor.extract_entities(text)
+    def _extract_features(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract features from data"""
+        features = {}
+        for key, value in data.items():
+            if key != 'label':
+                if isinstance(value, (int, float)):
+                    features[key] = float(value)
+                else:
+                    features[key] = str(value)
+        return features
+    
+    def _calculate_similarity(self, features1: Dict[str, Any], 
+                            features2: Dict[str, Any]) -> float:
+        """Calculate similarity between two feature sets"""
+        common_keys = set(features1.keys()) & set(features2.keys())
+        if not common_keys:
+            return 0.0
+        
+        similarities = []
+        for key in common_keys:
+            val1, val2 = features1[key], features2[key]
+            
+            if isinstance(val1, (int, float)) and isinstance(val2, (int, float)):
+                # Numeric similarity
+                max_val = max(abs(val1), abs(val2))
+                if max_val == 0:
+                    sim = 1.0
+                else:
+                    sim = 1.0 - abs(val1 - val2) / max_val
+            else:
+                # String similarity (simple exact match)
+                sim = 1.0 if str(val1) == str(val2) else 0.0
+            
+            similarities.append(sim)
+        
+        return statistics.mean(similarities)
+    
+    def _classify_by_similarity(self, similarities: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Classify based on similarity scores"""
+        if not similarities:
+            return {'label': 'unknown', 'confidence': 0.0}
+        
+        # Group by label and calculate average similarity
+        label_scores = defaultdict(list)
+        for sim_data in similarities:
+            label_scores[sim_data['label']].append(sim_data['similarity'])
+        
+        # Calculate average score for each label
+        label_averages = {}
+        for label, scores in label_scores.items():
+            label_averages[label] = statistics.mean(scores)
+        
+        # Find best label
+        best_label = max(label_averages.keys(), key=lambda x: label_averages[x])
+        confidence = label_averages[best_label]
         
         return {
-            "keywords": keywords,
-            "sentiment": sentiment,
-            "sentiment_confidence": sentiment_confidence,
-            "entities": entities,
-            "word_count": len(text.split()),
-            "character_count": len(text),
-            "confidence": sentiment_confidence,
-            "reasoning": "Performed comprehensive text analysis"
+            'label': best_label,
+            'confidence': confidence,
+            'feature_score': confidence
         }
     
-    def _classify_text(self, text: str) -> Dict[str, Any]:
-        """Classify text using pattern recognition"""
-        classification, confidence = self.pattern_recognizer.classify(text)
+    def _update_learned_patterns(self, decision: Dict[str, Any]) -> None:
+        """Update learned patterns based on feedback"""
+        decision_option = decision['decision']
+        feedback_score = decision.get('feedback_score', 0.5)
         
-        return {
-            "classification": classification,
-            "confidence": confidence,
-            "reasoning": f"Classified as {classification} with {confidence:.2f} confidence"
-        }
-    
-    def _extract_information(self, text: str) -> Dict[str, Any]:
-        """Extract structured information from text"""
-        entities = self.text_processor.extract_entities(text)
-        keywords = self.text_processor.extract_keywords(text, top_k=5)
+        if decision_option not in self.patterns_learned:
+            self.patterns_learned[decision_option] = {
+                'total_uses': 0,
+                'total_score': 0.0,
+                'success_rate': 0.5
+            }
         
-        return {
-            "entities": entities,
-            "keywords": [kw[0] for kw in keywords],
-            "confidence": 0.7,
-            "reasoning": "Extracted entities and keywords using pattern matching"
-        }
-    
-    def _make_decision(self, text: str) -> Dict[str, Any]:
-        """Make intelligent decision based on text"""
-        analysis = self._analyze_text(text)
-        
-        context = {
-            "sentiment": analysis["sentiment"],
-            "confidence": analysis["sentiment_confidence"],
-            "word_count": analysis["word_count"],
-            "error_count": len([entity for entity in analysis["entities"]["capitalized_words"] 
-                              if "error" in entity.lower() or "fail" in entity.lower()])
-        }
-        
-        action, confidence, reasoning = self.decision_engine.make_decision(context)
-        
-        return {
-            "action": action,
-            "confidence": confidence,
-            "reasoning": reasoning,
-            "context": context
-        }
-    
-    def train_pattern(self, pattern_name: str, examples: List[str]):
-        """Train the AI on new patterns"""
-        self.pattern_recognizer.learn_pattern(pattern_name, examples)
-    
-    def add_decision_rule(self, condition: str, action: str, weight: float = 1.0):
-        """Add new decision rule"""
-        self.decision_engine.add_rule(condition, action, weight)
-    
-    def remember(self, key: str, value: Any):
-        """Store information in memory"""
-        self.memory[key] = value
-    
-    def recall(self, key: str) -> Any:
-        """Retrieve information from memory"""
-        return self.memory.get(key)
-    
-    def make_decision(self, options: List[str], context: Dict[str, Any]) -> AIResponse:
-        """Make a decision from given options based on context"""
-        start_time = time.time()
-        
-        if not options:
-            return AIResponse(
-                result={'choice': None, 'confidence': 0.0, 'reasoning': 'No options provided'},
-                confidence=0.0,
-                reasoning='No options provided',
-                processing_time=time.time() - start_time
-            )
-        
-        # Use decision engine to evaluate options
-        context_text = json.dumps(context) if context else ""
-        decision_result = self.decision_engine.make_decision(context_text)
-        
-        # Map decision to available options
-        best_option = None
-        best_score = 0.0
-        reasoning = "Rule-based decision making"
-        
-        # Simple keyword matching to select best option
-        for option in options:
-            score = 0.0
-            option_lower = option.lower()
-            
-            # Score based on context keywords
-            if context:
-                context_str = str(context).lower()
-                common_words = set(option_lower.split()) & set(context_str.split())
-                score += len(common_words) * 0.2
-            
-            # Score based on option characteristics
-            if 'error' in context_str and any(word in option_lower for word in ['fix', 'repair', 'resolve']):
-                score += 0.5
-            elif 'success' in context_str and any(word in option_lower for word in ['continue', 'proceed', 'next']):
-                score += 0.5
-            elif any(word in option_lower for word in ['default', 'standard', 'normal']):
-                score += 0.3
-            
-            if score > best_score:
-                best_score = score
-                best_option = option
-                reasoning = f"Selected '{option}' based on context analysis (score: {score:.2f})"
-        
-        # If no clear winner, pick first option
-        if not best_option:
-            best_option = options[0]
-            reasoning = "Default selection (first option)"
-            best_score = 0.5
-        
-        # More optimistic confidence for production testing
-        confidence = min(0.95, max(0.7, best_score))
-        
-        return AIResponse(
-            result={
-                'choice': best_option,
-                'confidence': confidence,
-                'reasoning': reasoning,
-                'options_evaluated': len(options),
-                'decision_method': 'rule_based'
-            },
-            confidence=confidence,
-            reasoning=reasoning,
-            processing_time=time.time() - start_time
-        )
-
-# Global AI processor instance
-ai_processor = BuiltinAIProcessor()
-
-def process_with_ai(text: str, task: str = "analyze") -> AIResponse:
-    """Quick access to AI processing"""
-    return ai_processor.process_text(text, task)
-
-def train_ai_pattern(pattern_name: str, examples: List[str]):
-    """Train AI on new patterns"""
-    ai_processor.train_pattern(pattern_name, examples)
-
-if __name__ == "__main__":
-    # Demo the built-in AI processor
-    print("🧠 Built-in AI Processor Demo")
-    print("=" * 40)
-    
-    processor = BuiltinAIProcessor()
-    
-    # Test text analysis
-    test_text = "This is an amazing product! I love how it works perfectly. Contact us at info@example.com or call 555-123-4567."
-    
-    print("📝 Text Analysis:")
-    result = processor.process_text(test_text, "analyze")
-    print(f"  Confidence: {result.confidence:.2f}")
-    print(f"  Sentiment: {result.result['sentiment']}")
-    print(f"  Keywords: {[kw[0] for kw in result.result['keywords'][:3]]}")
-    print(f"  Entities found: {sum(len(v) for v in result.result['entities'].values())}")
-    print(f"  Processing time: {result.processing_time*1000:.1f}ms")
-    
-    # Test pattern learning
-    print("\n🎯 Pattern Learning:")
-    email_examples = [
-        "Please contact support@company.com for help",
-        "Send your resume to hr@startup.io",
-        "For billing questions, email billing@service.net"
-    ]
-    
-    processor.train_pattern("support_request", email_examples)
-    
-    test_classification = processor.process_text("Email admin@website.org for assistance", "classify")
-    print(f"  Classification: {test_classification.result['classification']}")
-    print(f"  Confidence: {test_classification.result['confidence']:.2f}")
-    
-    # Test decision making
-    print("\n🤔 Decision Making:")
-    decision_result = processor.process_text("There are multiple errors in the system", "decide")
-    print(f"  Recommended action: {decision_result.result['action']}")
-    print(f"  Confidence: {decision_result.result['confidence']:.2f}")
-    print(f"  Reasoning: {decision_result.result['reasoning']}")
-    
-    print("\n✅ Built-in AI processor working perfectly!")
-    print("🧠 Intelligence without external ML libraries!")
-    print("🎯 No transformers or torch dependencies required!")
+        pattern = self.patterns_learned[decision_option]
+        pattern['total_uses'] += 1
+        pattern['total_score'] += feedback_score
+        pattern['success_rate'] = pattern['total_score'] / pattern['total_uses']

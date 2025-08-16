@@ -56,9 +56,13 @@ except ImportError:
 
 try:
     import pandas as pd
-    import openpyxl
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.utils.dataframe import dataframe_to_rows
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils.dataframe import dataframe_to_rows
+        OPENPYXL_AVAILABLE = True
+    except ImportError:
+        OPENPYXL_AVAILABLE = False
     EXCEL_AVAILABLE = True
 except ImportError:
     EXCEL_AVAILABLE = False
