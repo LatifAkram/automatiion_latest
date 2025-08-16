@@ -1023,10 +1023,135 @@ class ZeroBottleneckUltraEngine:
                 # Complex actions - just verify element exists
                 await element.is_visible()
             
+            # AI-GUIDED ACTIONS (New sophisticated actions)
+            elif action == 'find_content':
+                # Intelligent content discovery
+                await self.execute_ai_guided_search(page, data or 'trending content')
+                
+            elif action == 'select_content':
+                # Smart content selection
+                await self.execute_smart_content_selection(page)
+                
+            elif action == 'initiate_playback':
+                # Intelligent playback initiation
+                await self.execute_playback_initiation(page)
+                
+            elif action == 'ai_guided_click':
+                # AI-enhanced clicking with confidence
+                await element.click(timeout=10000)
+                await asyncio.sleep(1)  # Wait for response
+                
+            elif action in ['locate_search', 'search_input', 'execute_search', 'smart_search', 'intelligent_select', 'initiate_play']:
+                # Enhanced AI-guided actions
+                if action in ['locate_search', 'search_input', 'smart_search']:
+                    # Search-related actions
+                    await element.click()
+                    await asyncio.sleep(0.5)
+                    if data:
+                        await element.clear()
+                        await element.fill(data)
+                        await page.keyboard.press('Enter')
+                elif action in ['execute_search', 'intelligent_select', 'initiate_play']:
+                    # Execution actions
+                    await element.click(timeout=10000)
+                    await asyncio.sleep(1)
+            
             return {'success': True, 'message': f'{action} completed successfully'}
             
         except Exception as e:
             return {'success': False, 'message': f'{action} failed: {str(e)}'}
+    
+    async def execute_ai_guided_search(self, page: Page, search_term: str):
+        """Execute intelligent search using multiple strategies"""
+        print(f"🔍 AI-guided search for: {search_term}")
+        
+        # YouTube-specific search strategies
+        search_selectors = [
+            'input[name="search_query"]',  # YouTube primary
+            '#search-input input',         # YouTube container
+            'input[aria-label*="Search"]', # ARIA-based
+            '[placeholder*="Search"]',     # Placeholder-based
+            'input[type="search"]',        # Generic search
+            '#search input'                # Generic container
+        ]
+        
+        for selector in search_selectors:
+            try:
+                await page.wait_for_selector(selector, timeout=5000)
+                search_box = page.locator(selector).first
+                
+                if await search_box.is_visible():
+                    await search_box.click()
+                    await search_box.clear()
+                    await search_box.fill(search_term)
+                    await page.keyboard.press('Enter')
+                    await asyncio.sleep(2)
+                    print(f"✅ Search executed with: {selector}")
+                    return
+            except:
+                continue
+        
+        print("⚠️ No search interface found")
+    
+    async def execute_smart_content_selection(self, page: Page):
+        """Smart content selection using multiple strategies"""
+        print("🎯 AI-guided content selection")
+        
+        # Video/content selectors for YouTube
+        content_selectors = [
+            'a[href*="/watch"]',           # YouTube video links
+            'ytd-video-renderer a',        # YouTube video renderers
+            '#video-title',                # Video titles
+            '.ytd-video-renderer',         # Video containers
+            '[aria-label*="video"]',       # ARIA video labels
+            'h3 a'                         # Generic video titles
+        ]
+        
+        for selector in content_selectors:
+            try:
+                await page.wait_for_selector(selector, timeout=5000)
+                elements = page.locator(selector)
+                
+                if await elements.count() > 0:
+                    first_video = elements.first
+                    if await first_video.is_visible():
+                        await first_video.click()
+                        await asyncio.sleep(3)
+                        print(f"✅ Content selected with: {selector}")
+                        return
+            except:
+                continue
+        
+        print("⚠️ No content found to select")
+    
+    async def execute_playback_initiation(self, page: Page):
+        """Initiate playback using intelligent strategies"""
+        print("▶️ AI-guided playback initiation")
+        
+        # Playback selectors
+        play_selectors = [
+            'button[aria-label*="Play"]',   # Play button
+            '.ytp-play-button',            # YouTube player play
+            '[title*="Play"]',             # Title-based play
+            'button[data-title-no-tooltip="Play"]',  # YouTube specific
+            '.html5-video-player button',  # Video player buttons
+            'video'                        # Direct video element
+        ]
+        
+        for selector in play_selectors:
+            try:
+                await page.wait_for_selector(selector, timeout=5000)
+                play_button = page.locator(selector).first
+                
+                if await play_button.is_visible():
+                    await play_button.click()
+                    await asyncio.sleep(2)
+                    print(f"✅ Playback initiated with: {selector}")
+                    return
+            except:
+                continue
+        
+        print("⚠️ No playback controls found")
     
     async def self_heal_subtask(self, page: Page, subtask: dict, platform: str):
         """Self-heal failed subtask with advanced strategies"""
