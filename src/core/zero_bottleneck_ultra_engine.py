@@ -175,6 +175,75 @@ class ZeroBottleneckUltraEngine:
         
         return selectors
     
+    async def query_comprehensive_database(self, platform: str, search_actions: list, target: str, complexity: str):
+        """Query the comprehensive database directly for AI-guided actions"""
+        matching_selectors = []
+        
+        try:
+            import sqlite3
+            conn = sqlite3.connect('comprehensive_commercial_selectors.db')
+            cursor = conn.cursor()
+            
+            # Build query for multiple action types
+            action_placeholders = ','.join(['?' for _ in search_actions])
+            query = f"""
+                SELECT css_selector, xpath_selector, aria_selector, action_type, 
+                       css_fallbacks, xpath_fallbacks, aria_fallbacks, text_fallbacks,
+                       success_rate, reliability_score
+                FROM comprehensive_selectors 
+                WHERE platform_name = ? 
+                AND action_type IN ({action_placeholders})
+                ORDER BY reliability_score DESC, success_rate DESC
+                LIMIT 50
+            """
+            
+            params = [platform] + search_actions
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+            
+            print(f"🔍 DEBUG: Found {len(rows)} selectors for platform '{platform}' and actions {search_actions}")
+            
+            for row in rows:
+                css_sel, xpath_sel, aria_sel, action_type, css_fb, xpath_fb, aria_fb, text_fb, success_rate, reliability = row
+                
+                # Primary selectors
+                selectors_to_add = []
+                if css_sel and css_sel.strip():
+                    selectors_to_add.append({
+                        'selector': css_sel.strip(),
+                        'type': 'css',
+                        'confidence': reliability or 0.8,
+                        'action': action_type,
+                        'platform': platform
+                    })
+                
+                if xpath_sel and xpath_sel.strip():
+                    selectors_to_add.append({
+                        'selector': xpath_sel.strip(),
+                        'type': 'xpath',
+                        'confidence': (reliability or 0.8) * 0.9,
+                        'action': action_type,
+                        'platform': platform
+                    })
+                
+                if aria_sel and aria_sel.strip():
+                    selectors_to_add.append({
+                        'selector': aria_sel.strip(),
+                        'type': 'aria',
+                        'confidence': (reliability or 0.8) * 0.85,
+                        'action': action_type,
+                        'platform': platform
+                    })
+                
+                matching_selectors.extend(selectors_to_add)
+            
+            conn.close()
+            
+        except Exception as e:
+            print(f"❌ DEBUG: Database query failed: {e}")
+        
+        return matching_selectors[:30]  # Top 30 selectors
+    
     def load_platform_patterns(self):
         """Load comprehensive platform patterns for intelligent detection"""
         return {
@@ -422,6 +491,8 @@ class ZeroBottleneckUltraEngine:
                 selectors = await self.get_ultra_selectors(
                     detected_platform, subtask['action'], subtask.get('target', ''), subtask.get('complexity', 'moderate')
                 )
+                print(f"🔍 DEBUG: Selectors found for '{subtask['action']}': {len(selectors)} groups")
+                print(f"🔍 DEBUG: First few selectors: {selectors[:2] if selectors else 'NONE FOUND'}")
                 
                 # Phase 5: Execute with Multiple Fallback Layers
                 subtask_success = False
@@ -893,6 +964,18 @@ class ZeroBottleneckUltraEngine:
         """Get ultra-comprehensive selectors with zero bottlenecks"""
         all_selectors = []
         
+        # Map AI-guided actions to traditional database actions
+        action_mapping = {
+            'find_content': ['input_text', 'type', 'search', 'click'],
+            'select_content': ['click', 'hover', 'double_click'],
+            'initiate_playback': ['click', 'button_click', 'play'],
+            'ai_guided_click': ['click', 'button_click', 'link_click']
+        }
+        
+        # Get mapped actions or use original action
+        search_actions = action_mapping.get(action, [action])
+        print(f"🔍 DEBUG: Mapping '{action}' to actions: {search_actions}")
+        
         # Search across all databases (load on demand)
         relevant_databases = [
             f"social_{platform}",
@@ -904,6 +987,12 @@ class ZeroBottleneckUltraEngine:
             "legacy_comprehensive_commercial_selectors.db",
             "legacy_platform_selectors.db"
         ]
+        
+        # First, try the main comprehensive database directly
+        if os.path.exists('comprehensive_commercial_selectors.db'):
+            matching_selectors = await self.query_comprehensive_database(platform, search_actions, target, complexity)
+            if matching_selectors:
+                all_selectors.append(matching_selectors)
         
         for db_name in relevant_databases:
             # Load database on demand
@@ -920,7 +1009,9 @@ class ZeroBottleneckUltraEngine:
                 if isinstance(selector_data, dict):
                     if selector_data.get('platform', '').lower() == platform.lower():
                         matches.append(10)
-                    if selector_data.get('action_type', '').lower() == action.lower():
+                    # Check against mapped actions
+                    selector_action = selector_data.get('action_type', '').lower()
+                    if selector_action == action.lower() or selector_action in [a.lower() for a in search_actions]:
                         matches.append(8)
                     if target.lower() in str(selector_data.get('selector', '')).lower():
                         matches.append(5)
