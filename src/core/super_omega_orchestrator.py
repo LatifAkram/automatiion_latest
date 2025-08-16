@@ -399,10 +399,10 @@ class SuperOmegaOrchestrator:
             # Route request intelligently - ENSURE AI SWARM IS USED AS CLAIMED IN README
             processing_mode = self.router.route_request(request, ai_metrics, builtin_metrics)
             
-            # CRITICAL ALIGNMENT FIX: FORCE AI SWARM USAGE FOR AUTOMATION AS CLAIMED IN README
+            # CRITICAL FIX: FORCE ULTRA ENGINE FOR AUTOMATION EXECUTION
             if request.task_type == 'automation_execution':
-                # OVERRIDE: Always use AI-first for automation to match README claims
-                processing_mode = ProcessingMode.AI_FIRST
+                # DIRECT ROUTE: Use ONLY builtin (Ultra Engine) for automation - NO AI OVERHEAD
+                processing_mode = ProcessingMode.BUILTIN_ONLY
             
             # Process based on routing decision
             if processing_mode == ProcessingMode.AI_FIRST:
