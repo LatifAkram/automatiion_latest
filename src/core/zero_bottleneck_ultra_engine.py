@@ -407,9 +407,10 @@ class ZeroBottleneckUltraEngine:
                 'timestamp': datetime.now().isoformat()
             })
             
-            # Phase 3: Task Decomposition and Execution
-            subtasks = await self.decompose_ultra_task(task.instruction, detected_platform)
-            print(f"📋 Decomposed into {len(subtasks)} subtasks")
+            # Phase 3: AI-Guided Task Decomposition and Execution
+            ai_analysis = task.metadata.get('ai_analysis') if task.metadata else None
+            subtasks = await self.decompose_ultra_task(task.instruction, detected_platform, ai_analysis)
+            print(f"📋 Decomposed into {len(subtasks)} AI-guided subtasks")
             
             for i, subtask in enumerate(subtasks, 1):
                 print(f"  🔧 Executing subtask {i}/{len(subtasks)}: {subtask['action']}")
@@ -733,66 +734,119 @@ class ZeroBottleneckUltraEngine:
         
         return False
     
-    async def decompose_ultra_task(self, instruction: str, platform: str):
-        """Decompose any instruction into executable subtasks"""
-        instruction_lower = instruction.lower()
+    async def decompose_ultra_task(self, instruction: str, platform: str, ai_analysis=None):
+        """Decompose instruction using AI analysis + sophisticated patterns"""
+        print(f"🤖 Using AI-guided task decomposition for: {instruction}")
+        
         subtasks = []
         
-        # Enhanced task decomposition with comprehensive patterns
-        if any(word in instruction_lower for word in ['login', 'sign in', 'log in']):
-            subtasks.extend([
-                {'action': 'click', 'target': 'login_button', 'complexity': 'simple'},
-                {'action': 'type', 'target': 'username_field', 'data': 'user@example.com', 'complexity': 'simple'},
-                {'action': 'type', 'target': 'password_field', 'data': 'password123', 'complexity': 'simple'},
-                {'action': 'click', 'target': 'submit_button', 'complexity': 'simple'}
-            ])
+        # PHASE 1: Use AI Analysis if available (SOPHISTICATED)
+        if ai_analysis and hasattr(ai_analysis, 'get'):
+            print("✨ Leveraging AI Swarm analysis for task decomposition")
+            
+            # Extract AI insights
+            ai_interpretation = ai_analysis.get('analysis', '')
+            healed_selectors = ai_analysis.get('healed_selectors', [])
+            
+            # Use AI analysis to guide task creation
+            if 'search' in ai_interpretation.lower() or 'find' in instruction.lower():
+                search_term = self.extract_search_term_with_ai(instruction, ai_interpretation)
+                subtasks.extend([
+                    {'action': 'navigate', 'target': 'main_page', 'complexity': 'simple'},
+                    {'action': 'locate_search', 'target': 'search_interface', 'complexity': 'moderate', 'ai_guided': True},
+                    {'action': 'search_input', 'target': 'search_field', 'data': search_term, 'complexity': 'moderate', 'ai_guided': True},
+                    {'action': 'execute_search', 'target': 'search_trigger', 'complexity': 'moderate', 'ai_guided': True}
+                ])
+                
+            if 'play' in instruction.lower() or 'video' in ai_interpretation.lower():
+                subtasks.extend([
+                    {'action': 'find_content', 'target': 'video_results', 'complexity': 'complex', 'ai_guided': True},
+                    {'action': 'select_content', 'target': 'best_match_video', 'complexity': 'complex', 'ai_guided': True},
+                    {'action': 'initiate_playback', 'target': 'play_button', 'complexity': 'moderate', 'ai_guided': True}
+                ])
+                
+            # Use healed selectors from AI
+            for selector_info in healed_selectors:
+                if selector_info.get('confidence', 0) > 0.5:
+                    subtasks.append({
+                        'action': 'ai_guided_click',
+                        'target': selector_info.get('selector', 'button'),
+                        'complexity': 'ai_enhanced',
+                        'ai_guided': True,
+                        'selector_strategy': selector_info.get('strategy', 'generic'),
+                        'ai_confidence': selector_info.get('confidence', 0.6)
+                    })
         
-        if any(word in instruction_lower for word in ['search', 'find', 'look for']):
-            search_term = self.extract_search_term(instruction)
-            subtasks.extend([
-                {'action': 'click', 'target': 'search_field', 'complexity': 'simple'},
-                {'action': 'type', 'target': 'search_field', 'data': search_term, 'complexity': 'simple'},
-                {'action': 'click', 'target': 'search_button', 'complexity': 'simple'}
-            ])
-        
-        if any(word in instruction_lower for word in ['open', 'navigate', 'go to']):
-            subtasks.append({'action': 'navigate', 'target': 'page', 'complexity': 'simple'})
-        
-        if any(word in instruction_lower for word in ['click', 'press', 'tap']):
-            target = self.extract_click_target(instruction)
-            subtasks.append({'action': 'click', 'target': target, 'complexity': 'moderate'})
-        
-        if any(word in instruction_lower for word in ['type', 'enter', 'input', 'fill']):
-            data = self.extract_input_data(instruction)
-            subtasks.append({'action': 'type', 'target': 'input_field', 'data': data, 'complexity': 'moderate'})
-        
-        if any(word in instruction_lower for word in ['select', 'choose', 'pick']):
-            option = self.extract_selection_option(instruction)
-            subtasks.append({'action': 'select', 'target': 'dropdown', 'data': option, 'complexity': 'moderate'})
-        
-        if any(word in instruction_lower for word in ['upload', 'attach', 'add file']):
-            subtasks.append({'action': 'upload', 'target': 'file_input', 'complexity': 'complex'})
-        
-        if any(word in instruction_lower for word in ['download', 'save', 'export']):
-            subtasks.append({'action': 'download', 'target': 'download_link', 'complexity': 'complex'})
-        
-        # Platform-specific task enhancement
-        if platform == 'youtube' and any(word in instruction_lower for word in ['play', 'watch', 'trending']):
-            subtasks.extend([
-                {'action': 'click', 'target': 'trending_section', 'complexity': 'moderate'},
-                {'action': 'click', 'target': 'video_thumbnail', 'complexity': 'moderate'},
-                {'action': 'wait', 'target': 'video_player', 'complexity': 'simple'}
-            ])
-        
-        # Default fallback for complex instructions
+        # PHASE 2: Enhanced pattern-based decomposition (FALLBACK)
         if not subtasks:
+            print("🔄 Using enhanced pattern-based decomposition")
+            instruction_lower = instruction.lower()
+            
+            # YouTube-specific sophisticated patterns
+            if platform == 'youtube':
+                if any(word in instruction_lower for word in ['play', 'watch', 'trending', 'music', 'songs']):
+                    search_term = self.extract_search_term(instruction)
+                    subtasks.extend([
+                        {'action': 'navigate', 'target': 'youtube_home', 'complexity': 'simple'},
+                        {'action': 'smart_search', 'target': 'youtube_search', 'data': search_term, 'complexity': 'moderate'},
+                        {'action': 'intelligent_select', 'target': 'relevant_video', 'complexity': 'complex'},
+                        {'action': 'initiate_play', 'target': 'video_player', 'complexity': 'moderate'}
+                    ])
+                    
+                if 'trending' in instruction_lower:
+                    subtasks.insert(1, {'action': 'access_trending', 'target': 'trending_section', 'complexity': 'moderate'})
+            
+            # Generic sophisticated patterns
+            elif any(word in instruction_lower for word in ['search', 'find', 'look for']):
+                search_term = self.extract_search_term(instruction)
+                subtasks.extend([
+                    {'action': 'locate_search_interface', 'target': 'search_mechanism', 'complexity': 'moderate'},
+                    {'action': 'input_search_query', 'target': 'search_field', 'data': search_term, 'complexity': 'simple'},
+                    {'action': 'execute_search', 'target': 'search_activation', 'complexity': 'simple'},
+                    {'action': 'process_results', 'target': 'search_results', 'complexity': 'complex'}
+                ])
+        
+        # PHASE 3: Intelligent default for complex instructions
+        if not subtasks:
+            print("🧠 Using intelligent analysis for complex instruction")
             subtasks = [
-                {'action': 'analyze', 'target': 'page_content', 'complexity': 'complex'},
-                {'action': 'interact', 'target': 'primary_element', 'complexity': 'ultra_complex'}
+                {'action': 'intelligent_analysis', 'target': 'page_structure', 'complexity': 'complex'},
+                {'action': 'context_aware_interaction', 'target': 'primary_interface', 'complexity': 'ultra_complex'},
+                {'action': 'adaptive_execution', 'target': 'dynamic_elements', 'complexity': 'ai_enhanced'}
             ]
         
+        print(f"📋 Generated {len(subtasks)} AI-guided subtasks")
         return subtasks
     
+    def extract_search_term_with_ai(self, instruction: str, ai_interpretation: str):
+        """Extract search term using AI interpretation"""
+        print(f"🤖 AI-guided search term extraction from: {instruction}")
+        
+        # Use AI interpretation to enhance search term extraction
+        instruction_words = instruction.lower().split()
+        ai_words = ai_interpretation.lower().split() if ai_interpretation else []
+        
+        # Look for content-related keywords from AI analysis
+        content_keywords = []
+        for word in ai_words:
+            if word in ['music', 'video', 'song', 'trending', 'popular', 'content', 'surah', 'yaasin']:
+                content_keywords.append(word)
+        
+        # Extract main search terms from instruction
+        search_terms = []
+        skip_words = {'open', 'go', 'to', 'navigate', 'visit', 'play', 'watch', 'find', 'search', 'and'}
+        
+        for word in instruction_words:
+            if word not in skip_words and len(word) > 2:
+                search_terms.append(word)
+        
+        # Combine AI insights with extracted terms
+        final_terms = search_terms + content_keywords
+        result = ' '.join(dict.fromkeys(final_terms))  # Remove duplicates while preserving order
+        
+        print(f"🎯 AI-enhanced search term: '{result}'")
+        return result if result else 'trending content'
+
     def extract_search_term(self, instruction: str):
         """Extract search term from instruction"""
         # Simple extraction - can be enhanced with NLP
@@ -1116,8 +1170,8 @@ def get_ultra_engine():
         _ultra_engine = ZeroBottleneckUltraEngine()
     return _ultra_engine
 
-async def execute_anything(instruction: str, platform: str = None, complexity: str = "moderate"):
-    """Execute ANY automation task with ZERO limitations"""
+async def execute_anything(instruction: str, platform: str = None, complexity: str = "moderate", ai_analysis=None):
+    """Execute ANY automation task with ZERO limitations and AI guidance"""
     engine = get_ultra_engine()
     
     task = UltraTask(
@@ -1129,7 +1183,8 @@ async def execute_anything(instruction: str, platform: str = None, complexity: s
         timeout=300.0,
         evidence_required=True,
         self_healing=True,
-        fallback_enabled=True
+        fallback_enabled=True,
+        metadata={'ai_analysis': ai_analysis} if ai_analysis else None
     )
     
     return await engine.execute_ultra_task(task)

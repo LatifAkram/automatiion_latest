@@ -491,7 +491,8 @@ class SuperOmegaOrchestrator:
                                 execute_anything(
                                     instruction=instruction,
                                     platform=request.data.get('platform', 'auto-detect'),
-                                    complexity="high"
+                                    complexity="high",
+                                    ai_analysis=ai_response.result  # Pass AI analysis to Ultra Engine
                                 ),
                                 timeout=90.0  # 90 second timeout for Ultra Engine
                             )
