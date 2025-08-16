@@ -1130,10 +1130,10 @@ class SuperOmegaOrchestrator:
         return mapping.get(task_type, RequestType.GENERAL_AI)
     
     def _map_task_to_ai_component(self, task_type: str) -> AIComponentType:
-        """Map task type to TRUE AI component"""
+        """Map task type to TRUE AI component (5 components as per README)"""
         mapping = {
-            'text_analysis': AIComponentType.DECISION_ENGINE,
-            'decision_making': AIComponentType.DECISION_ENGINE,
+            'text_analysis': AIComponentType.DATA_FABRIC,  # Data analysis capabilities
+            'decision_making': AIComponentType.DATA_FABRIC,  # Trust scoring and decision logic
             'pattern_learning': AIComponentType.SKILL_MINING,
             'pattern_recognition': AIComponentType.SKILL_MINING,
             'data_validation': AIComponentType.DATA_FABRIC,
@@ -1141,9 +1141,9 @@ class SuperOmegaOrchestrator:
             'automation_execution': AIComponentType.SELF_HEALING,  # Use self-healing for automation
             'selector_healing': AIComponentType.SELF_HEALING,
             'code_generation': AIComponentType.COPILOT,
-            'visual_analysis': AIComponentType.VISION_INTELLIGENCE
+            'visual_analysis': AIComponentType.SELF_HEALING  # Visual analysis for selector healing
         }
-        return mapping.get(task_type, AIComponentType.DECISION_ENGINE)
+        return mapping.get(task_type, AIComponentType.DATA_FABRIC)
     
     def _calculate_builtin_confidence(self, result: Any, task_type: str) -> float:
         """Calculate confidence for built-in processing result"""
