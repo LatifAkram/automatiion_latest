@@ -471,19 +471,78 @@ class SuperOmegaOrchestrator:
             
             ai_response = await self.ai_swarm.process_request(ai_request)
             
-            # ARCHITECTURE ALIGNMENT: Higher confidence required for automation to trigger Ultra Engine fallback
+            # ARCHITECTURE ALIGNMENT: For automation tasks, ALWAYS execute browser automation even with high AI confidence
             confidence_threshold = 0.8 if request.task_type == 'automation_execution' else 0.3
             if ai_response.success and ai_response.confidence > confidence_threshold:
                 self.metrics.ai_requests += 1
-                return HybridResponse(
-                    request_id=request.request_id,
-                    success=True,
-                    result=ai_response.result,
-                    processing_path='ai',
-                    confidence=ai_response.confidence,
-                    processing_time=0,  # Will be set later
-                    metadata={'ai_component': ai_response.component_type.value}
-                )
+                
+                # CRITICAL FIX: For automation_execution, ALSO execute the actual browser automation
+                if request.task_type == 'automation_execution':
+                    try:
+                        # Execute actual browser automation using Zero-Bottleneck Ultra Engine
+                        from zero_bottleneck_ultra_engine import execute_anything
+                        
+                        instruction = request.data.get('instruction', '')
+                        print(f"🚀 AI SWARM + BROWSER AUTOMATION: Executing {instruction}")
+                        
+                        # Execute with UNLIMITED capabilities and ZERO bottlenecks
+                        browser_result = await execute_anything(
+                            instruction=instruction,
+                            platform=request.data.get('platform', 'auto-detect'),
+                            session_id=request.request_id,
+                            evidence_required=True,
+                            ultra_mode=True
+                        )
+                        
+                        # Combine AI analysis with browser execution results
+                        combined_result = {
+                            'ai_analysis': ai_response.result,
+                            'browser_execution': browser_result,
+                            'success': browser_result.get('success', False),
+                            'actions_performed': browser_result.get('actions_performed', []),
+                            'screenshot': browser_result.get('screenshot', ''),
+                            'url_visited': browser_result.get('url', ''),
+                            'page_title': browser_result.get('page_title', ''),
+                            'automation_completed': browser_result.get('automation_completed', False)
+                        }
+                        
+                        return HybridResponse(
+                            request_id=request.request_id,
+                            success=browser_result.get('success', False),
+                            result=combined_result,
+                            processing_path='ai_with_browser_execution',
+                            confidence=ai_response.confidence,
+                            processing_time=0,  # Will be set later
+                            metadata={'ai_component': ai_response.component_type.value, 'browser_executed': True}
+                        )
+                        
+                    except Exception as browser_error:
+                        print(f"❌ Browser automation failed: {browser_error}")
+                        # Return AI result even if browser fails
+                        return HybridResponse(
+                            request_id=request.request_id,
+                            success=True,
+                            result={
+                                'ai_analysis': ai_response.result,
+                                'browser_execution': {'error': str(browser_error)},
+                                'success': False
+                            },
+                            processing_path='ai_browser_failed',
+                            confidence=ai_response.confidence,
+                            processing_time=0,
+                            metadata={'ai_component': ai_response.component_type.value, 'browser_error': str(browser_error)}
+                        )
+                else:
+                    # Non-automation tasks: return AI result directly
+                    return HybridResponse(
+                        request_id=request.request_id,
+                        success=True,
+                        result=ai_response.result,
+                        processing_path='ai',
+                        confidence=ai_response.confidence,
+                        processing_time=0,  # Will be set later
+                        metadata={'ai_component': ai_response.component_type.value}
+                    )
             else:
                 # Fallback to built-in
                 return await self._fallback_to_builtin(request, 'ai_low_confidence')
