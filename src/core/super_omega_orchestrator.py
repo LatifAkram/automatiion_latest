@@ -431,19 +431,25 @@ class SuperOmegaOrchestrator:
             return response
             
         except Exception as e:
-            # Emergency fallback
+            # Emergency fallback with comprehensive error handling
             processing_time = time.time() - start_time
             self.metrics.failed_requests += 1
             
-            return HybridResponse(
-                request_id=request.request_id,
-                success=False,
-                result={'error': str(e)},
-                processing_path='emergency_fallback',
-                confidence=0.0,
-                processing_time=processing_time,
-                error=str(e)
-            )
+            # Try emergency fallback recovery
+            try:
+                emergency_result = await self._emergency_fallback_recovery(request, str(e))
+                return emergency_result
+            except:
+                # Final emergency fallback
+                return HybridResponse(
+                    request_id=request.request_id,
+                    success=False,
+                    result={'error': str(e)},
+                    processing_path='emergency_fallback',
+                    confidence=0.0,
+                    processing_time=processing_time,
+                    error=str(e)
+                )
     
     async def _process_ai_first(self, request: HybridRequest) -> HybridResponse:
         """Process with AI first, fallback to built-in if needed"""
@@ -475,7 +481,8 @@ class SuperOmegaOrchestrator:
                 return await self._fallback_to_builtin(request, 'ai_low_confidence')
                 
         except Exception as e:
-            # Fallback to built-in
+            # Emergency fallback to built-in with comprehensive error handling
+            self.metrics.failed_requests += 1
             return await self._fallback_to_builtin(request, f'ai_error: {str(e)}')
     
     async def _process_builtin_first(self, request: HybridRequest) -> HybridResponse:
@@ -606,6 +613,8 @@ class SuperOmegaOrchestrator:
             return combined_result
             
         except Exception as e:
+            # Emergency fallback with comprehensive error handling
+            self.metrics.failed_requests += 1
             return await self._fallback_to_builtin(request, f'hybrid_error: {str(e)}')
     
     async def _process_ai_only(self, request: HybridRequest) -> HybridResponse:
@@ -1349,6 +1358,26 @@ class ComplexityAnalyzer:
             return max(self._count_nested_levels(item, level + 1) for item in obj)
         else:
             return level
+    
+    async def _emergency_fallback_recovery(self, request: HybridRequest, error: str) -> HybridResponse:
+        """Emergency fallback recovery system"""
+        try:
+            # Attempt minimal built-in processing as last resort
+            result = await self._process_with_builtin(request)
+            result.processing_path = 'emergency_recovery'
+            result.error = f"Recovered from: {error}"
+            return result
+        except Exception as recovery_error:
+            # Absolute final fallback
+            return HybridResponse(
+                request_id=request.request_id,
+                success=False,
+                result={'error': error, 'recovery_error': str(recovery_error)},
+                processing_path='emergency_final',
+                confidence=0.0,
+                processing_time=0.0,
+                error=f"Complete failure: {error}"
+            )
 
 # Global SuperOmega instance
 _super_omega_instance = None
