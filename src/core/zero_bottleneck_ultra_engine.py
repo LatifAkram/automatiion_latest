@@ -179,12 +179,27 @@ class ZeroBottleneckUltraEngine:
         """Query the comprehensive database directly for AI-guided actions"""
         matching_selectors = []
         
-        # Find the correct database path
+        # Find the correct database path - check multiple possible locations
+        current_dir = os.getcwd()
         db_paths = [
+            # Linux/Docker paths
             '/workspace/comprehensive_commercial_selectors.db',
+            # Windows/Local paths
+            os.path.join(current_dir, 'comprehensive_commercial_selectors.db'),
             'comprehensive_commercial_selectors.db',
-            os.path.join(os.getcwd(), 'comprehensive_commercial_selectors.db')
+            # Root directory relative paths
+            os.path.join(os.path.dirname(current_dir), 'comprehensive_commercial_selectors.db'),
+            # Check if we're in a subdirectory and go up
+            os.path.join(os.path.dirname(os.path.dirname(current_dir)), 'comprehensive_commercial_selectors.db')
         ]
+        
+        # Also check common database locations
+        common_locations = [
+            './comprehensive_commercial_selectors.db',
+            '../comprehensive_commercial_selectors.db',
+            '../../comprehensive_commercial_selectors.db'
+        ]
+        db_paths.extend(common_locations)
         
         db_path = None
         for path in db_paths:
@@ -261,6 +276,32 @@ class ZeroBottleneckUltraEngine:
             print(f"❌ DEBUG: Database query failed: {e}")
         
         return matching_selectors[:30]  # Top 30 selectors
+    
+    def create_emergency_youtube_selectors(self, search_actions: list):
+        """Create emergency YouTube selectors when database is not available"""
+        emergency_selectors = []
+        
+        # YouTube search selectors
+        if any(action in ['input_text', 'type', 'search'] for action in search_actions):
+            emergency_selectors.extend([
+                {'selector': 'input[name="search_query"]', 'type': 'css', 'confidence': 0.9, 'action': 'search', 'platform': 'youtube'},
+                {'selector': '#search-input input', 'type': 'css', 'confidence': 0.85, 'action': 'search', 'platform': 'youtube'},
+                {'selector': 'input[placeholder*="Search"]', 'type': 'css', 'confidence': 0.8, 'action': 'search', 'platform': 'youtube'},
+                {'selector': '//input[@name="search_query"]', 'type': 'xpath', 'confidence': 0.75, 'action': 'search', 'platform': 'youtube'}
+            ])
+        
+        # YouTube click selectors
+        if any(action in ['click', 'button_click', 'link_click'] for action in search_actions):
+            emergency_selectors.extend([
+                {'selector': '#search-icon-legacy', 'type': 'css', 'confidence': 0.9, 'action': 'click', 'platform': 'youtube'},
+                {'selector': 'button[aria-label*="Search"]', 'type': 'css', 'confidence': 0.85, 'action': 'click', 'platform': 'youtube'},
+                {'selector': 'ytd-video-renderer a#video-title', 'type': 'css', 'confidence': 0.8, 'action': 'click', 'platform': 'youtube'},
+                {'selector': '.ytd-video-renderer h3 a', 'type': 'css', 'confidence': 0.75, 'action': 'click', 'platform': 'youtube'},
+                {'selector': 'button.ytp-play-button', 'type': 'css', 'confidence': 0.85, 'action': 'click', 'platform': 'youtube'}
+            ])
+        
+        print(f"🚨 DEBUG: Created {len(emergency_selectors)} emergency YouTube selectors")
+        return emergency_selectors
     
     def load_platform_patterns(self):
         """Load comprehensive platform patterns for intelligent detection"""
@@ -1007,24 +1048,38 @@ class ZeroBottleneckUltraEngine:
         ]
         
         # First, try the main comprehensive database directly
-        print(f"🔍 DEBUG: Current working directory: {os.getcwd()}")
-        db_path = 'comprehensive_commercial_selectors.db'
-        abs_db_path = os.path.abspath(db_path)
-        workspace_db_path = '/workspace/comprehensive_commercial_selectors.db'
+        current_dir = os.getcwd()
+        print(f"🔍 DEBUG: Current working directory: {current_dir}")
         
-        print(f"🔍 DEBUG: Checking paths:")
-        print(f"  - Relative: {db_path} -> {os.path.exists(db_path)}")
-        print(f"  - Absolute: {abs_db_path} -> {os.path.exists(abs_db_path)}")
-        print(f"  - Workspace: {workspace_db_path} -> {os.path.exists(workspace_db_path)}")
+        # Check multiple possible database locations
+        db_search_paths = [
+            # Linux/Docker paths
+            '/workspace/comprehensive_commercial_selectors.db',
+            # Windows/Local paths  
+            os.path.join(current_dir, 'comprehensive_commercial_selectors.db'),
+            'comprehensive_commercial_selectors.db',
+            # Parent directory paths
+            os.path.join(os.path.dirname(current_dir), 'comprehensive_commercial_selectors.db'),
+            os.path.join(os.path.dirname(os.path.dirname(current_dir)), 'comprehensive_commercial_selectors.db'),
+            # Relative paths
+            './comprehensive_commercial_selectors.db',
+            '../comprehensive_commercial_selectors.db', 
+            '../../comprehensive_commercial_selectors.db'
+        ]
         
-        # Try workspace path first
-        if os.path.exists(workspace_db_path):
-            db_path = workspace_db_path
-        elif os.path.exists(db_path):
-            pass  # Use relative path
-        else:
+        print(f"🔍 DEBUG: Checking database paths:")
+        db_path = None
+        for path in db_search_paths:
+            exists = os.path.exists(path)
+            print(f"  - {path} -> {exists}")
+            if exists and db_path is None:
+                db_path = path
+        
+        if not db_path:
             print("❌ DEBUG: Comprehensive database file not found in any location")
-            db_path = None
+            print(f"🔍 DEBUG: Please ensure comprehensive_commercial_selectors.db exists in one of these locations:")
+            for path in db_search_paths[:5]:  # Show first 5 paths
+                print(f"  - {path}")
         
         if db_path:
             print(f"🔍 DEBUG: Querying comprehensive database for platform '{platform}' and actions {search_actions}")
@@ -1036,6 +1091,12 @@ class ZeroBottleneckUltraEngine:
                 print("❌ DEBUG: No selectors returned from comprehensive database")
         else:
             print("❌ DEBUG: Comprehensive database file not found")
+            # Create emergency fallback selectors for YouTube
+            if platform.lower() == 'youtube':
+                print("🚨 DEBUG: Creating emergency YouTube selectors as fallback")
+                emergency_selectors = self.create_emergency_youtube_selectors(search_actions)
+                if emergency_selectors:
+                    all_selectors.append(emergency_selectors)
         
         for db_name in relevant_databases:
             # Load database on demand
