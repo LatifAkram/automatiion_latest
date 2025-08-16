@@ -552,10 +552,8 @@ export default function Home() {
 
         setActiveAutomation(aiMessage.id);
 
-        // Handle different types of requests
-        if (isSearchRequest) {
-          await executeSearch(message, aiMessage.id);
-        } else if (isAutomationRequest) {
+        // Handle different types of requests - prioritize automation over search
+        if (isAutomationRequest) {
           // Intelligent automation is already running, just update status
           setTimeout(() => {
             updateMessageInChat(currentChatId, aiMessage.id, {
