@@ -179,9 +179,27 @@ class ZeroBottleneckUltraEngine:
         """Query the comprehensive database directly for AI-guided actions"""
         matching_selectors = []
         
+        # Find the correct database path
+        db_paths = [
+            '/workspace/comprehensive_commercial_selectors.db',
+            'comprehensive_commercial_selectors.db',
+            os.path.join(os.getcwd(), 'comprehensive_commercial_selectors.db')
+        ]
+        
+        db_path = None
+        for path in db_paths:
+            if os.path.exists(path):
+                db_path = path
+                break
+        
+        if not db_path:
+            print("❌ DEBUG: Could not find comprehensive database in query method")
+            return []
+        
         try:
             import sqlite3
-            conn = sqlite3.connect('comprehensive_commercial_selectors.db')
+            print(f"🔍 DEBUG: Connecting to database: {db_path}")
+            conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
             
             # Build query for multiple action types
@@ -989,9 +1007,26 @@ class ZeroBottleneckUltraEngine:
         ]
         
         # First, try the main comprehensive database directly
+        print(f"🔍 DEBUG: Current working directory: {os.getcwd()}")
         db_path = 'comprehensive_commercial_selectors.db'
-        print(f"🔍 DEBUG: Checking if database exists: {db_path} -> {os.path.exists(db_path)}")
-        if os.path.exists(db_path):
+        abs_db_path = os.path.abspath(db_path)
+        workspace_db_path = '/workspace/comprehensive_commercial_selectors.db'
+        
+        print(f"🔍 DEBUG: Checking paths:")
+        print(f"  - Relative: {db_path} -> {os.path.exists(db_path)}")
+        print(f"  - Absolute: {abs_db_path} -> {os.path.exists(abs_db_path)}")
+        print(f"  - Workspace: {workspace_db_path} -> {os.path.exists(workspace_db_path)}")
+        
+        # Try workspace path first
+        if os.path.exists(workspace_db_path):
+            db_path = workspace_db_path
+        elif os.path.exists(db_path):
+            pass  # Use relative path
+        else:
+            print("❌ DEBUG: Comprehensive database file not found in any location")
+            db_path = None
+        
+        if db_path:
             print(f"🔍 DEBUG: Querying comprehensive database for platform '{platform}' and actions {search_actions}")
             matching_selectors = await self.query_comprehensive_database(platform, search_actions, target, complexity)
             print(f"🔍 DEBUG: Comprehensive database returned {len(matching_selectors)} selectors")
