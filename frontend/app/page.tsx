@@ -8,7 +8,7 @@ import AIThinkingDisplay from '../src/components/ai-thinking-display';
 import { RealTimeBrowser } from '../src/components/real-time-browser';
 
 // Backend configuration
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081';
 
 // Theme configuration
 type Theme = 'light' | 'dark' | 'auto';

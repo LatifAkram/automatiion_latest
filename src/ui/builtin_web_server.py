@@ -52,10 +52,19 @@ class WebSocketConnection:
     
     def send_frame(self, frame: WebSocketFrame):
         """Send WebSocket frame"""
-        if not self.connected:
+        if not self.connected or not self.socket:
             return
         
         try:
+            # Check if socket is still valid
+            if hasattr(self.socket, 'fileno'):
+                try:
+                    self.socket.fileno()
+                except:
+                    # Socket is closed
+                    self.connected = False
+                    return
+            
             # Create WebSocket frame
             payload_length = len(frame.payload)
             
@@ -78,6 +87,9 @@ class WebSocketConnection:
             
             self.socket.send(frame_data)
             
+        except (ConnectionResetError, BrokenPipeError, OSError) as e:
+            # Connection closed by client
+            self.connected = False
         except Exception as e:
             logger.error(f"WebSocket send error: {e}")
             self.connected = False
@@ -138,7 +150,7 @@ class WebSocketConnection:
 class BuiltinWebServer:
     """Complete web server with WebSocket support"""
     
-    def __init__(self, host: str = "localhost", port: int = 8080):
+    def __init__(self, host: str = "localhost", port: int = 8081):
         self.host = host
         self.port = port
         self.routes = {}
@@ -493,7 +505,7 @@ class BuiltinWebServer:
 class LiveConsoleServer(BuiltinWebServer):
     """Live console server using built-in web server"""
     
-    def __init__(self, host: str = "localhost", port: int = 8080):
+    def __init__(self, host: str = "localhost", port: int = 8081):
         super().__init__(host, port)
         self.setup_routes()
         self.active_runs = {}
