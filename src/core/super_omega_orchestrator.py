@@ -40,6 +40,11 @@ from true_ai_swarm_system import (
     get_true_ai_swarm, AIRequest, AIResponse, 
     AIProvider, AIComponentType
 )
+try:
+    from enterprise_ai_swarm import get_enterprise_ai_swarm
+    ENTERPRISE_AI_AVAILABLE = True
+except ImportError:
+    ENTERPRISE_AI_AVAILABLE = False
 # Keep legacy import for compatibility
 from ai_swarm_orchestrator import (
     RequestType
