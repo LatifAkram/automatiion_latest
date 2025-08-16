@@ -303,6 +303,158 @@ class ZeroBottleneckUltraEngine:
         print(f"🚨 DEBUG: Created {len(emergency_selectors)} emergency YouTube selectors")
         return emergency_selectors
     
+    def detect_platform_from_instruction(self, instruction: str) -> str:
+        """Intelligently detect platform from instruction"""
+        instruction_lower = instruction.lower()
+        
+        # Platform detection patterns
+        platform_patterns = {
+            'youtube': ['youtube', 'yt'],
+            'flipkart': ['flipkart', 'flipkart.com'],
+            'amazon': ['amazon', 'amzn', 'amazon.com'],
+            'google': ['google', 'google.com'],
+            'facebook': ['facebook', 'fb', 'facebook.com'],
+            'instagram': ['instagram', 'insta', 'ig'],
+            'twitter': ['twitter', 'tweet'],
+            'linkedin': ['linkedin'],
+            'netflix': ['netflix'],
+            'spotify': ['spotify'],
+            'github': ['github'],
+            'stackoverflow': ['stackoverflow', 'stack overflow']
+        }
+        
+        for platform, patterns in platform_patterns.items():
+            if any(pattern in instruction_lower for pattern in patterns):
+                return platform
+        
+        # Default based on action type
+        if any(word in instruction_lower for word in ['buy', 'purchase', 'shop', 'price']):
+            return 'ecommerce'
+        elif any(word in instruction_lower for word in ['play', 'watch', 'video']):
+            return 'media'
+        else:
+            return 'web'
+    
+    def extract_entities_from_instruction(self, instruction: str) -> dict:
+        """Extract entities like search terms, filters, etc."""
+        instruction_lower = instruction.lower()
+        words = instruction.split()
+        
+        entities = {
+            'search_term': '',
+            'price_filter': '',
+            'quality_filter': '',
+            'filters': ''
+        }
+        
+        # Extract search terms (skip action words)
+        skip_words = {'open', 'go', 'to', 'navigate', 'visit', 'and', 'the', 'a', 'an', 
+                     'play', 'watch', 'find', 'search', 'buy', 'purchase', 'with'}
+        
+        search_terms = []
+        for word in words:
+            if word.lower() not in skip_words and len(word) > 2:
+                search_terms.append(word)
+        
+        entities['search_term'] = ' '.join(search_terms)
+        
+        # Extract price filters
+        if any(word in instruction_lower for word in ['cheap', 'low price', 'budget', 'affordable']):
+            entities['price_filter'] = 'low_price'
+        elif any(word in instruction_lower for word in ['expensive', 'premium', 'high end']):
+            entities['price_filter'] = 'high_price'
+        
+        # Extract quality filters
+        if any(word in instruction_lower for word in ['best', 'top', 'quality', 'premium']):
+            entities['quality_filter'] = 'high_quality'
+        
+        # Combine filters
+        filters = []
+        if entities['price_filter']:
+            filters.append(entities['price_filter'])
+        if entities['quality_filter']:
+            filters.append(entities['quality_filter'])
+        entities['filters'] = ' '.join(filters)
+        
+        return entities
+    
+    def create_emergency_platform_selectors(self, platform: str, search_actions: list):
+        """Create emergency selectors for any platform"""
+        emergency_selectors = []
+        
+        # Platform-specific selectors
+        if platform == 'flipkart':
+            if any(action in ['input_text', 'type', 'search'] for action in search_actions):
+                emergency_selectors.extend([
+                    {'selector': 'input[name="q"]', 'type': 'css', 'confidence': 0.9, 'action': 'search', 'platform': 'flipkart'},
+                    {'selector': 'input[placeholder*="Search"]', 'type': 'css', 'confidence': 0.85, 'action': 'search', 'platform': 'flipkart'},
+                    {'selector': '._3704LK', 'type': 'css', 'confidence': 0.8, 'action': 'search', 'platform': 'flipkart'}
+                ])
+            
+            if any(action in ['click', 'button_click'] for action in search_actions):
+                emergency_selectors.extend([
+                    {'selector': 'button[type="submit"]', 'type': 'css', 'confidence': 0.9, 'action': 'click', 'platform': 'flipkart'},
+                    {'selector': '._2iLD__', 'type': 'css', 'confidence': 0.85, 'action': 'click', 'platform': 'flipkart'},
+                    {'selector': 'a[href*="/p/"]', 'type': 'css', 'confidence': 0.8, 'action': 'click', 'platform': 'flipkart'}
+                ])
+        
+        # Generic e-commerce selectors
+        elif platform in ['ecommerce', 'amazon']:
+            emergency_selectors.extend([
+                {'selector': 'input[type="search"]', 'type': 'css', 'confidence': 0.8, 'action': 'search', 'platform': platform},
+                {'selector': 'button[type="submit"]', 'type': 'css', 'confidence': 0.75, 'action': 'click', 'platform': platform},
+                {'selector': 'a[href*="product"]', 'type': 'css', 'confidence': 0.7, 'action': 'click', 'platform': platform}
+            ])
+        
+        print(f"🚨 DEBUG: Created {len(emergency_selectors)} emergency {platform} selectors")
+        return emergency_selectors
+    
+    async def execute_filter_application(self, page: Page, filter_data: str):
+        """Apply filters on any platform"""
+        print(f"🔧 Applying filters: {filter_data}")
+        
+        # Try common filter selectors
+        filter_selectors = [
+            'select[name*="price"]',
+            'select[name*="sort"]',
+            'button[data-testid*="filter"]',
+            '.filter-option',
+            '[aria-label*="filter"]'
+        ]
+        
+        for selector in filter_selectors:
+            try:
+                element = await page.locator(selector).first.wait_for(timeout=5000)
+                await element.click()
+                await asyncio.sleep(1)
+                print(f"✅ Filter applied with: {selector}")
+                return
+            except:
+                continue
+        
+        print("⚠️ No filter elements found")
+    
+    async def execute_platform_navigation(self, page: Page, platform: str):
+        """Navigate to platform"""
+        platform_urls = {
+            'youtube': 'https://www.youtube.com',
+            'flipkart': 'https://www.flipkart.com',
+            'amazon': 'https://www.amazon.com',
+            'google': 'https://www.google.com',
+            'facebook': 'https://www.facebook.com',
+            'ecommerce': 'https://www.flipkart.com'  # Default e-commerce
+        }
+        
+        url = platform_urls.get(platform, f'https://www.{platform}.com')
+        print(f"🌐 Navigating to {platform}: {url}")
+        
+        try:
+            await page.goto(url, timeout=30000)
+            await page.wait_for_load_state('domcontentloaded')
+            print(f"✅ Successfully navigated to {platform}")
+        except Exception as e:
+            print(f"❌ Navigation failed: {e}")
+    
     def load_platform_patterns(self):
         """Load comprehensive platform patterns for intelligent detection"""
         return {
@@ -923,10 +1075,43 @@ class ZeroBottleneckUltraEngine:
                         'ai_confidence': selector_info.get('confidence', 0.6)
                     })
         
-        # PHASE 2: Enhanced pattern-based decomposition (FALLBACK)
+        # PHASE 2: Universal platform decomposition (SOPHISTICATED)
         if not subtasks:
-            print("🔄 Using enhanced pattern-based decomposition")
+            print("🔄 Using sophisticated universal platform decomposition")
             instruction_lower = instruction.lower()
+            
+            # Detect platform intelligently
+            detected_platform_name = self.detect_platform_from_instruction(instruction)
+            print(f"🌐 DEBUG: Detected platform: {detected_platform_name}")
+            
+            # Extract entities intelligently (search terms, products, filters)
+            entities = self.extract_entities_from_instruction(instruction)
+            print(f"🎯 DEBUG: Extracted entities: {entities}")
+            
+            # Create sophisticated multi-step workflow
+            if any(word in instruction_lower for word in ['search', 'find', 'look', 'buy']):
+                subtasks.extend([
+                    {'action': 'navigate', 'target': detected_platform_name, 'complexity': 'simple'},
+                    {'action': 'find_content', 'target': 'search_interface', 'data': entities.get('search_term', ''), 'complexity': 'complex', 'ai_guided': True},
+                    {'action': 'select_content', 'target': 'best_match', 'data': entities.get('filters', ''), 'complexity': 'complex', 'ai_guided': True}
+                ])
+                
+                # Add filtering if price/quality mentioned
+                if entities.get('price_filter') or entities.get('quality_filter'):
+                    subtasks.append({
+                        'action': 'apply_filters', 'target': 'filter_interface', 
+                        'data': f"{entities.get('price_filter', '')} {entities.get('quality_filter', '')}".strip(),
+                        'complexity': 'complex', 'ai_guided': True
+                    })
+            
+            if any(word in instruction_lower for word in ['play', 'watch', 'open']):
+                if not any(s['action'] == 'find_content' for s in subtasks):
+                    subtasks.extend([
+                        {'action': 'navigate', 'target': detected_platform_name, 'complexity': 'simple'},
+                        {'action': 'find_content', 'target': 'content', 'data': entities.get('search_term', ''), 'complexity': 'complex', 'ai_guided': True},
+                        {'action': 'select_content', 'target': 'best_match', 'complexity': 'complex', 'ai_guided': True},
+                        {'action': 'initiate_playback', 'target': 'play_interface', 'complexity': 'moderate', 'ai_guided': True}
+                    ])
             
             # YouTube-specific sophisticated patterns
             if platform == 'youtube':
@@ -1100,12 +1285,15 @@ class ZeroBottleneckUltraEngine:
                 print("❌ DEBUG: No selectors returned from comprehensive database")
         else:
             print("❌ DEBUG: Comprehensive database file not found")
-            # Create emergency fallback selectors for YouTube
+            # Create emergency fallback selectors for any platform
+            print(f"🚨 DEBUG: Creating emergency {platform} selectors as fallback")
             if platform.lower() == 'youtube':
-                print("🚨 DEBUG: Creating emergency YouTube selectors as fallback")
                 emergency_selectors = self.create_emergency_youtube_selectors(search_actions)
-                if emergency_selectors:
-                    all_selectors.append(emergency_selectors)
+            else:
+                emergency_selectors = self.create_emergency_platform_selectors(platform, search_actions)
+            
+            if emergency_selectors:
+                all_selectors.append(emergency_selectors)
         
         for db_name in relevant_databases:
             # Load database on demand
@@ -1251,6 +1439,14 @@ class ZeroBottleneckUltraEngine:
                 # AI-enhanced clicking with confidence
                 await element.click(timeout=10000)
                 await asyncio.sleep(1)  # Wait for response
+                
+            elif action == 'apply_filters':
+                # Apply search filters (price, quality, etc.)
+                await self.execute_filter_application(page, data)
+                
+            elif action == 'navigate':
+                # Navigate to platform
+                await self.execute_platform_navigation(page, data)
                 
             elif action in ['locate_search', 'search_input', 'execute_search', 'smart_search', 'intelligent_select', 'initiate_play']:
                 # Enhanced AI-guided actions
