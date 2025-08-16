@@ -1,0 +1,33 @@
+{
+  "session_id": "ui_session_1755330803",
+  "start_time": "2025-08-16T07:53:24.168684",
+  "end_time": "2025-08-16T07:53:24.771080",
+  "duration_seconds": 0.602384,
+  "actions_performed": 1,
+  "errors_encountered": 0,
+  "success_rate": 1.0,
+  "healing_attempts": 0,
+  "successful_healings": 0,
+  "healing_success_rate": 0,
+  "evidence_collected": {
+    "screenshots": 1,
+    "dom_snapshots": 1,
+    "videos": 0
+  },
+  "super_omega_components": {
+    "semantic_dom": true,
+    "shadow_simulator": true,
+    "micro_planner": true,
+    "edge_kernel": true
+  },
+  "skills_discovered": 0,
+  "patterns_identified": 0,
+  "performance_metrics": {
+    "domContentLoaded": 0.30000000447034836,
+    "loadComplete": 0,
+    "firstContentfulPaint": 152,
+    "transferSize": 52518,
+    "domInteractive": NaN
+  },
+  "dependency_free": true
+}

@@ -741,6 +741,7 @@ class LiveConsoleServer(BuiltinWebServer):
                 try:
                     # Try to import and use the complete hybrid system
                     from core.super_omega_orchestrator import get_super_omega, HybridRequest, ProcessingMode, ComplexityLevel
+                    from core.real_ai_connector import generate_ai_response
                     
                     # Get the SuperOmega orchestrator
                     orchestrator = get_super_omega()
@@ -772,13 +773,22 @@ class LiveConsoleServer(BuiltinWebServer):
                     # Execute with hybrid intelligence
                     async def run_hybrid_automation():
                         try:
+                            # First try to get AI interpretation of the instruction
+                            ai_response = await generate_ai_response(
+                                f"Analyze this automation instruction: {instruction}",
+                                {"instruction": instruction, "session_id": session_id}
+                            )
+                            
+                            # Then process with hybrid system
                             response = await orchestrator.process_request(hybrid_request)
                             
-                            # Format response for API
+                            # Format comprehensive response for API
                             return {
                                 "success": response.success,
                                 "session_id": session_id,
                                 "instruction": instruction,
+                                "ai_interpretation": ai_response.content,
+                                "ai_provider": ai_response.provider,
                                 "processing_path": response.processing_path,
                                 "confidence": response.confidence,
                                 "processing_time": response.processing_time,
@@ -786,7 +796,7 @@ class LiveConsoleServer(BuiltinWebServer):
                                 "fallback_used": response.fallback_used,
                                 "result": response.result,
                                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                                "system": "SUPER-OMEGA Hybrid Intelligence"
+                                "system": "SUPER-OMEGA Hybrid Intelligence with Real AI"
                             }
                             
                         except Exception as hybrid_error:

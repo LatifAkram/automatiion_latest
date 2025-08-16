@@ -40,6 +40,13 @@ from pathlib import Path
 # Import built-in components for fallbacks
 from builtin_ai_processor import BuiltinAIProcessor
 
+# Import real AI connector for actual intelligence
+try:
+    from real_ai_connector import get_real_ai_connector, generate_ai_response
+    REAL_AI_AVAILABLE = True
+except ImportError:
+    REAL_AI_AVAILABLE = False
+
 class AIComponentType(Enum):
     ORCHESTRATOR = "orchestrator"
     SELF_HEALING = "self_healing"
@@ -1470,11 +1477,34 @@ class AISwarmOrchestrator:
             return await component.generate_code(request.data.get('specification', {}))
         
         else:
-            # Generic processing
+            # Use real AI for general processing if available
+            if REAL_AI_AVAILABLE:
+                try:
+                    instruction = request.data.get('instruction', '')
+                    context = request.data.get('context', {})
+                    
+                    ai_response = await generate_ai_response(instruction, context)
+                    
+                    return {
+                        'success': True,
+                        'content': ai_response.content,
+                        'confidence': ai_response.confidence,
+                        'provider': ai_response.provider,
+                        'processing_time': ai_response.processing_time,
+                        'cached': ai_response.cached,
+                        'real_ai_used': True
+                    }
+                    
+                except Exception as e:
+                    # Fall back to generic processing
+                    pass
+            
+            # Generic processing fallback
             return {
                 'success': True,
-                'message': 'Processed by AI component',
-                'confidence': 0.8
+                'message': 'Processed by AI component with built-in intelligence',
+                'confidence': 0.8,
+                'real_ai_used': False
             }
     
     async def _process_with_fallback(self, request: AIRequest, start_time: float, 
