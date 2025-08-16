@@ -489,31 +489,46 @@ class SuperOmegaOrchestrator:
                         browser_result = await execute_anything(
                             instruction=instruction,
                             platform=request.data.get('platform', 'auto-detect'),
-                            session_id=request.request_id,
-                            evidence_required=True,
-                            ultra_mode=True
+                            complexity="high"
                         )
                         
                         # Combine AI analysis with browser execution results
                         combined_result = {
                             'ai_analysis': ai_response.result,
-                            'browser_execution': browser_result,
-                            'success': browser_result.get('success', False),
-                            'actions_performed': browser_result.get('actions_performed', []),
-                            'screenshot': browser_result.get('screenshot', ''),
-                            'url_visited': browser_result.get('url', ''),
-                            'page_title': browser_result.get('page_title', ''),
-                            'automation_completed': browser_result.get('automation_completed', False)
+                            'browser_execution': {
+                                'success': browser_result.success,
+                                'platform_detected': browser_result.platform_detected,
+                                'execution_time': browser_result.execution_time,
+                                'confidence': browser_result.confidence,
+                                'actions_performed': browser_result.actions_performed,
+                                'screenshots': browser_result.screenshots,
+                                'selectors_used': len(browser_result.selectors_used),
+                                'self_healing_count': browser_result.self_healing_count,
+                                'fallbacks_triggered': browser_result.fallbacks_triggered,
+                                'result_details': browser_result.result
+                            },
+                            'success': browser_result.success,
+                            'actions_performed': browser_result.actions_performed,
+                            'screenshots': browser_result.screenshots,
+                            'platform_detected': browser_result.platform_detected,
+                            'automation_completed': browser_result.success,
+                            'execution_time': browser_result.execution_time
                         }
                         
                         return HybridResponse(
                             request_id=request.request_id,
-                            success=browser_result.get('success', False),
+                            success=browser_result.success,
                             result=combined_result,
                             processing_path='ai_with_browser_execution',
-                            confidence=ai_response.confidence,
+                            confidence=max(ai_response.confidence, browser_result.confidence),
                             processing_time=0,  # Will be set later
-                            metadata={'ai_component': ai_response.component_type.value, 'browser_executed': True}
+                            metadata={
+                                'ai_component': ai_response.component_type.value, 
+                                'browser_executed': True,
+                                'platform_detected': browser_result.platform_detected,
+                                'actions_count': len(browser_result.actions_performed),
+                                'self_healing_used': browser_result.self_healing_count > 0
+                            }
                         )
                         
                     except Exception as browser_error:
@@ -521,11 +536,12 @@ class SuperOmegaOrchestrator:
                         # Return AI result even if browser fails
                         return HybridResponse(
                             request_id=request.request_id,
-                            success=True,
+                            success=False,
                             result={
                                 'ai_analysis': ai_response.result,
                                 'browser_execution': {'error': str(browser_error)},
-                                'success': False
+                                'success': False,
+                                'error_details': str(browser_error)
                             },
                             processing_path='ai_browser_failed',
                             confidence=ai_response.confidence,
