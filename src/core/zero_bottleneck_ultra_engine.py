@@ -59,18 +59,20 @@ class ZeroBottleneckUltraEngine:
     """The ultimate automation engine with ZERO limitations"""
     
     def __init__(self):
-        self.selector_databases = self.load_all_selector_databases()
+        # Use lazy loading to prevent initialization hangs
+        self.selector_databases = {}  # Load on demand
         self.platform_patterns = self.load_platform_patterns()
-        self.workflow_templates = self.load_workflow_templates()
+        self.workflow_templates = {}  # Load on demand
         self.self_healing_strategies = self.initialize_self_healing()
         self.performance_cache = {}
         self.success_rate_tracker = {}
         self.browser_pool = []
         self.context_pool = []
         self.concurrent_limit = 50
+        self.database_index = self.load_database_index()  # Just load index, not full databases
         
         print(f"🚀 ZERO-BOTTLENECK ULTRA ENGINE INITIALIZED")
-        print(f"📊 Loaded {len(self.selector_databases)} selector databases")
+        print(f"📊 Database index loaded: {len(self.database_index)} databases available")
         print(f"🎯 Ready to handle ANY task on ANY platform with ZERO limitations!")
     
     def load_all_selector_databases(self):
@@ -101,6 +103,44 @@ class ZeroBottleneckUltraEngine:
             databases = {}
         
         return databases
+    
+    def load_database_index(self):
+        """Load just the database index without loading full databases"""
+        database_index = {}
+        try:
+            conn = sqlite3.connect("ultra_selector_master_index.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT database_file, platform_name, category FROM platform_databases")
+            db_list = cursor.fetchall()
+            conn.close()
+            
+            for db_file, platform_name, category in db_list:
+                if os.path.exists(db_file):
+                    database_index[f"{category}_{platform_name}"] = db_file
+            
+            # Add legacy databases
+            legacy_dbs = ["comprehensive_commercial_selectors.db", "platform_selectors.db"]
+            for db_file in legacy_dbs:
+                if os.path.exists(db_file):
+                    database_index[f"legacy_{db_file}"] = db_file
+                    
+        except Exception as e:
+            logger.warning(f"Database index loading issue: {e}")
+            
+        return database_index
+    
+    def load_database_on_demand(self, database_key):
+        """Load specific database only when needed"""
+        if database_key in self.selector_databases:
+            return self.selector_databases[database_key]
+        
+        if database_key in self.database_index:
+            db_file = self.database_index[database_key]
+            print(f"📊 Loading database on demand: {database_key}")
+            self.selector_databases[database_key] = self.load_database_to_memory(db_file)
+            return self.selector_databases[database_key]
+        
+        return []
     
     def load_database_to_memory(self, db_file):
         """Load entire database to memory for zero-latency access"""
@@ -792,8 +832,23 @@ class ZeroBottleneckUltraEngine:
         """Get ultra-comprehensive selectors with zero bottlenecks"""
         all_selectors = []
         
-        # Search across all loaded databases
-        for db_name, selectors in self.selector_databases.items():
+        # Search across all databases (load on demand)
+        relevant_databases = [
+            f"social_{platform}",
+            f"ecommerce_{platform}",
+            f"enterprise_{platform}",
+            f"developer_{platform}",
+            f"indian_{platform}",
+            f"financial_{platform}",
+            "legacy_comprehensive_commercial_selectors.db",
+            "legacy_platform_selectors.db"
+        ]
+        
+        for db_name in relevant_databases:
+            # Load database on demand
+            selectors = self.load_database_on_demand(db_name)
+            if not selectors:
+                continue
             matching_selectors = []
             
             for selector_data in selectors:
