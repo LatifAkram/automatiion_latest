@@ -765,14 +765,27 @@ class SuperOmegaOrchestrator:
                                         except:
                                             continue
                                     
-                                    # Fallback to search if trending not found
-                                    if not actions_performed:
-                                        search_terms = "trending songs 2025"
-                                        search_box = page.locator("input[name='search_query'], #search")
-                                        if await search_box.count() > 0:
-                                            await search_box.fill(search_terms)
-                                            await page.keyboard.press("Enter")
-                                            actions_performed.append(f"Searched for: {search_terms}")
+                                                                                # Fallback to search if trending not found
+                                            if not actions_performed:
+                                                search_terms = "trending songs 2025"
+                                                # Use more specific selector to avoid strict mode violation
+                                                search_selectors = [
+                                                    "input[name='search_query']",
+                                                    "#search-input input",
+                                                    "[placeholder*='Search']",
+                                                    "input[role='combobox']"
+                                                ]
+                                                
+                                                for selector in search_selectors:
+                                                    try:
+                                                        search_box = page.locator(selector).first()
+                                                        if await search_box.count() > 0:
+                                                            await search_box.fill(search_terms)
+                                                            await page.keyboard.press("Enter")
+                                                            actions_performed.append(f"Searched for: {search_terms}")
+                                                            break
+                                                    except Exception as e:
+                                                        continue
                                 except Exception as e:
                                     actions_performed.append(f"Action failed: {str(e)}")
                         
