@@ -322,8 +322,30 @@ class ZeroBottleneckUltraEngine:
         print(f"🎯 EXECUTING ULTRA TASK: {task.instruction}")
         print(f"📊 Platform: {task.platform}, Complexity: {task.complexity}")
         
-        # Get or create browser context
-        browser, context, page = await self.get_browser_context()
+        # Get or create browser context with timeout
+        try:
+            browser, context, page = await asyncio.wait_for(
+                self.get_browser_context(),
+                timeout=45.0  # 45 second total timeout for browser setup
+            )
+        except asyncio.TimeoutError:
+            print("❌ Browser setup timed out - aborting task")
+            return UltraResult(
+                task_id=task.id,
+                success=False,
+                result={'error': 'Browser setup timeout'},
+                evidence=[],
+                execution_time=time.time() - start_time,
+                attempts_made=0,
+                selectors_used=[],
+                fallbacks_triggered=0,
+                self_healing_count=0,
+                confidence=0.0,
+                platform_detected=task.platform,
+                actions_performed=[],
+                screenshots=[],
+                error_details='Browser setup timeout - system may be under heavy load'
+            )
         
         try:
             # Phase 1: Intelligent Platform Detection and Navigation
@@ -485,45 +507,63 @@ class ZeroBottleneckUltraEngine:
             await self.return_browser_context(browser, context, page)
     
     async def get_browser_context(self):
-        """Get optimized browser context from pool"""
+        """Get optimized browser context from pool with timeout protection"""
         if self.browser_pool:
             return self.browser_pool.pop()
         
-        # Create new browser context with ultra performance settings
-        playwright = await async_playwright().start()
-        browser = await playwright.chromium.launch(
-            headless=True,
-            args=[
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-web-security',
-                '--disable-blink-features=AutomationControlled',
-                '--disable-extensions',
-                '--disable-plugins',
-                '--disable-images',  # Faster loading
-                '--disable-javascript-harmony-shipping',
-                '--disable-background-timer-throttling',
-                '--disable-renderer-backgrounding',
-                '--disable-backgrounding-occluded-windows',
-                '--disable-background-networking',
-                '--memory-pressure-off',
-                '--max_old_space_size=4096'
-            ]
-        )
-        
-        context = await browser.new_context(
-            viewport={'width': 1920, 'height': 1080},
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        )
-        
-        page = await context.new_page()
-        
-        # Set ultra performance timeouts
-        page.set_default_timeout(60000)
-        page.set_default_navigation_timeout(60000)
-        
-        return browser, context, page
+        try:
+            print("🚀 Creating new browser context...")
+            
+            # Create new browser context with timeout protection
+            playwright = await async_playwright().start()
+            
+            # Launch browser with timeout
+            browser = await asyncio.wait_for(
+                playwright.chromium.launch(
+                    headless=True,
+                    args=[
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox', 
+                        '--disable-dev-shm-usage',
+                        '--disable-web-security',
+                        '--disable-blink-features=AutomationControlled',
+                        '--disable-extensions',
+                        '--disable-plugins'
+                    ]
+                ),
+                timeout=15.0  # 15 second timeout for browser launch
+            )
+            print("✅ Browser launched successfully")
+            
+            # Create context with timeout
+            context = await asyncio.wait_for(
+                browser.new_context(
+                    viewport={'width': 1366, 'height': 768},
+                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                ),
+                timeout=10.0  # 10 second timeout for context creation
+            )
+            print("✅ Browser context created")
+            
+            # Create page with timeout
+            page = await asyncio.wait_for(
+                context.new_page(),
+                timeout=10.0  # 10 second timeout for page creation
+            )
+            print("✅ Page created successfully")
+            
+            # Set reasonable timeouts
+            page.set_default_timeout(30000)  # 30 seconds
+            page.set_default_navigation_timeout(30000)  # 30 seconds
+            
+            return browser, context, page
+            
+        except asyncio.TimeoutError:
+            print("❌ Browser creation timed out - using fallback")
+            raise Exception("Browser creation timeout - system may be under heavy load")
+        except Exception as e:
+            print(f"❌ Browser creation failed: {e}")
+            raise
     
     async def return_browser_context(self, browser, context, page):
         """Return browser context to pool for reuse"""
@@ -611,30 +651,28 @@ class ZeroBottleneckUltraEngine:
         return detected_platform, target_url
     
     async def ultra_navigate(self, page: Page, url: str, platform: str):
-        """Navigate with ultra robustness and zero bottlenecks"""
+        """Navigate with ultra robustness and timeout protection"""
         try:
-            platform_config = self.platform_patterns.get(platform, {})
-            wait_strategies = platform_config.get('wait_strategies', ['domcontentloaded'])
+            print(f"🌐 Navigating to: {url}")
             
-            # Navigate with primary strategy
-            await page.goto(url, wait_until=wait_strategies[0], timeout=30000)
+            # Navigate with timeout protection
+            await asyncio.wait_for(
+                page.goto(url, wait_until='domcontentloaded'),
+                timeout=20.0  # 20 second timeout for navigation
+            )
+            print("✅ Navigation completed")
             
-            # Additional wait for dynamic content
-            if platform_config.get('dynamic_content', False):
-                await asyncio.sleep(2)
-                
-                # Wait for platform-specific indicators
-                patterns = platform_config.get('patterns', [])
-                if patterns:
-                    try:
-                        await page.wait_for_selector(patterns[0], timeout=10000)
-                    except:
-                        pass  # Continue even if specific elements aren't found
+            # Brief wait for page stabilization
+            await asyncio.sleep(2)
+            print("✅ Page stabilized")
             
             return True
             
+        except asyncio.TimeoutError:
+            print(f"⚠️ Navigation timeout for {url}")
+            return False
         except Exception as e:
-            logger.warning(f"Navigation failed: {e}")
+            print(f"❌ Navigation failed: {e}")
             return False
     
     async def self_heal_navigation(self, page: Page, url: str, platform: str):
