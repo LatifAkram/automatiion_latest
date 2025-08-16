@@ -165,10 +165,12 @@ class BuiltinAIProcessor:
         
         return {
             'decision': best_option,
+            'choice': best_option,  # Add 'choice' key for backward compatibility
             'confidence': confidence,
             'reasoning': reasoning,
             'scores': scores,
-            'all_options': options
+            'all_options': options,
+            'result': {'choice': best_option}  # Add nested result for compatibility
         }
 
     def recognize_patterns(self, examples: List[Dict[str, Any]], 
@@ -427,23 +429,57 @@ class BuiltinAIProcessor:
         """Score an option based on context and learned patterns"""
         base_score = 0.5  # Neutral starting point
         
+        # Enhanced automation-specific scoring
+        instruction = context.get('instruction', '').lower() if context else ''
+        
+        # Automation-specific keyword matching
+        automation_keywords = {
+            'automation': ['automate', 'execute', 'run', 'perform', 'do'],
+            'search': ['search', 'find', 'look', 'locate', 'discover'],
+            'navigation': ['navigate', 'go', 'visit', 'open', 'browse'],
+            'interaction': ['click', 'type', 'enter', 'submit', 'select'],
+            'form_filling': ['fill', 'complete', 'input', 'enter', 'submit']
+        }
+        
+        # Score based on keyword relevance
+        if option.lower() in automation_keywords:
+            keywords = automation_keywords[option.lower()]
+            matches = sum(1 for keyword in keywords if keyword in instruction)
+            if matches > 0:
+                base_score += 0.4 * (matches / len(keywords))
+        
+        # Platform-specific scoring
+        platform_indicators = {
+            'automation': ['facebook', 'amazon', 'google', 'flipkart', 'twitter', 'linkedin'],
+            'search': ['amazon', 'google', 'flipkart', 'ebay', 'shopping'],
+            'navigation': ['website', 'url', 'http', 'www', '.com'],
+            'interaction': ['button', 'link', 'form', 'field', 'menu'],
+            'form_filling': ['register', 'signup', 'login', 'form', 'details']
+        }
+        
+        if option.lower() in platform_indicators:
+            indicators = platform_indicators[option.lower()]
+            matches = sum(1 for indicator in indicators if indicator in instruction)
+            if matches > 0:
+                base_score += 0.3 * (matches / len(indicators))
+        
         # Score based on context
         if context:
             # Check for positive indicators in context
             score_value = context.get('score', 0)
             if isinstance(score_value, (int, float)):
-                base_score += score_value * 0.3
+                base_score += score_value * 0.2
             
             # Check for priority indicators
             priority = context.get('priority', 'medium')
             if priority == 'high':
-                base_score += 0.2
+                base_score += 0.15
             elif priority == 'low':
                 base_score -= 0.1
             
             # Check for historical success
             if option in context.get('successful_options', []):
-                base_score += 0.3
+                base_score += 0.25
             
             # Check for failure history
             if option in context.get('failed_options', []):
@@ -453,6 +489,10 @@ class BuiltinAIProcessor:
         if option in self.patterns_learned:
             pattern_score = self.patterns_learned[option].get('success_rate', 0.5)
             base_score = (base_score + pattern_score) / 2
+        
+        # Bonus for common automation actions
+        if option.lower() in ['automation', 'search', 'navigation']:
+            base_score += 0.1
         
         # Ensure score is between 0 and 1
         return max(0.0, min(1.0, base_score))

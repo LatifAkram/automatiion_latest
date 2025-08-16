@@ -715,7 +715,7 @@ class LiveConsoleServer(BuiltinWebServer):
         
         @self.route("/api/fixed-super-omega-execute", methods=['POST'])
         def execute_automation(request):
-            """Execute automation instruction using complete SUPER-OMEGA hybrid system"""
+            """Execute automation instruction using complete SUPER-OMEGA hybrid system with enhanced parsing"""
             try:
                 # Get instruction from request body
                 body = request.get('body', {})
@@ -726,6 +726,37 @@ class LiveConsoleServer(BuiltinWebServer):
                         "success": False,
                         "error": "No instruction provided"
                     }
+                
+                # Enhanced parsing integration
+                enhanced_parsing_enabled = body.get('enhanced_parsing', True)
+                parsing_result = None
+                
+                if enhanced_parsing_enabled:
+                    try:
+                        # Import enhanced parser
+                        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'core'))
+                        from enhanced_instruction_parser import parse_instruction_enhanced
+                        
+                        # Parse instruction with enhanced system
+                        parsing_result = parse_instruction_enhanced(instruction, body.get('context', {}))
+                        
+                        # Use parsed information to enhance processing
+                        if parsing_result.instruction_type.value != 'automation':
+                            # If not detected as automation, handle differently
+                            if parsing_result.instruction_type.value == 'chat':
+                                return {
+                                    "success": True,
+                                    "message": "This appears to be a conversational request. Redirecting to chat system.",
+                                    "suggestion": "Use /api/chat endpoint for better results",
+                                    "parsed_info": {
+                                        "type": parsing_result.instruction_type.value,
+                                        "intent": parsing_result.intent_category.value,
+                                        "confidence": parsing_result.confidence
+                                    }
+                                }
+                    except Exception as parse_error:
+                        print(f"Enhanced parsing error: {parse_error}")
+                        # Continue with standard processing if enhanced parsing fails
 
                 # Execute automation using complete hybrid system
                 import asyncio
@@ -746,14 +777,26 @@ class LiveConsoleServer(BuiltinWebServer):
                     # Get the SuperOmega orchestrator
                     orchestrator = get_super_omega()
                     
-                    # Determine complexity based on instruction
+                    # Determine complexity based on instruction (enhanced with parser results)
                     complexity = ComplexityLevel.MODERATE
-                    if any(word in instruction.lower() for word in ['complex', 'multi', 'workflow', 'advanced']):
-                        complexity = ComplexityLevel.COMPLEX
-                    elif any(word in instruction.lower() for word in ['ultra', 'intelligent', 'orchestrate']):
-                        complexity = ComplexityLevel.ULTRA_COMPLEX
-                    elif any(word in instruction.lower() for word in ['simple', 'basic', 'easy']):
-                        complexity = ComplexityLevel.SIMPLE
+                    
+                    if parsing_result:
+                        # Use enhanced parser complexity analysis
+                        complexity_mapping = {
+                            'SIMPLE': ComplexityLevel.SIMPLE,
+                            'MODERATE': ComplexityLevel.MODERATE,
+                            'COMPLEX': ComplexityLevel.COMPLEX,
+                            'ULTRA_COMPLEX': ComplexityLevel.ULTRA_COMPLEX
+                        }
+                        complexity = complexity_mapping.get(parsing_result.complexity_level.name, ComplexityLevel.MODERATE)
+                    else:
+                        # Fallback to keyword-based complexity detection
+                        if any(word in instruction.lower() for word in ['complex', 'multi', 'workflow', 'advanced']):
+                            complexity = ComplexityLevel.COMPLEX
+                        elif any(word in instruction.lower() for word in ['ultra', 'intelligent', 'orchestrate']):
+                            complexity = ComplexityLevel.ULTRA_COMPLEX
+                        elif any(word in instruction.lower() for word in ['simple', 'basic', 'easy']):
+                            complexity = ComplexityLevel.SIMPLE
                     
                     # Create hybrid request
                     hybrid_request = HybridRequest(
@@ -782,8 +825,8 @@ class LiveConsoleServer(BuiltinWebServer):
                             # Then process with hybrid system
                             response = await orchestrator.process_request(hybrid_request)
                             
-                            # Format comprehensive response for API
-                            return {
+                            # Format comprehensive response for API with enhanced parsing info
+                            api_response = {
                                 "success": response.success,
                                 "session_id": session_id,
                                 "instruction": instruction,
@@ -798,6 +841,26 @@ class LiveConsoleServer(BuiltinWebServer):
                                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                                 "system": "SUPER-OMEGA Hybrid Intelligence with Real AI"
                             }
+                            
+                            # Add enhanced parsing information if available
+                            if parsing_result:
+                                api_response["enhanced_parsing"] = {
+                                    "instruction_type": parsing_result.instruction_type.value,
+                                    "intent_category": parsing_result.intent_category.value,
+                                    "complexity_level": parsing_result.complexity_level.name,
+                                    "parsing_confidence": parsing_result.confidence,
+                                    "detected_platforms": parsing_result.platforms,
+                                    "extracted_entities": list(parsing_result.entities.keys()),
+                                    "steps_identified": len(parsing_result.steps),
+                                    "preprocessing_applied": parsing_result.preprocessing_applied,
+                                    "metadata": parsing_result.metadata
+                                }
+                                
+                                # Use enhanced complexity if available
+                                if parsing_result.complexity_level.name != "MODERATE":
+                                    api_response["detected_complexity"] = parsing_result.complexity_level.name
+                            
+                            return api_response
                             
                         except Exception as hybrid_error:
                             logger.error(f"Hybrid system error: {hybrid_error}")
