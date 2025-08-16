@@ -7,6 +7,10 @@ Complete web server with WebSocket support using only Python standard library.
 Provides all functionality of FastAPI without external dependencies.
 """
 
+# Fix protobuf compatibility issue BEFORE any imports
+import os
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+
 import http.server
 import socketserver
 import json
