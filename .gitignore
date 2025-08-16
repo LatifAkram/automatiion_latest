@@ -1,1 +1,4 @@
 platform_selectors.db
+*.db
+comprehensive_commercial_selectors.db
+platform_selectors.db

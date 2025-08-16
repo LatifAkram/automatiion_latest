@@ -191,6 +191,9 @@ cd super-omega-automation
 # Optional: Install AI enhancements
 pip install transformers torch sentence-transformers
 
+# Generate comprehensive commercial selector databases (633,967+ selectors)
+python3 setup_commercial_databases.py
+
 # Ready to use immediately!
 python -m src.core.ai_swarm_orchestrator
 ```
