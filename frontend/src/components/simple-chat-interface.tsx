@@ -33,6 +33,7 @@ import {
   Copy,
   Share2
 } from 'lucide-react';
+import SophisticatedAutomationDisplay from './sophisticated-automation-display';
 
 interface Message {
   id: string;
@@ -52,6 +53,31 @@ interface Message {
     }>;
     handoffReason?: string;
     takeoverData?: any;
+    sophisticatedData?: {
+      success: boolean;
+      aiInterpretation: string;
+      aiProvider: string;
+      processingPath: string;
+      confidence: number;
+      processingTime: number;
+      fallbackUsed: boolean;
+      system: string;
+      enhancedParsing?: {
+        instruction_type: string;
+        intent_category: string;
+        complexity_level: string;
+        parsing_confidence: number;
+        detected_platforms: string[];
+        extracted_entities: string[];
+        steps_identified: number;
+        preprocessing_applied: string[];
+        metadata: any;
+      };
+      detectedComplexity?: string;
+      timestamp: string;
+      evidence: any[];
+      result: any;
+    };
   };
   sources?: Array<{
     title: string;
@@ -229,6 +255,16 @@ export default function SimpleChatInterface({
                 </div>
               </div>
             )}
+          </div>
+        )}
+        
+        {/* Sophisticated Automation Display */}
+        {message.automation?.sophisticatedData && (
+          <div className="mt-3">
+            <SophisticatedAutomationDisplay 
+              data={message.automation.sophisticatedData}
+              automationId={message.automation.automationId}
+            />
           </div>
         )}
         

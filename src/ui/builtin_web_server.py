@@ -831,6 +831,7 @@ class LiveConsoleServer(BuiltinWebServer):
                             api_response = {
                                 "success": response.success,
                                 "session_id": session_id,
+                                "automation_id": session_id,  # Add automation_id that frontend expects
                                 "instruction": instruction,
                                 "ai_interpretation": ai_response.content,
                                 "ai_provider": ai_response.provider,

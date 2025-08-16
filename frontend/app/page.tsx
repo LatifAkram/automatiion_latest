@@ -6,6 +6,7 @@ import SimpleChatInterface from '../src/components/simple-chat-interface';
 import RealBrowserAutomation from '../src/components/real-browser-automation';
 import AIThinkingDisplay from '../src/components/ai-thinking-display';
 import { RealTimeBrowser } from '../src/components/real-time-browser';
+import SophisticatedAutomationDisplay from '../src/components/sophisticated-automation-display';
 
 // Backend configuration
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081';
@@ -31,6 +32,31 @@ interface Message {
     }>;
     handoffReason?: string;
     takeoverData?: any;
+    sophisticatedData?: {
+      success: boolean;
+      aiInterpretation: string;
+      aiProvider: string;
+      processingPath: string;
+      confidence: number;
+      processingTime: number;
+      fallbackUsed: boolean;
+      system: string;
+      enhancedParsing?: {
+        instruction_type: string;
+        intent_category: string;
+        complexity_level: string;
+        parsing_confidence: number;
+        detected_platforms: string[];
+        extracted_entities: string[];
+        steps_identified: number;
+        preprocessing_applied: string[];
+        metadata: any;
+      };
+      detectedComplexity?: string;
+      timestamp: string;
+      evidence: any[];
+      result: any;
+    };
   };
   sources?: Array<{
     title: string;
@@ -759,13 +785,31 @@ export default function Home() {
 
       if (automationResponse.ok) {
         const automationData = await automationResponse.json();
+        console.log('🎯 SOPHISTICATED RESPONSE:', automationData); // Debug log
+        
         updateMessageInChat(currentChatId, messageId, {
           automation: { 
             type: 'web_automation', 
             status: 'completed', 
             progress: 100,
             automationId: automationData.automation_id,
-            screenshots: automationData.result?.screenshots
+            screenshots: automationData.result?.screenshots,
+            // Add all sophisticated features
+            sophisticatedData: {
+              success: automationData.success,
+              aiInterpretation: automationData.ai_interpretation,
+              aiProvider: automationData.ai_provider,
+              processingPath: automationData.processing_path,
+              confidence: automationData.confidence,
+              processingTime: automationData.processing_time,
+              fallbackUsed: automationData.fallback_used,
+              system: automationData.system,
+              enhancedParsing: automationData.enhanced_parsing,
+              detectedComplexity: automationData.detected_complexity,
+              timestamp: automationData.timestamp,
+              evidence: automationData.evidence,
+              result: automationData.result
+            }
           }
         });
       } else {
