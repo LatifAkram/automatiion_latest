@@ -1597,11 +1597,20 @@ class AISwarmOrchestrator:
                 'last_used': metrics.last_used.isoformat() if metrics.last_used else None
             }
         
+        # Calculate overall success rate
+        overall_success_rate = self.successful_requests / max(self.total_requests, 1)
+        
+        # Calculate average response time across all components
+        active_components = [m for m in self.metrics.values() if m.availability]
+        average_response_time = sum(m.avg_processing_time for m in active_components) / len(active_components) if active_components else 0.0
+        
         return {
             'total_requests': self.total_requests,
             'successful_requests': self.successful_requests,
-            'overall_success_rate': self.successful_requests / max(self.total_requests, 1),
-            'active_components': len([m for m in self.metrics.values() if m.availability]),
+            'success_rate': overall_success_rate,  # Standard key name
+            'overall_success_rate': overall_success_rate,  # Alternative key name
+            'average_response_time': average_response_time,  # Standard key name
+            'active_components': len(active_components),
             'component_statistics': component_stats,
             'fallback_available': True
         }
