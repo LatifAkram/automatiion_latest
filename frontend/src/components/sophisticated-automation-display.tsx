@@ -102,10 +102,16 @@ export default function SophisticatedAutomationDisplay({ data, automationId }: S
                 <span className="font-medium text-gray-600 dark:text-gray-400">Processing Path:</span>
                 <div className="text-purple-600 font-medium capitalize">{data.processingPath}</div>
               </div>
-              <div>
-                <span className="font-medium text-gray-600 dark:text-gray-400">AI Provider:</span>
-                <div className="text-green-600 font-medium capitalize">{data.aiProvider}</div>
-              </div>
+                              <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-400">AI Provider:</span>
+                  <div className="text-green-600 font-medium capitalize">{data.aiProvider}</div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-400">AI Component:</span>
+                  <div className="text-purple-600 font-medium capitalize">
+                    {data.enhancedParsing?.metadata?.ai_component || 'orchestrator'}
+                  </div>
+                </div>
               <div>
                 <span className="font-medium text-gray-600 dark:text-gray-400">Processing Time:</span>
                 <div className="text-orange-600 font-medium">{formatProcessingTime(data.processingTime)}</div>
