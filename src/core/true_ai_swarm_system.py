@@ -167,9 +167,10 @@ class TrueAIComponent:
             raise ValueError(f"Unknown provider: {provider}")
     
     async def _call_gemini(self, prompt: str, request: AIRequest) -> Dict[str, Any]:
-        """Call Google Gemini API"""
+        """Call Google Gemini API - EXACT USER SPECIFICATION"""
         async with aiohttp.ClientSession() as session:
-            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
+            # USER SPECIFIED: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite
+            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
             headers = {"Content-Type": "application/json"}
             
             payload = {
@@ -180,6 +181,7 @@ class TrueAIComponent:
                 }
             }
             
+            # USER SPECIFIED API KEY: AIzaSyAvGhmG_WAI_dx4YoXIiFRmWpojzmrtIpQ
             params = {"key": "AIzaSyAvGhmG_WAI_dx4YoXIiFRmWpojzmrtIpQ"}
             
             async with session.post(url, headers=headers, json=payload, params=params) as response:
@@ -191,7 +193,7 @@ class TrueAIComponent:
                             'success': True,
                             'content': content,
                             'confidence': 0.9,
-                            'model': 'gemini-2.0-flash-exp'
+                            'model': 'gemini-2.5-flash-lite'  # Updated to match user specification
                         }
                 
                 return {'success': False, 'error': f'Gemini API error: {response.status}'}
