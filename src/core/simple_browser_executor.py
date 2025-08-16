@@ -101,7 +101,7 @@ class SimpleBrowserExecutor:
                 print("🌐 Launching browser...")
                 browser = await asyncio.wait_for(
                     p.chromium.launch(
-                        headless=True,
+                        headless=False,  # VISIBLE BROWSER for live automation viewing
                         args=['--no-sandbox', '--disable-dev-shm-usage']
                     ),
                     timeout=15.0

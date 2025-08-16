@@ -560,7 +560,7 @@ class ZeroBottleneckUltraEngine:
             # Launch browser with timeout
             browser = await asyncio.wait_for(
                 playwright.chromium.launch(
-                    headless=True,
+                    headless=False,  # VISIBLE BROWSER for live automation viewing
                     args=[
                         '--no-sandbox',
                         '--disable-setuid-sandbox', 
