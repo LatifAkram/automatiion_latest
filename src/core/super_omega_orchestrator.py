@@ -396,8 +396,16 @@ class SuperOmegaOrchestrator:
             ai_metrics = self._get_ai_metrics()
             builtin_metrics = self._get_builtin_metrics()
             
-            # Route request intelligently
+            # Route request intelligently - ENSURE AI SWARM IS USED AS CLAIMED IN README
             processing_mode = self.router.route_request(request, ai_metrics, builtin_metrics)
+            
+            # ALIGNMENT FIX: For automation tasks, prefer AI-first as claimed in README
+            if request.task_type == 'automation_execution':
+                # Use AI-first for automation as promised in README
+                if processing_mode == ProcessingMode.BUILTIN_ONLY:
+                    processing_mode = ProcessingMode.AI_FIRST
+                elif processing_mode == ProcessingMode.BUILTIN_FIRST:
+                    processing_mode = ProcessingMode.HYBRID
             
             # Process based on routing decision
             if processing_mode == ProcessingMode.AI_FIRST:
