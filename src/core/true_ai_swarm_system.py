@@ -13,6 +13,7 @@ import asyncio
 import json
 import time
 import logging
+import os
 from typing import Dict, List, Any, Optional, Union, Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -229,14 +230,79 @@ class TrueAIComponent:
                 return {'success': False, 'error': f'Local LLM error: {response.status}'}
     
     async def _call_openai(self, prompt: str, request: AIRequest) -> Dict[str, Any]:
-        """Call OpenAI GPT"""
-        # Placeholder - would need API key
-        return {'success': False, 'error': 'OpenAI API key not configured'}
+        """Call OpenAI GPT - REAL IMPLEMENTATION"""
+        async with aiohttp.ClientSession() as session:
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY', 'sk-your-openai-api-key-here')}"
+            }
+            
+            payload = {
+                "model": "gpt-4o",  # Latest GPT-4 Omni model
+                "messages": [
+                    {"role": "system", "content": f"You are a specialized {self.component_type.value} AI."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 4096
+            }
+            
+            try:
+                async with session.post(url, headers=headers, json=payload) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        content = data['choices'][0]['message']['content']
+                        return {
+                            'success': True,
+                            'content': content,
+                            'confidence': 0.9,
+                            'model': 'gpt-4o'
+                        }
+                    elif response.status == 401:
+                        return {'success': False, 'error': 'OpenAI API key not configured or invalid'}
+                    else:
+                        return {'success': False, 'error': f'OpenAI API error: {response.status}'}
+            except Exception as e:
+                return {'success': False, 'error': f'OpenAI connection error: {str(e)}'}
     
     async def _call_claude(self, prompt: str, request: AIRequest) -> Dict[str, Any]:
-        """Call Anthropic Claude"""
-        # Placeholder - would need API key  
-        return {'success': False, 'error': 'Claude API key not configured'}
+        """Call Anthropic Claude - REAL IMPLEMENTATION"""
+        async with aiohttp.ClientSession() as session:
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "Content-Type": "application/json",
+                "x-api-key": os.getenv('ANTHROPIC_API_KEY', 'sk-ant-your-anthropic-api-key-here'),
+                "anthropic-version": "2023-06-01"
+            }
+            
+            payload = {
+                "model": "claude-3-5-sonnet-20241022",  # Latest Claude 3.5 Sonnet
+                "max_tokens": 4096,
+                "temperature": 0.7,
+                "system": f"You are a specialized {self.component_type.value} AI.",
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ]
+            }
+            
+            try:
+                async with session.post(url, headers=headers, json=payload) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        content = data['content'][0]['text']
+                        return {
+                            'success': True,
+                            'content': content,
+                            'confidence': 0.9,
+                            'model': 'claude-3-5-sonnet-20241022'
+                        }
+                    elif response.status == 401:
+                        return {'success': False, 'error': 'Anthropic API key not configured or invalid'}
+                    else:
+                        return {'success': False, 'error': f'Claude API error: {response.status}'}
+            except Exception as e:
+                return {'success': False, 'error': f'Claude connection error: {str(e)}'}  
     
     async def _post_process_ai_result(self, ai_result: Dict[str, Any], request: AIRequest) -> Dict[str, Any]:
         """Post-process AI result with component-specific logic - OVERRIDE in subclasses"""
