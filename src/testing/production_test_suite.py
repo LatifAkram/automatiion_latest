@@ -45,7 +45,7 @@ except ImportError:
 from ..core.deterministic_executor import DeterministicExecutor
 from ..core.self_healing_locators import SelfHealingLocatorStack
 from ..core.semantic_dom_graph import SemanticDOMGraph
-from ..models.contracts import StepContract, Action, ActionType, TargetSelector
+from models.contracts import StepContract, Action, ActionType, TargetSelector
 
 
 class PlatformType(str, Enum):

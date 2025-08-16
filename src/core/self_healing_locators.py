@@ -51,10 +51,10 @@ try:
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
-from .semantic_dom_graph import SemanticDOMGraph, DOMNode, BoundingBox
+from semantic_dom_graph import SemanticDOMGraph, DOMNode, BoundingBox
 # Import contracts with fallback
 try:
-    from ..models.contracts import TargetSelector, StepContract
+    from models.contracts import TargetSelector, StepContract
 except ImportError:
     from dataclasses import dataclass
     from typing import Any, Optional, Dict

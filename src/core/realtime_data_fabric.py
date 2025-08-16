@@ -39,7 +39,7 @@ except ImportError:
 
 # Import contracts with fallback
 try:
-    from ..models.contracts import FactSource, Fact
+    from models.contracts import FactSource, Fact
 except ImportError:
     from enum import Enum
     

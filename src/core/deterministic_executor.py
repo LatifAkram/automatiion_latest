@@ -29,11 +29,11 @@ try:
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
-from .semantic_dom_graph import SemanticDOMGraph
-from .self_healing_locators import SelfHealingLocatorStack
+from semantic_dom_graph import SemanticDOMGraph
+from self_healing_locators import SelfHealingLocatorStack
 # Import contracts with fallback
 try:
-    from ..models.contracts import StepContract, Action, ActionType, TargetSelector, StepEvidence, EvidenceType
+    from models.contracts import StepContract, Action, ActionType, TargetSelector, StepEvidence, EvidenceType
 except ImportError:
     from enum import Enum
     from dataclasses import dataclass

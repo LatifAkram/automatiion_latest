@@ -83,8 +83,8 @@ class EnhancedSelfHealingLocator:
         
         # Initialize built-in processors for fallbacks
         try:
-            from .builtin_ai_processor import BuiltinAIProcessor
-            from .builtin_vision_processor import BuiltinVisionProcessor
+            from builtin_ai_processor import BuiltinAIProcessor
+            from builtin_vision_processor import BuiltinVisionProcessor
             self.ai_processor = BuiltinAIProcessor()
             self.vision_processor = BuiltinVisionProcessor()
         except ImportError:

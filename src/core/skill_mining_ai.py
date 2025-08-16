@@ -37,8 +37,8 @@ except ImportError:
     np = None
 
 # Built-in fallbacks
-from .builtin_ai_processor import BuiltinAIProcessor
-from .builtin_data_validation import BaseValidator
+from builtin_ai_processor import BuiltinAIProcessor
+from builtin_data_validation import BaseValidator
 
 logger = logging.getLogger(__name__)
 

@@ -7,18 +7,18 @@ Core functionality using only built-in Python libraries.
 """
 
 # Import built-in systems first
-from .builtin_performance_monitor import get_system_metrics, builtin_monitor
-from .builtin_data_validation import BaseValidator, ValidationError
-from .builtin_ai_processor import BuiltinAIProcessor
-from .builtin_vision_processor import process_image, analyze_screenshot, vision_processor
+from builtin_performance_monitor import get_system_metrics, builtin_monitor
+from builtin_data_validation import BaseValidator, ValidationError
+from builtin_ai_processor import BuiltinAIProcessor
+from builtin_vision_processor import process_image, analyze_screenshot, vision_processor
 
 # Import configuration (now dependency-free)
-from .config import Config, get_config, load_config, save_config
+from config import Config, get_config, load_config, save_config
 
 # Import other core modules
 # Import AutoSkillMining separately to avoid dependency issues
 try:
-    from .auto_skill_mining import AutoSkillMiner as AutoSkillMining
+    from auto_skill_mining import AutoSkillMiner as AutoSkillMining
 except ImportError:
     # Create a mock AutoSkillMining for when imports fail
     class AutoSkillMining:
@@ -36,7 +36,7 @@ ShadowDOMSimulator = None
 RealtimeDataFabric = None
 
 try:
-    from .orchestrator import MultiAgentOrchestrator
+    from orchestrator import MultiAgentOrchestrator
     # Create alias for backward compatibility
     Orchestrator = MultiAgentOrchestrator
 except ImportError as e:
@@ -69,7 +69,7 @@ except ImportError as e:
         def __init__(self, *args, **kwargs): pass
 
 try:
-    from .semantic_dom_graph import SemanticDOMGraph
+    from semantic_dom_graph import SemanticDOMGraph
 except ImportError as e:
     print(f"⚠️ SemanticDOMGraph not available: {e}")
     class SemanticDOMGraph:
@@ -77,7 +77,7 @@ except ImportError as e:
         def analyze_dom(self, *args, **kwargs): return {}
 
 try:
-    from .shadow_dom_simulator import ShadowDOMSimulator
+    from shadow_dom_simulator import ShadowDOMSimulator
 except ImportError as e:
     print(f"⚠️ ShadowDOMSimulator not available: {e}")
     class ShadowDOMSimulator:
@@ -85,7 +85,7 @@ except ImportError as e:
         def simulate(self, *args, **kwargs): return True
 
 try:
-    from .realtime_data_fabric import RealTimeDataFabric as RealtimeDataFabric
+    from realtime_data_fabric import RealTimeDataFabric as RealtimeDataFabric
 except ImportError as e:
     print(f"⚠️ RealTimeDataFabric not available: {e}")
     class RealtimeDataFabric:

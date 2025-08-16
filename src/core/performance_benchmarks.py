@@ -138,7 +138,7 @@ class PerformanceBenchmarker:
         
         try:
             # Import here to avoid circular dependencies
-            from .semantic_dom_graph import SemanticDOMGraph
+            from semantic_dom_graph import SemanticDOMGraph
             
             # Create test DOM structure
             test_html = """
@@ -213,7 +213,7 @@ class PerformanceBenchmarker:
         start_cpu = psutil.cpu_percent()
         
         try:
-            from .shadow_dom_simulator import ShadowDOMSimulator
+            from shadow_dom_simulator import ShadowDOMSimulator
             
             simulator = ShadowDOMSimulator()
             durations = []
@@ -276,7 +276,7 @@ class PerformanceBenchmarker:
         start_cpu = psutil.cpu_percent()
         
         try:
-            from .realtime_data_fabric import RealTimeDataFabric
+            from realtime_data_fabric import RealTimeDataFabric
             
             fabric = RealTimeDataFabric()
             durations = []

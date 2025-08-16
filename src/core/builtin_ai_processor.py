@@ -50,16 +50,21 @@ class BuiltinAIProcessor:
             ]
         }
         
-        # Entity extraction patterns
+        # Enhanced entity extraction patterns
         self.entity_patterns = {
             'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-            'phone': r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',
-            'url': r'https?://[^\s<>"{}|\\^`[\]]+',
+            'phone': r'(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}|\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b|\b\d{10}\b',
+            'url': r'https?://[^\s<>"{}|\\^`[\]]+|www\.[^\s<>"{}|\\^`[\]]+',
             'ip': r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b',
-            'date': r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b',
+            'date': r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b',
             'time': r'\b\d{1,2}:\d{2}(?::\d{2})?\s?(?:AM|PM|am|pm)?\b',
-            'currency': r'\$\d+(?:\.\d{2})?|\d+(?:\.\d{2})?\s?(?:USD|EUR|GBP|INR)',
-            'credit_card': r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b'
+            'currency': r'\$\d+(?:,\d{3})*(?:\.\d{2})?|\d+(?:,\d{3})*(?:\.\d{2})?\s?(?:USD|EUR|GBP|INR|dollars?|euros?)',
+            'credit_card': r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b',
+            'ssn': r'\b\d{3}-\d{2}-\d{4}\b',
+            'zipcode': r'\b\d{5}(?:-\d{4})?\b',
+            'hashtag': r'#\w+',
+            'mention': r'@\w+',
+            'percentage': r'\b\d+(?:\.\d+)?%'
         }
 
     def analyze_text(self, text: str) -> Dict[str, Any]:

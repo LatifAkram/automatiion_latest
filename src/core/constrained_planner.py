@@ -41,12 +41,12 @@ try:
 except ImportError:
     ANTHROPIC_AVAILABLE = False
 
-from .semantic_dom_graph import SemanticDOMGraph
-from .self_healing_locators import SelfHealingLocatorStack
-from .shadow_dom_simulator import ShadowDOMSimulator, SimulationResult
+from semantic_dom_graph import SemanticDOMGraph
+from self_healing_locators import SelfHealingLocatorStack
+from shadow_dom_simulator import ShadowDOMSimulator, SimulationResult
 # Import contracts with fallback
 try:
-    from ..models.contracts import StepContract, Action, ActionType, TargetSelector
+    from models.contracts import StepContract, Action, ActionType, TargetSelector
 except ImportError:
     from enum import Enum
     from dataclasses import dataclass

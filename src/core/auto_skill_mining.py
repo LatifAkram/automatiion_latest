@@ -49,9 +49,9 @@ except ImportError:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
 
 try:
-    from .semantic_dom_graph import SemanticDOMGraph
-    from .shadow_dom_simulator import ShadowDOMSimulator, SimulationResult
-    from ..models.contracts import StepContract, RunReport, EvidenceContract
+    from semantic_dom_graph import SemanticDOMGraph
+    from shadow_dom_simulator import ShadowDOMSimulator, SimulationResult
+    from models.contracts import StepContract, RunReport, EvidenceContract
     CORE_IMPORTS_AVAILABLE = True
 except ImportError as e:
     # Create mock classes for when imports fail
@@ -835,7 +835,7 @@ class AutoSkillMiner:
             
             for skill_step in skill.steps:
                 # Convert skill step back to StepContract for simulation
-                from ..models.contracts import Action, TargetSelector
+                from models.contracts import Action, TargetSelector
                 
                 target = TargetSelector(**skill_step.target_pattern) if skill_step.target_pattern else None
                 action = Action(
