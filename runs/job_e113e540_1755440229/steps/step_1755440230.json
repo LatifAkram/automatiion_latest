@@ -1,0 +1,20 @@
+{
+  "id": "step_1755440230",
+  "timestamp": "2025-08-17T14:17:10.721626",
+  "session_id": "job_e113e540_1755440229",
+  "step_data": {
+    "action": "wait_for_selector",
+    "selector": "h1",
+    "state": "visible",
+    "execution_time_ms": 99.50447082519531,
+    "success": true
+  },
+  "evidence_files": {
+    "screenshots": [
+      "runs/job_e113e540_1755440229/frames/step_1755440230_1755440230632.png"
+    ],
+    "dom_snapshots": [
+      "runs/job_e113e540_1755440229/dom_step_1755440230_1755440230632.html"
+    ]
+  }
+}
