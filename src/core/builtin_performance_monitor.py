@@ -371,6 +371,24 @@ class BuiltinPerformanceMonitor:
         """Get historical metrics data"""
         return getattr(self, '_metrics_history', [])
     
+    def get_system_metrics_dict(self) -> Dict[str, Any]:
+        """Get system metrics as dictionary (as claimed in README)"""
+        try:
+            metrics = self.get_comprehensive_metrics()
+            return asdict(metrics)
+        except Exception as e:
+            return {
+                'cpu_percent': 0.0,
+                'memory_percent': 0.0,
+                'memory_used_mb': 0.0,
+                'memory_total_mb': 0.0,
+                'disk_usage_percent': 0.0,
+                'process_count': 0,
+                'load_average': None,
+                'uptime_seconds': 0.0,
+                'platform_info': {"error": str(e)}
+            }
+    
     def save_metrics_report(self, filename: str = "system_metrics_report.json"):
         """Save comprehensive metrics report"""
         metrics = self.get_comprehensive_metrics()
