@@ -705,6 +705,80 @@ class FixedSuperOmegaLiveAutomation:
             })
             return {'success': False, 'error': str(e)}
 
+    async def super_omega_open_tab(self, session_id: str, url: str = 'about:blank') -> Dict[str, Any]:
+        """Open a new tab and make it the active page."""
+        session = self.sessions.get(session_id)
+        if not session or not session.context:
+            return {'success': False, 'error': 'Session not found'}
+        try:
+            new_page = await session.context.new_page()
+            await new_page.goto(url)
+            session.page = new_page
+            return {'success': True, 'url': url, 'tabs': len(session.context.pages)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_switch_tab(self, session_id: str, index: int = 0) -> Dict[str, Any]:
+        """Switch active tab by index."""
+        session = self.sessions.get(session_id)
+        if not session or not session.context:
+            return {'success': False, 'error': 'Session not found'}
+        try:
+            pages = session.context.pages
+            if index < 0 or index >= len(pages):
+                return {'success': False, 'error': f'Invalid tab index {index}'}
+            session.page = pages[index]
+            return {'success': True, 'active_index': index, 'tabs': len(pages)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_close_tab(self, session_id: str, index: int = None) -> Dict[str, Any]:
+        """Close current tab or a specific index."""
+        session = self.sessions.get(session_id)
+        if not session or not session.context:
+            return {'success': False, 'error': 'Session not found'}
+        try:
+            pages = session.context.pages
+            if index is None:
+                await session.page.close()
+            else:
+                if index < 0 or index >= len(pages):
+                    return {'success': False, 'error': f'Invalid tab index {index}'}
+                await pages[index].close()
+            return {'success': True, 'tabs': len(session.context.pages)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_save_storage_state(self, session_id: str, path: str) -> Dict[str, Any]:
+        """Save cookies/localStorage to a file for persistence."""
+        session = self.sessions.get(session_id)
+        if not session or not session.context:
+            return {'success': False, 'error': 'Session not found'}
+        try:
+            await session.context.storage_state(path=path)
+            return {'success': True, 'path': path}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_load_storage_state(self, session_id: str, path: str) -> Dict[str, Any]:
+        """Reload a context with a saved storage state."""
+        session = self.sessions.get(session_id)
+        if not session or not session.browser:
+            return {'success': False, 'error': 'Session not found'}
+        try:
+            # Close old context
+            if session.context:
+                try:
+                    await session.context.close()
+                except Exception:
+                    pass
+            # Create new context with storage state
+            session.context = await session.browser.new_context(storage_state=path, accept_downloads=True)
+            session.page = await session.context.new_page()
+            return {'success': True, 'path': path}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     async def super_omega_perform_action(self, session_id: str, step: Dict[str, Any]) -> Dict[str, Any]:
         """Generic advanced action executor with healing and evidence.
         Supported actions: hover, dblclick, right_click, press_key, drag_and_drop,
