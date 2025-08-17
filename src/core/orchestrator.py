@@ -16,7 +16,7 @@ from uuid import uuid4
 
 # Import core modules with fallbacks
 try:
-    from config import Config
+    from .config import Config
 except ImportError:
     class Config:
         def __init__(self, *args, **kwargs): pass

@@ -32,7 +32,7 @@ import urllib.parse
 import ssl
 
 # Import our reliable built-in system
-from builtin_ai_processor import BuiltinAIProcessor
+from .builtin_ai_processor import BuiltinAIProcessor
 
 @dataclass
 class AIResponse:

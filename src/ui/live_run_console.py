@@ -24,7 +24,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Import our built-in web server
-from builtin_web_server import BuiltinWebServer, WebSocketConnection
+from ui.builtin_web_server import BuiltinWebServer, WebSocketConnection
+
+# Real automation integration (no placeholders)
+try:
+	from testing.super_omega_live_automation_fixed import (
+		get_fixed_super_omega_live_automation,
+		ExecutionMode
+	)
+	_HAS_LIVE_AUTOMATION = True
+except Exception:
+	_HAS_LIVE_AUTOMATION = False
 
 logger = logging.getLogger(__name__)
 
@@ -885,7 +895,7 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
     
     def _create_console_handler(self):
         """Create custom request handler for console"""
-        from builtin_web_server import BuiltinHTTPRequestHandler
+        from ui.builtin_web_server import BuiltinHTTPRequestHandler
         
         class ConsoleRequestHandler(BuiltinHTTPRequestHandler):
             def _serve_default_page(self):
@@ -957,7 +967,7 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
                 elif message_type == 'get_system_metrics':
                     # Get system metrics
                     try:
-                        from builtin_performance_monitor import BuiltinPerformanceMonitor
+                        from core.builtin_performance_monitor import BuiltinPerformanceMonitor
                         monitor = BuiltinPerformanceMonitor()
                         metrics = monitor.get_system_metrics_dict()
                         
@@ -1008,49 +1018,66 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
             session = self.active_sessions[session_id]
             session.status = "running"
             session.updated_at = time.time()
-            
-            # Simulate automation steps (in production, integrate with your automation engine)
+
+            if not _HAS_LIVE_AUTOMATION:
+                raise RuntimeError("Live automation module not available; no simulation permitted")
+
+            # Initialize live automation lazily
+            if not hasattr(self, "_live_automation") or self._live_automation is None:
+                self._live_automation = get_fixed_super_omega_live_automation({
+                    'headless': True
+                })
+
             import asyncio
-            
-            # Basic instruction processing
-            if "navigate" in instruction.lower():
+            async def _run():
+                # Ensure session exists in live automation
+                await self._live_automation.create_super_omega_session(
+                    session_id=session_id,
+                    url="about:blank",
+                    mode=ExecutionMode.HYBRID
+                )
+
+                instr = instruction.strip()
+                result: Dict[str, Any] = {"success": True, "message": "Executed", "details": {}}
+                if instr.lower().startswith("navigate "):
+                    url = instr.split(" ", 1)[1].strip()
+                    result = await self._live_automation.super_omega_navigate(session_id, url)
+                elif instr.lower().startswith("click "):
+                    selector = instr.split(" ", 1)[1].strip()
+                    result = await self._live_automation.super_omega_find_element(session_id, selector)
+                else:
+                    # For now, only allow explicit supported commands; do not simulate
+                    raise ValueError(f"Unsupported instruction: {instruction}")
+
+                # Update local session steps minimally from real result
+                step_action = 'navigate' if 'url' in instr.lower() or instr.lower().startswith('navigate') else 'click'
                 session.steps.append({
-                    "action": "navigate",
-                    "target": "target_url",
-                    "status": "completed",
+                    "action": step_action,
+                    "target": instruction,
+                    "status": "completed" if result.get('success') else 'failed',
                     "timestamp": time.time()
                 })
-                
-            elif "click" in instruction.lower():
-                session.steps.append({
-                    "action": "click",
-                    "target": "element",
-                    "status": "completed",
-                    "timestamp": time.time()
-                })
-            
-            # Simulate evidence collection
-            session.evidence.append(f"screenshot_{session_id}_{int(time.time())}.png")
-            session.evidence.append(f"video_{session_id}_{int(time.time())}.mp4")
-            
-            # Update session as completed
-            session.status = "completed"
-            session.updated_at = time.time()
-            
+
+                # Mark completion
+                session.status = "completed" if result.get('success') else "failed"
+                session.updated_at = time.time()
+                return result
+
+            # Run the async flow
+            result = asyncio.run(_run())
+
             return {
-                'success': True,
-                'message': f'Automation completed successfully: {instruction}',
+                'success': bool(result.get('success', True)),
+                'message': result.get('message', 'Automation executed'),
                 'session_id': session_id,
-                'steps_completed': len(session.steps),
-                'evidence_collected': len(session.evidence)
+                'steps_completed': len(session.steps)
             }
-            
+
         except Exception as e:
             # Update session as failed
             if session_id in self.active_sessions:
                 self.active_sessions[session_id].status = "failed"
                 self.active_sessions[session_id].updated_at = time.time()
-            
             return {
                 'success': False,
                 'message': f'Automation failed: {str(e)}',

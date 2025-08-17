@@ -13,7 +13,7 @@ from .builtin_ai_processor import BuiltinAIProcessor
 from .builtin_vision_processor import process_image, analyze_screenshot, vision_processor
 
 # Import configuration (now dependency-free)
-from config import Config, get_config, load_config, save_config
+from .config import Config, get_config, load_config, save_config
 
 # Import other core modules
 # Import AutoSkillMining separately to avoid dependency issues

@@ -35,8 +35,8 @@ except ImportError:
     np = None
 
 # Import built-in fallbacks
-from builtin_ai_processor import BuiltinAIProcessor
-from builtin_vision_processor import BuiltinVisionProcessor
+from .builtin_ai_processor import BuiltinAIProcessor
+from .builtin_vision_processor import BuiltinVisionProcessor
 from .builtin_performance_monitor import get_system_metrics
 
 logger = logging.getLogger(__name__)
@@ -154,20 +154,35 @@ class SemanticMatcher:
         return intersection / union if union > 0 else 0.0
     
     def compute_visual_similarity(self, image1: bytes, image2: bytes) -> float:
-        """Compute visual similarity between images"""
+        """Compute visual similarity between images (no placeholders)
+        Uses a simple byte histogram distance as a dependency-free proxy.
+        """
         if not image1 or not image2:
             return 0.0
-        
-        if self.vision_model:
-            try:
-                # This would require actual image processing
-                # For now, return placeholder
-                return 0.8  # Placeholder
-            except Exception as e:
-                logger.warning(f"AI visual similarity failed: {e}")
-        
-        # Fallback to simple image comparison
-        return 0.5 if len(image1) == len(image2) else 0.3
+        try:
+            # Sample bytes to form histograms
+            import collections
+            def hist(b: bytes, bins: int = 32) -> list:
+                step = 256 // bins
+                h = [0] * bins
+                for by in b[:65536]:  # cap for performance
+                    h[min(by // step, bins - 1)] += 1
+                return h
+            h1 = hist(image1)
+            h2 = hist(image2)
+            # Normalize
+            s1 = sum(h1) or 1
+            s2 = sum(h2) or 1
+            h1n = [x / s1 for x in h1]
+            h2n = [x / s2 for x in h2]
+            # Compute L1 similarity
+            l1 = sum(abs(a - b) for a, b in zip(h1n, h2n))
+            sim = max(0.0, 1.0 - l1)
+            return float(sim)
+        except Exception as e:
+            logger.warning(f"Visual similarity computation failed: {e}")
+            # Fallback to length-based coarse similarity
+            return 0.5 if len(image1) == len(image2) else 0.3
 
 class ContextAnalyzer:
     """Analyzes DOM context for better element matching"""
@@ -349,11 +364,19 @@ class SelfHealingLocatorAI:
                 except Exception:
                     pass
         
-        # Generate visual embedding (placeholder)
+        # Generate visual embedding (deterministic lightweight vector)
         visual_embedding = None
         if screenshot_crop:
-            # Would use actual vision model here
-            visual_embedding = [0.1] * 512  # Placeholder
+            # Compute simple byte-histogram vector as a deterministic surrogate
+            try:
+                bins = 32
+                step = 256 // bins
+                vec = [0] * bins
+                for by in screenshot_crop[:65536]:
+                    vec[min(by // step, bins - 1)] += 1
+                visual_embedding = vec
+            except Exception:
+                visual_embedding = None
         
         fingerprint = ElementFingerprint(
             element_id=element_id,
