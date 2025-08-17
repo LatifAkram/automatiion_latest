@@ -398,7 +398,12 @@ Please respond in JSON format:
         
         # Check supporting data
         for data in supporting_data:
-            data_lower = data.lower()
+            # Coerce to string for robust matching
+            try:
+                data_str = data if isinstance(data, str) else json.dumps(data, ensure_ascii=False)
+            except Exception:
+                data_str = str(data)
+            data_lower = data_str.lower()
             
             # Simple keyword matching
             if any(word in data_lower for word in claim_lower.split() if len(word) > 3):
