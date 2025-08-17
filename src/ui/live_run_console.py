@@ -1039,18 +1039,41 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
 
                 instr = instruction.strip()
                 result: Dict[str, Any] = {"success": True, "message": "Executed", "details": {}}
+
+                # Simple one-liners
                 if instr.lower().startswith("navigate "):
                     url = instr.split(" ", 1)[1].strip()
                     result = await self._live_automation.super_omega_navigate(session_id, url)
                 elif instr.lower().startswith("click "):
                     selector = instr.split(" ", 1)[1].strip()
                     result = await self._live_automation.super_omega_find_element(session_id, selector)
+                # Multi-step: navigate -> type -> click -> wait -> extract
+                elif instr.lower().startswith("workflow "):
+                    # Expect JSON array of steps after 'workflow '
+                    import json as _json
+                    steps = _json.loads(instr[len("workflow "):])
+                    for step in steps:
+                        a = step.get('action', '').lower()
+                        if a == 'navigate':
+                            url = step['url']
+                            result = await self._live_automation.super_omega_navigate(session_id, url)
+                        elif a == 'find':
+                            selector = step['selector']
+                            result = await self._live_automation.super_omega_find_element(session_id, selector)
+                        elif a == 'wait':
+                            dur_ms = int(step.get('ms', 1000))
+                            import asyncio as _asyncio
+                            await _asyncio.sleep(dur_ms/1000.0)
+                        else:
+                            raise ValueError(f"Unsupported workflow step: {step}")
+                    # Final result carries last step outcome
+                    result = {**result, 'workflow_steps': len(steps)}
                 else:
                     # For now, only allow explicit supported commands; do not simulate
                     raise ValueError(f"Unsupported instruction: {instruction}")
 
                 # Update local session steps minimally from real result
-                step_action = 'navigate' if 'url' in instr.lower() or instr.lower().startswith('navigate') else 'click'
+                step_action = 'navigate' if instr.lower().startswith('navigate') else ('click' if instr.lower().startswith('click') else ('workflow' if instr.lower().startswith('workflow') else 'unknown'))
                 session.steps.append({
                     "action": step_action,
                     "target": instruction,
