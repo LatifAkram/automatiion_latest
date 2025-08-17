@@ -704,6 +704,151 @@ class FixedSuperOmegaLiveAutomation:
                 'execution_time_ms': (time.time() - start) * 1000
             })
             return {'success': False, 'error': str(e)}
+
+    async def super_omega_perform_action(self, session_id: str, step: Dict[str, Any]) -> Dict[str, Any]:
+        """Generic advanced action executor with healing and evidence.
+        Supported actions: hover, dblclick, right_click, press_key, drag_and_drop,
+        check, uncheck, wait_load_state, eval_js, set_cookie, get_cookies,
+        set_local_storage, get_local_storage, screenshot, back, forward, refresh,
+        set_viewport, get_text, get_attribute, inner_html, exists, visible, hidden
+        """
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        action = step.get('action','').lower()
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            page = session.page
+            context = session.context
+            def sel_heal(selector: str) -> str:
+                return selector
+            # Common selector resolution with healing
+            async def resolve_selector(selector: str, timeout: int = 10000) -> str:
+                try:
+                    await page.wait_for_selector(selector, timeout=timeout)
+                    return selector
+                except Exception:
+                    heal = await self.super_omega_find_element(session_id, selector, timeout)
+                    if not heal.get('success'):
+                        raise RuntimeError(heal.get('error','heal failed'))
+                    return heal.get('healed_selector', selector)
+            if action == 'hover':
+                sel = await resolve_selector(step['selector'])
+                await page.hover(sel)
+            elif action == 'dblclick':
+                sel = await resolve_selector(step['selector'])
+                await page.dblclick(sel)
+            elif action == 'right_click':
+                sel = await resolve_selector(step['selector'])
+                await page.click(sel, button='right')
+            elif action == 'press_key':
+                sel = await resolve_selector(step['selector'])
+                await page.press(sel, step['key'])
+            elif action == 'drag_and_drop':
+                src = await resolve_selector(step['source'])
+                dst = await resolve_selector(step['target'])
+                await page.drag_and_drop(src, dst)
+            elif action == 'check':
+                sel = await resolve_selector(step['selector'])
+                await page.check(sel)
+            elif action == 'uncheck':
+                sel = await resolve_selector(step['selector'])
+                await page.uncheck(sel)
+            elif action == 'wait_load_state':
+                state = step.get('state','networkidle')
+                await page.wait_for_load_state(state)
+            elif action == 'eval_js':
+                expr = step['expression']
+                result = await page.evaluate(expr)
+                await self._save_step_evidence(session, step_id, {'action': action, 'result_type': str(type(result))})
+                return {'success': True, 'result': result}
+            elif action == 'set_cookie':
+                cookies = step['cookies'] if isinstance(step['cookies'], list) else [step['cookies']]
+                # Normalize cookies for Playwright context
+                ctx_cookies = []
+                for c in cookies:
+                    ctx_cookies.append({
+                        'name': c['name'], 'value': c['value'],
+                        'domain': c.get('domain'), 'path': c.get('path','/'),
+                        'url': c.get('url'), 'expires': c.get('expires'), 'httpOnly': c.get('httpOnly', False), 'secure': c.get('secure', False), 'sameSite': c.get('sameSite')
+                    })
+                await context.add_cookies(ctx_cookies)
+            elif action == 'get_cookies':
+                domain = step.get('domain')
+                url = step.get('url')
+                result = await context.cookies(urls=[url] if url else None)
+                return {'success': True, 'cookies': result}
+            elif action == 'set_local_storage':
+                k = step['key']; v = step['value']
+                await page.evaluate("(k,v)=>localStorage.setItem(k,v)", k, v)
+            elif action == 'get_local_storage':
+                k = step['key']
+                val = await page.evaluate("(k)=>localStorage.getItem(k)", k)
+                return {'success': True, 'value': val}
+            elif action == 'screenshot':
+                path = step.get('path', str(session.evidence_dir / f"shot_{int(time.time()*1000)}.png"))
+                await page.screenshot(path=path, full_page=True)
+                return {'success': True, 'path': path}
+            elif action == 'back':
+                await page.go_back()
+            elif action == 'forward':
+                await page.go_forward()
+            elif action == 'refresh':
+                await page.reload()
+            elif action == 'set_viewport':
+                width = int(step.get('width', 1280)); height = int(step.get('height', 800))
+                await page.set_viewport_size({'width': width, 'height': height})
+            elif action == 'get_text':
+                sel = await resolve_selector(step['selector'])
+                el = await page.query_selector(sel)
+                txt = await el.text_content()
+                return {'success': True, 'text': txt}
+            elif action == 'get_attribute':
+                sel = await resolve_selector(step['selector'])
+                attr = step['name']
+                el = await page.query_selector(sel)
+                val = await el.get_attribute(attr)
+                return {'success': True, 'value': val}
+            elif action == 'inner_html':
+                sel = await resolve_selector(step['selector'])
+                el = await page.query_selector(sel)
+                html = await el.inner_html()
+                return {'success': True, 'html': html}
+            elif action == 'exists':
+                sel = step['selector']
+                el = await page.query_selector(sel)
+                return {'success': True, 'exists': el is not None}
+            elif action == 'visible':
+                sel = await resolve_selector(step['selector'])
+                el = await page.query_selector(sel)
+                box = await el.bounding_box()
+                return {'success': True, 'visible': box is not None and box.get('width',0)>0 and box.get('height',0)>0}
+            elif action == 'hidden':
+                try:
+                    await page.wait_for_selector(step['selector'], state='hidden', timeout=step.get('timeout_ms', 10000))
+                    return {'success': True, 'hidden': True}
+                except Exception:
+                    return {'success': True, 'hidden': False}
+            else:
+                return {'success': False, 'error': f'Unsupported action: {action}'}
+            # default success case with evidence
+            await self._capture_evidence(session, step_id, action)
+            await self._save_step_evidence(session, step_id, {
+                'action': action,
+                'params': {k:v for k,v in step.items() if k!='action'},
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': True
+            })
+            return {'success': True}
+        except Exception as e:
+            await self._save_step_evidence(session, step_id, {
+                'action': action,
+                'params': {k:v for k,v in step.items() if k!='action'},
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
     
     async def _fixed_super_omega_element_healing(self, session: FixedSuperOmegaSession, original_selector: str, step_id: str) -> Dict[str, Any]:
         """FIXED SUPER-OMEGA element healing with dependency-free components"""
