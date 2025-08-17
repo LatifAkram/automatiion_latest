@@ -27,6 +27,8 @@ import statistics
 from collections import defaultdict, deque
 import urllib.parse
 import urllib.request
+import os
+import sqlite3
 
 # AI imports with fallbacks
 try:
@@ -52,8 +54,8 @@ except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 # Built-in fallbacks
-from builtin_ai_processor import BuiltinAIProcessor
-from builtin_data_validation import BaseValidator
+from .builtin_ai_processor import BuiltinAIProcessor
+from .builtin_data_validation import BaseValidator
 
 logger = logging.getLogger(__name__)
 
@@ -459,62 +461,152 @@ class DataCollector:
             return []
     
     async def _collect_from_api(self, query: str, config: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Collect data from web API"""
-        # Simplified API collection
-        api_url = config.get('url', '')
+        """Collect data from web API (real HTTP call)"""
+        api_url = config.get('url', '').strip()
         if not api_url:
             return []
         
-        # Mock API response for demo
-        return [
-            {
-                'value': f"API result for {query}",
-                'source_url': api_url,
-                'confidence': 0.8,
-                'timestamp': time.time()
-            }
-        ]
-    
+        # Build URL with query if needed
+        if '{query}' in api_url:
+            full_url = api_url.replace('{query}', urllib.parse.quote_plus(query))
+        else:
+            params = config.get('params', {})
+            if query and 'q' not in params:
+                params['q'] = query
+            if params:
+                sep = '&' if ('?' in api_url) else '?'
+                full_url = f"{api_url}{sep}{urllib.parse.urlencode(params)}"
+            else:
+                full_url = api_url
+        
+        headers = config.get('headers', {})
+        timeout_ms = int(config.get('timeout_ms', 8000))
+        req = urllib.request.Request(full_url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=timeout_ms / 1000.0) as resp:
+                content_type = resp.headers.get('Content-Type', '')
+                raw = resp.read()
+                value: Any
+                try:
+                    if 'json' in content_type or raw.strip().startswith(b'{') or raw.strip().startswith(b'['):
+                        value = json.loads(raw.decode('utf-8', errors='ignore'))
+                    else:
+                        # Return textual content snippet
+                        text = raw.decode('utf-8', errors='ignore')
+                        value = text[:2000]
+                except Exception:
+                    value = raw[:2048]
+                return [{
+                    'value': value,
+                    'source_url': full_url,
+                    'confidence': float(config.get('default_confidence', 0.8)),
+                    'timestamp': time.time()
+                }]
+        except Exception as e:
+            logger.error(f"API collection error from {full_url}: {e}")
+            return []
+
     async def _collect_from_web(self, query: str, config: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Collect data from web scraping"""
-        # Simplified web scraping
-        base_url = config.get('base_url', '')
+        """Collect data from web pages (real HTTP fetch)"""
+        base_url = config.get('base_url', '').strip()
         if not base_url:
             return []
         
-        # Mock web scraping result
-        return [
-            {
-                'value': f"Web scraped data about {query}",
-                'source_url': f"{base_url}/search?q={urllib.parse.quote(query)}",
-                'confidence': 0.6,
-                'timestamp': time.time()
-            }
-        ]
-    
+        # Construct a simple search URL if supported, otherwise fetch base URL
+        url = base_url
+        if '{query}' in base_url:
+            url = base_url.replace('{query}', urllib.parse.quote_plus(query))
+        elif '?' not in base_url:
+            url = f"{base_url}?q={urllib.parse.quote_plus(query)}"
+        
+        headers = config.get('headers', {})
+        timeout_ms = int(config.get('timeout_ms', 8000))
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=timeout_ms / 1000.0) as resp:
+                html = resp.read().decode('utf-8', errors='ignore')
+                # Extract title and a small snippet
+                title_match = re.search(r"<title>(.*?)</title>", html, re.IGNORECASE | re.DOTALL)
+                title = title_match.group(1).strip() if title_match else ''
+                snippet = re.sub(r"<[^>]+>", " ", html)
+                snippet = re.sub(r"\s+", " ", snippet).strip()[:500]
+                return [{
+                    'value': {'title': title, 'snippet': snippet},
+                    'source_url': url,
+                    'confidence': float(config.get('default_confidence', 0.6)),
+                    'timestamp': time.time()
+                }]
+        except Exception as e:
+            logger.error(f"Web collection error from {url}: {e}")
+            return []
+
     async def _collect_from_database(self, query: str, config: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Collect data from database"""
-        # Mock database query
-        return [
-            {
-                'value': f"Database record for {query}",
-                'source_url': f"db://{config.get('database', 'main')}/table",
-                'confidence': 0.95,
-                'timestamp': time.time()
-            }
-        ]
-    
+        """Collect data from SQLite database (real query)"""
+        db_path = config.get('sqlite_path')
+        table = config.get('table')
+        column = config.get('column')
+        if not (db_path and table and column):
+            return []
+        try:
+            rows: List[Dict[str, Any]] = []
+            conn = sqlite3.connect(db_path)
+            try:
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                cur.execute(f"SELECT {column} AS value FROM {table} WHERE {column} LIKE ? LIMIT 20", (f"%{query}%",))
+                for r in cur.fetchall():
+                    rows.append({
+                        'value': r['value'],
+                        'source_url': f"sqlite://{db_path}:{table}.{column}",
+                        'confidence': 0.95,
+                        'timestamp': time.time()
+                    })
+            finally:
+                conn.close()
+            return rows
+        except Exception as e:
+            logger.error(f"Database collection error: {e}")
+            return []
+
     async def _collect_from_files(self, query: str, config: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Collect data from file system"""
-        # Mock file system search
-        return [
-            {
-                'value': f"File content related to {query}",
-                'source_url': f"file://{config.get('base_path', '/data')}/{query}.txt",
-                'confidence': 0.7,
-                'timestamp': time.time()
-            }
-        ]
+        """Collect data from filesystem (real file scan)"""
+        base_path = config.get('base_path') or '.'
+        exts = set(config.get('exts', ['.txt', '.md', '.log']))
+        max_files = int(config.get('max_files', 50))
+        max_bytes = int(config.get('max_bytes', 1024 * 1024))
+        results: List[Dict[str, Any]] = []
+        try:
+            count = 0
+            for root, _, files in os.walk(base_path):
+                for name in files:
+                    if count >= max_files:
+                        break
+                    if exts and not any(name.lower().endswith(ext) for ext in exts):
+                        continue
+                    path = os.path.join(root, name)
+                    try:
+                        with open(path, 'rb') as f:
+                            data = f.read(max_bytes)
+                        text = data.decode('utf-8', errors='ignore')
+                        if query.lower() in text.lower():
+                            # capture a small snippet around first occurrence
+                            idx = text.lower().find(query.lower())
+                            start = max(0, idx - 120)
+                            end = min(len(text), idx + 120)
+                            snippet = text[start:end].replace('\n', ' ')
+                            results.append({
+                                'value': {'file': path, 'snippet': snippet},
+                                'source_url': f"file://{path}",
+                                'confidence': 0.7,
+                                'timestamp': time.time()
+                            })
+                            count += 1
+                    except Exception:
+                        continue
+            return results
+        except Exception as e:
+            logger.error(f"Filesystem collection error: {e}")
+            return []
 
 class RealTimeDataFabricAI:
     """Main real-time data fabric with AI-powered trust scoring"""

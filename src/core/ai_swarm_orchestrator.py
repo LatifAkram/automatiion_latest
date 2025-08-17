@@ -38,7 +38,7 @@ import os
 from pathlib import Path
 
 # Import built-in components for fallbacks
-from builtin_ai_processor import BuiltinAIProcessor
+from .builtin_ai_processor import BuiltinAIProcessor
 
 # Import real AI connector for actual intelligence
 try:

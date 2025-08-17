@@ -14,9 +14,9 @@ from pathlib import Path
 
 # Import our built-in validation system
 try:
-    from builtin_data_validation import BaseValidator, validate_email, validate_url
+    from .builtin_data_validation import BaseValidator, validate_email, validate_url
 except ImportError:
-    from builtin_data_validation import BaseValidator, validate_email, validate_url
+    from .builtin_data_validation import BaseValidator, validate_email, validate_url
 
 @dataclass
 class DatabaseConfig:
