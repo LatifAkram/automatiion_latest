@@ -176,6 +176,7 @@ class FixedSuperOmegaLiveAutomation:
             (evidence_dir / "steps").mkdir(exist_ok=True)
             (evidence_dir / "frames").mkdir(exist_ok=True)
             (evidence_dir / "code").mkdir(exist_ok=True)
+            (evidence_dir / "downloads").mkdir(exist_ok=True)
             
             # Launch browser with SUPER-OMEGA configuration
             browser_options = {
@@ -198,7 +199,10 @@ class FixedSuperOmegaLiveAutomation:
                 viewport={'width': 1920, 'height': 1080},
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 record_video_dir=str(evidence_dir / "videos") if self.config.get('record_video', True) else None,
-                record_video_size={'width': 1920, 'height': 1080}
+                record_video_size={'width': 1920, 'height': 1080},
+                accept_downloads=True,
+                record_har_path=str(evidence_dir / "network.har"),
+                record_har_omit_content=False
             )
             
             # Create page with advanced monitoring
@@ -268,6 +272,48 @@ class FixedSuperOmegaLiveAutomation:
             
             # Error monitoring
             page.on('pageerror', lambda error: self._handle_page_error(error, evidence_dir))
+
+            # Response logging
+            def _on_response(resp):
+                try:
+                    rec = {
+                        'timestamp': datetime.now().isoformat(),
+                        'url': resp.url,
+                        'status': resp.status,
+                        'ok': resp.ok,
+                        'headers': resp.headers
+                    }
+                    with open(evidence_dir / "responses.jsonl", "a") as f:
+                        f.write(json.dumps(rec) + "\n")
+                except Exception:
+                    pass
+            page.on('response', _on_response)
+
+            # Download handling
+            def _on_download(dl):
+                try:
+                    target_dir = evidence_dir / "downloads"
+                    target_dir.mkdir(exist_ok=True)
+                    suggested = dl.suggested_filename
+                    path = target_dir / suggested
+                    # save_as is async in playwright; use ensure_future to not block
+                    async def _save():
+                        try:
+                            await dl.save_as(str(path))
+                            meta = {
+                                'timestamp': datetime.now().isoformat(),
+                                'url': dl.url,
+                                'path': str(path),
+                                'suggested': suggested
+                            }
+                            with open(evidence_dir / "downloads.jsonl", "a") as f:
+                                f.write(json.dumps(meta) + "\n")
+                        except Exception:
+                            pass
+                    asyncio.ensure_future(_save())
+                except Exception:
+                    pass
+            page.on('download', _on_download)
             
             logger.info("✅ Advanced monitoring enabled")
             
