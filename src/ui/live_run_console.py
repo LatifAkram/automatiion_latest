@@ -1091,8 +1091,12 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
                             dur_ms = int(step.get('ms', 1000))
                             import asyncio as _asyncio
                             await _asyncio.sleep(dur_ms/1000.0)
+                        # Direct mapping for some advanced actions
+                        elif a in ['hover','dblclick','right_click','press_key','drag_and_drop','check','uncheck','wait_load_state','eval_js','set_cookie','get_cookies','set_local_storage','get_local_storage','screenshot','back','forward','refresh','set_viewport','get_text','get_attribute','inner_html','exists','visible','hidden','ocr','ocr_element','ocr_page']:
+                            result = await self._live_automation.super_omega_perform_action(session_id, step)
                         else:
-                            raise ValueError(f"Unsupported workflow step: {step}")
+                            # Fallback to generic executor for any other actions
+                            result = await self._live_automation.super_omega_perform_action(session_id, step)
                     # Final result carries last step outcome
                     result = {**result, 'workflow_steps': len(steps)}
                 else:
