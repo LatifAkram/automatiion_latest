@@ -356,30 +356,60 @@ class BuiltinHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
                             request_data = json.loads(data.decode('utf-8'))
                         else:
                             request_data = json.loads(data) if isinstance(data, str) else data
-                        
                         response = {
                             'success': True,
                             'message': 'Automation request received',
-                            'request_id': hashlib.md5(str(time.time()).encode()).hexdigest()[:8],
+                            'request': request_data,
                             'timestamp': time.time()
                         }
                         self._send_json_response(response)
-                        
-                    except json.JSONDecodeError:
-                        self._send_error_response(400, "Invalid JSON data")
+                    except Exception as e:
+                        self._send_error_response(400, str(e))
                 else:
-                    response = {
-                        'available_endpoints': [
-                            '/api/status',
-                            '/api/health',
-                            '/api/automation'
-                        ],
-                        'timestamp': time.time()
-                    }
-                    self._send_json_response(response)
+                    self._send_error_response(405, "Method Not Allowed")
+            
+            elif endpoint == 'jobs':
+                # Autonomous orchestrator job APIs
+                from autonomy.job_store import JobStore
+                store = JobStore()
+                if method == 'POST':
+                    try:
+                        body = json.loads(data.decode('utf-8')) if isinstance(data, bytes) else (json.loads(data) if isinstance(data, str) else data)
+                        steps = body.get('steps', [])
+                        priority = int(body.get('priority', 0))
+                        run_at = body.get('run_at')
+                        webhook = body.get('webhook')
+                        # Defer to orchestrator submit for ID generation
+                        import uuid
+                        job_id = str(uuid.uuid4())
+                        store.create_job(job_id, 'workflow', {'steps': steps}, priority=priority, run_at=run_at)
+                        if webhook:
+                            store.add_webhook(job_id, webhook, 'completed')
+                            store.add_webhook(job_id, webhook, 'failed')
+                        self._send_json_response({'success': True, 'job_id': job_id})
+                    except Exception as e:
+                        self._send_error_response(400, str(e))
+                elif method == 'GET':
+                    # `/api/jobs/<id>` or `/api/jobs/<id>/steps`
+                    if len(path_parts) < 3:
+                        self._send_error_response(400, "Job ID required")
+                        return
+                    job_id = path_parts[2]
+                    sub = path_parts[3] if len(path_parts) > 3 else ''
+                    if sub == 'steps':
+                        steps = [s.__dict__ for s in store.list_steps(job_id)]
+                        self._send_json_response({'success': True, 'job_id': job_id, 'steps': steps})
+                    else:
+                        job = store.get_job(job_id)
+                        if not job:
+                            self._send_error_response(404, "Job not found")
+                            return
+                        self._send_json_response({'success': True, 'job': job.__dict__})
+                else:
+                    self._send_error_response(405, "Method Not Allowed")
             
             else:
-                self._send_error_response(404, f"API endpoint '{endpoint}' not found")
+                self._send_error_response(404, "Unknown API endpoint")
                 
         except Exception as e:
             logger.error(f"API request handling failed: {e}")
