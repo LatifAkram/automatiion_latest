@@ -1,0 +1,22 @@
+{
+  "verification_sources": {
+    "httpbin": {
+      "type": "web_api",
+      "url": "https://httpbin.org/get",
+      "default_confidence": 0.7,
+      "timeout_ms": 8000
+    },
+    "example_home": {
+      "type": "web_scraping",
+      "base_url": "https://example.com",
+      "default_confidence": 0.6,
+      "timeout_ms": 8000
+    },
+    "python_org": {
+      "type": "web_scraping",
+      "base_url": "https://www.python.org/search/?q={query}",
+      "default_confidence": 0.6,
+      "timeout_ms": 8000
+    }
+  }
+}
