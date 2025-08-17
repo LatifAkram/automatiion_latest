@@ -853,6 +853,36 @@ class FixedSuperOmegaLiveAutomation:
                     if not heal.get('success'):
                         raise RuntimeError(heal.get('error','heal failed'))
                     return heal.get('healed_selector', selector)
+            # Optional frame targeting
+            try:
+                if 'frame' in step and isinstance(step['frame'], dict):
+                    f = step['frame']
+                    # name-based
+                    if f.get('name'):
+                        fr = page.frame(name=f['name'])
+                        if fr:
+                            page = fr
+                    # url contains
+                    elif f.get('url'):
+                        import re as _re
+                        frames = [fr for fr in page.frames] if hasattr(page, 'frames') else []
+                        for fr in frames:
+                            try:
+                                if f['url'] in (fr.url or ''):
+                                    page = fr
+                                    break
+                            except Exception:
+                                continue
+                    # iframe selector
+                    elif f.get('selector'):
+                        el = await session.page.query_selector(f['selector'])
+                        if el:
+                            fr = await el.content_frame()
+                            if fr:
+                                page = fr
+            except Exception:
+                pass
+
             if action == 'hover':
                 sel = await resolve_selector(step['selector'])
                 await page.hover(sel)
@@ -916,8 +946,8 @@ class FixedSuperOmegaLiveAutomation:
                 if action == 'ocr_page':
                     data = await page.screenshot(full_page=True)
                 else:
-                    sel = await resolve_selector(step['selector'])
-                    el = await page.query_selector(sel)
+                    sel = step.get('shadow_selector') or await resolve_selector(step['selector'])
+                    el = await (page.locator(sel).element_handle() if step.get('shadow_selector') else page.query_selector(sel))
                     box = await el.bounding_box()
                     data = await page.screenshot(clip=box) if box else await page.screenshot()
                 lang = step.get('lang','eng')
@@ -933,33 +963,47 @@ class FixedSuperOmegaLiveAutomation:
                 width = int(step.get('width', 1280)); height = int(step.get('height', 800))
                 await page.set_viewport_size({'width': width, 'height': height})
             elif action == 'get_text':
-                sel = await resolve_selector(step['selector'])
-                el = await page.query_selector(sel)
-                txt = await el.text_content()
+                if step.get('shadow_selector'):
+                    txt = await page.locator(step['shadow_selector']).first.text_content()
+                else:
+                    sel = await resolve_selector(step['selector'])
+                    el = await page.query_selector(sel)
+                    txt = await el.text_content()
                 return {'success': True, 'text': txt}
             elif action == 'get_attribute':
-                sel = await resolve_selector(step['selector'])
                 attr = step['name']
-                el = await page.query_selector(sel)
-                val = await el.get_attribute(attr)
+                if step.get('shadow_selector'):
+                    loc = page.locator(step['shadow_selector']).first
+                    val = await loc.get_attribute(attr)
+                else:
+                    sel = await resolve_selector(step['selector'])
+                    el = await page.query_selector(sel)
+                    val = await el.get_attribute(attr)
                 return {'success': True, 'value': val}
             elif action == 'inner_html':
-                sel = await resolve_selector(step['selector'])
-                el = await page.query_selector(sel)
-                html = await el.inner_html()
+                if step.get('shadow_selector'):
+                    html = await page.locator(step['shadow_selector']).first.inner_html()
+                else:
+                    sel = await resolve_selector(step['selector'])
+                    el = await page.query_selector(sel)
+                    html = await el.inner_html()
                 return {'success': True, 'html': html}
             elif action == 'exists':
                 sel = step['selector']
                 el = await page.query_selector(sel)
                 return {'success': True, 'exists': el is not None}
             elif action == 'visible':
-                sel = await resolve_selector(step['selector'])
-                el = await page.query_selector(sel)
-                box = await el.bounding_box()
+                sel = step.get('shadow_selector') or await resolve_selector(step['selector'])
+                el = await (page.locator(sel).element_handle() if step.get('shadow_selector') else page.query_selector(sel))
+                box = await el.bounding_box() if el else None
                 return {'success': True, 'visible': box is not None and box.get('width',0)>0 and box.get('height',0)>0}
             elif action == 'hidden':
                 try:
-                    await page.wait_for_selector(step['selector'], state='hidden', timeout=step.get('timeout_ms', 10000))
+                    sel = step.get('shadow_selector') or step['selector']
+                    if step.get('shadow_selector'):
+                        await page.locator(sel).first.wait_for(state='hidden', timeout=step.get('timeout_ms', 10000))
+                    else:
+                        await page.wait_for_selector(sel, state='hidden', timeout=step.get('timeout_ms', 10000))
                     return {'success': True, 'hidden': True}
                 except Exception:
                     return {'success': True, 'hidden': False}
