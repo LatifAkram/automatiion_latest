@@ -105,7 +105,8 @@ class AutonomousOrchestrator:
         if a == 'wait':
             await asyncio.sleep(int(step.get('ms', 1000))/1000.0)
             return {'success': True, 'action':'wait'}
-        raise ValueError(f"Unsupported action: {a}")
+        # Fallback to generic advanced action executor
+        return await self._automation.super_omega_perform_action(session_id, step)
 
     async def _notify(self, job_id: str, event: str):
         urls = self.store.list_webhooks(job_id, event)
