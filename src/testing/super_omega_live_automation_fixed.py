@@ -790,6 +790,19 @@ class FixedSuperOmegaLiveAutomation:
                 path = step.get('path', str(session.evidence_dir / f"shot_{int(time.time()*1000)}.png"))
                 await page.screenshot(path=path, full_page=True)
                 return {'success': True, 'path': path}
+            elif action in ['ocr_page','ocr_element']:
+                # Capture image then OCR using system tesseract if available
+                from utils.ocr import extract_text_from_image_bytes
+                if action == 'ocr_page':
+                    data = await page.screenshot(full_page=True)
+                else:
+                    sel = await resolve_selector(step['selector'])
+                    el = await page.query_selector(sel)
+                    box = await el.bounding_box()
+                    data = await page.screenshot(clip=box) if box else await page.screenshot()
+                lang = step.get('lang','eng')
+                res = extract_text_from_image_bytes(data, lang=lang)
+                return res
             elif action == 'back':
                 await page.go_back()
             elif action == 'forward':
