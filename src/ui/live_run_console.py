@@ -1060,6 +1060,33 @@ class SuperOmegaLiveConsole(BuiltinWebServer):
                         elif a == 'find':
                             selector = step['selector']
                             result = await self._live_automation.super_omega_find_element(session_id, selector)
+                        elif a == 'click':
+                            selector = step['selector']
+                            result = await self._live_automation.super_omega_click(session_id, selector)
+                        elif a == 'type':
+                            selector = step['selector']
+                            text = step.get('text','')
+                            result = await self._live_automation.super_omega_type(session_id, selector, text)
+                        elif a == 'select':
+                            selector = step['selector']
+                            value = step['value']
+                            result = await self._live_automation.super_omega_select_option(session_id, selector, value)
+                        elif a == 'upload':
+                            selector = step['selector']
+                            file_path = step['file']
+                            result = await self._live_automation.super_omega_upload_file(session_id, selector, file_path)
+                        elif a == 'wait_for_selector':
+                            selector = step['selector']
+                            state = step.get('state', 'visible')
+                            ms = int(step.get('timeout_ms', 10000))
+                            result = await self._live_automation.super_omega_wait_for_selector(session_id, selector, state=state, timeout=ms)
+                        elif a == 'assert_text':
+                            selector = step['selector']
+                            expected = step['contains']
+                            result = await self._live_automation.super_omega_assert_text(session_id, selector, expected)
+                        elif a == 'scroll':
+                            selector = step['selector']
+                            result = await self._live_automation.super_omega_scroll_to(session_id, selector)
                         elif a == 'wait':
                             dur_ms = int(step.get('ms', 1000))
                             import asyncio as _asyncio

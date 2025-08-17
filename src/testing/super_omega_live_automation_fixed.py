@@ -489,6 +489,221 @@ class FixedSuperOmegaLiveAutomation:
                 'error': error_msg,
                 'execution_time_ms': (time.time() - start_time) * 1000
             }
+
+    async def super_omega_click(self, session_id: str, selector: str, timeout: int = 10000) -> Dict[str, Any]:
+        """Click an element, with healing and evidence capture."""
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            try:
+                await session.page.wait_for_selector(selector, timeout=timeout)
+                await session.page.click(selector, timeout=timeout)
+            except PlaywrightTimeoutError:
+                heal = await self.super_omega_find_element(session_id, selector, timeout)
+                if not heal.get('success'):
+                    return heal
+                healed_selector = heal.get('healed_selector', selector)
+                await session.page.click(healed_selector, timeout=timeout)
+            await self._capture_evidence(session, step_id, 'click')
+            await self._save_step_evidence(session, step_id, {
+                'action': 'click', 'selector': selector,
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': True
+            })
+            session.actions_performed += 1
+            return {'success': True, 'action': 'click', 'selector': selector}
+        except Exception as e:
+            session.errors_encountered += 1
+            await self._save_step_evidence(session, step_id, {
+                'action': 'click', 'selector': selector,
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_type(self, session_id: str, selector: str, text: str, timeout: int = 10000, clear: bool = True) -> Dict[str, Any]:
+        """Type into an input. Uses fill for reliability. Heals selectors if needed."""
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            target_selector = selector
+            try:
+                await session.page.wait_for_selector(selector, timeout=timeout)
+            except PlaywrightTimeoutError:
+                heal = await self.super_omega_find_element(session_id, selector, timeout)
+                if not heal.get('success'):
+                    return heal
+                target_selector = heal.get('healed_selector', selector)
+            if clear:
+                await session.page.fill(target_selector, "", timeout=timeout)
+            await session.page.fill(target_selector, text, timeout=timeout)
+            await self._capture_evidence(session, step_id, 'type')
+            await self._save_step_evidence(session, step_id, {
+                'action': 'type', 'selector': selector, 'text_len': len(text),
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': True
+            })
+            session.actions_performed += 1
+            return {'success': True, 'action': 'type', 'selector': selector}
+        except Exception as e:
+            session.errors_encountered += 1
+            await self._save_step_evidence(session, step_id, {
+                'action': 'type', 'selector': selector,
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_select_option(self, session_id: str, selector: str, value: str, timeout: int = 10000) -> Dict[str, Any]:
+        """Select an option in a <select> element by value."""
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            target_selector = selector
+            try:
+                await session.page.wait_for_selector(selector, timeout=timeout)
+            except PlaywrightTimeoutError:
+                heal = await self.super_omega_find_element(session_id, selector, timeout)
+                if not heal.get('success'):
+                    return heal
+                target_selector = heal.get('healed_selector', selector)
+            await session.page.select_option(target_selector, value=value, timeout=timeout)
+            await self._capture_evidence(session, step_id, 'select')
+            await self._save_step_evidence(session, step_id, {
+                'action': 'select', 'selector': selector, 'value': value,
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': True
+            })
+            session.actions_performed += 1
+            return {'success': True}
+        except Exception as e:
+            session.errors_encountered += 1
+            await self._save_step_evidence(session, step_id, {
+                'action': 'select', 'selector': selector,
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_upload_file(self, session_id: str, selector: str, file_path: str, timeout: int = 10000) -> Dict[str, Any]:
+        """Upload a file via input[type=file]."""
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            target_selector = selector
+            try:
+                await session.page.wait_for_selector(selector, timeout=timeout)
+            except PlaywrightTimeoutError:
+                heal = await self.super_omega_find_element(session_id, selector, timeout)
+                if not heal.get('success'):
+                    return heal
+                target_selector = heal.get('healed_selector', selector)
+            input_handle = await session.page.query_selector(target_selector)
+            await input_handle.set_input_files(file_path)
+            await self._capture_evidence(session, step_id, 'upload')
+            await self._save_step_evidence(session, step_id, {
+                'action': 'upload', 'selector': selector, 'file': file_path,
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': True
+            })
+            session.actions_performed += 1
+            return {'success': True}
+        except Exception as e:
+            session.errors_encountered += 1
+            await self._save_step_evidence(session, step_id, {
+                'action': 'upload', 'selector': selector,
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_wait_for_selector(self, session_id: str, selector: str, state: str = 'visible', timeout: int = 10000) -> Dict[str, Any]:
+        """Wait for selector in a given state."""
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            await session.page.wait_for_selector(selector, state=state, timeout=timeout)
+            await self._capture_evidence(session, step_id, 'wait_for_selector')
+            await self._save_step_evidence(session, step_id, {
+                'action': 'wait_for_selector', 'selector': selector, 'state': state,
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': True
+            })
+            return {'success': True}
+        except Exception as e:
+            await self._save_step_evidence(session, step_id, {
+                'action': 'wait_for_selector', 'selector': selector,
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_assert_text(self, session_id: str, selector: str, expected_substring: str, timeout: int = 10000) -> Dict[str, Any]:
+        """Assert that element's text contains a substring."""
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            el = await session.page.wait_for_selector(selector, timeout=timeout)
+            text = await el.text_content()
+            ok = (text or '').find(expected_substring) >= 0
+            await self._save_step_evidence(session, step_id, {
+                'action': 'assert_text', 'selector': selector,
+                'expected': expected_substring,
+                'actual_len': len(text or ''),
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': ok
+            })
+            return {'success': ok, 'actual': text}
+        except Exception as e:
+            await self._save_step_evidence(session, step_id, {
+                'action': 'assert_text', 'selector': selector,
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
+
+    async def super_omega_scroll_to(self, session_id: str, selector: str, timeout: int = 10000) -> Dict[str, Any]:
+        """Scroll element into view."""
+        session = self.sessions.get(session_id)
+        if not session or not session.page:
+            return {'success': False, 'error': 'Session not found'}
+        step_id = f"step_{int(time.time())}"
+        start = time.time()
+        try:
+            el = await session.page.wait_for_selector(selector, timeout=timeout)
+            await el.scroll_into_view_if_needed()
+            await self._capture_evidence(session, step_id, 'scroll')
+            await self._save_step_evidence(session, step_id, {
+                'action': 'scroll', 'selector': selector,
+                'execution_time_ms': (time.time() - start) * 1000,
+                'success': True
+            })
+            return {'success': True}
+        except Exception as e:
+            await self._save_step_evidence(session, step_id, {
+                'action': 'scroll', 'selector': selector,
+                'error': str(e), 'success': False,
+                'execution_time_ms': (time.time() - start) * 1000
+            })
+            return {'success': False, 'error': str(e)}
     
     async def _fixed_super_omega_element_healing(self, session: FixedSuperOmegaSession, original_selector: str, step_id: str) -> Dict[str, Any]:
         """FIXED SUPER-OMEGA element healing with dependency-free components"""
