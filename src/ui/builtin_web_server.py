@@ -640,6 +640,23 @@ class BuiltinWebServer:
             self.running = True
             self.start_time = time.time()
             
+            # Autostart orchestrator in background thread with its own event loop
+            try:
+                import threading as _t
+                import asyncio as _asyncio
+                from autonomy.orchestrator import AutonomousOrchestrator
+                def _run_orchestrator():
+                    try:
+                        _loop = _asyncio.new_event_loop()
+                        _asyncio.set_event_loop(_loop)
+                        orch = AutonomousOrchestrator()
+                        _loop.run_until_complete(orch.run_forever())
+                    except Exception as e:
+                        logger.error(f"Orchestrator error: {e}")
+                _t.Thread(target=_run_orchestrator, daemon=True).start()
+            except Exception as e:
+                logger.warning(f"Could not autostart orchestrator: {e}")
+            
             logger.info(f"Built-in Web Server started on {self.config.host}:{self.config.port}")
             logger.info(f"WebSocket support: {'Enabled' if self.config.enable_websockets else 'Disabled'}")
             logger.info(f"CORS support: {'Enabled' if self.config.enable_cors else 'Disabled'}")
