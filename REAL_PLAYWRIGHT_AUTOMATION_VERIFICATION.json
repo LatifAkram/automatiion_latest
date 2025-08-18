@@ -1,4 +1,0 @@
-{
-  "error": "Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"div#search\") to be visible\n    - waiting for\" https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dplaywright%2Bautomation%2Btesting%26sca_esv%3Dc83e770c741e0fe5%26source%3Dhp%26ei%3DiUafaOK5DrzT5NoP1rfPgQw%26iflsig%3D\u2026\" navigation to finish...\n    - navigated to \"https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dplaywright%2Bautomation%2Btesting%26sca_esv%3Dc83e770c741e0fe5%26source%3Dhp%26ei%3DiUafaOK5DrzT5NoP1rfPgQw%26iflsig%3D\u2026\"\n",
-  "real_automation_confirmed": false
-}

@@ -1,3 +1,0 @@
-Screenshot taken at 2025-08-18T09:31:49.950862
-High Performance Automation Engine
-Screenshot simulation for performance testing
