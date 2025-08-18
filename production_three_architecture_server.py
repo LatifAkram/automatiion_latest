@@ -1444,84 +1444,127 @@ class ProductionHTTPHandler(http.server.SimpleHTTPRequestHandler):
             import subprocess
             import sys
             
-            # Create Playwright automation script
+            # Create Windows-compatible Playwright automation script
             playwright_code = f'''
 import asyncio
-from playwright.async_api import async_playwright
-import time
+import sys
+import os
+
+# Set UTF-8 encoding for Windows
+if os.name == 'nt':
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    os.environ['PYTHONUTF8'] = '1'
+
+try:
+    from playwright.async_api import async_playwright
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
 
 async def automate_task():
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        page = await browser.new_page()
-        
-        instruction = "{instruction}"
-        
-        try:
-            if "youtube" in instruction.lower():
-                print("🌐 Opening YouTube...")
-                await page.goto("https://www.youtube.com")
-                await page.wait_for_load_state("networkidle")
-                
-                # Search for the content
-                search_terms = instruction.lower().replace("open youtube and play", "").strip()
-                if search_terms:
-                    print(f"🔍 Searching for: {{search_terms}}")
-                    search_box = await page.wait_for_selector("input[name='search_query']", timeout=10000)
-                    await search_box.fill(search_terms)
-                    await page.keyboard.press("Enter")
-                    await page.wait_for_load_state("networkidle")
+    if not PLAYWRIGHT_AVAILABLE:
+        return {{"success": False, "error": "Playwright not installed"}}
+    
+    try:
+        async with async_playwright() as p:
+            # Launch browser with Windows-compatible settings
+            browser = await p.chromium.launch(
+                headless=False,
+                args=['--no-sandbox', '--disable-dev-shm-usage', '--disable-web-security']
+            )
+            page = await browser.new_page()
+            
+            instruction = "{instruction}"
+            
+            try:
+                if "youtube" in instruction.lower():
+                    print("Opening YouTube...")
+                    await page.goto("https://www.youtube.com", wait_until="networkidle")
                     
-                    # Click first video
-                    first_video = await page.wait_for_selector("a#video-title", timeout=10000)
-                    await first_video.click()
-                    
-                    print("▶️ Video started playing")
-                    await page.wait_for_timeout(3000)  # Wait 3 seconds to confirm
-                    
-                    result = {{
-                        "success": True,
-                        "action": "youtube_automation",
-                        "search_terms": search_terms,
-                        "video_started": True,
-                        "url": page.url
-                    }}
+                    # Search for the content
+                    search_terms = instruction.lower().replace("open youtube and play", "").replace("open youtube", "").strip()
+                    if search_terms:
+                        print(f"Searching for: {{search_terms}}")
+                        
+                        # Wait for and fill search box
+                        search_box = await page.wait_for_selector("input[name='search_query']", timeout=15000)
+                        await search_box.fill(search_terms)
+                        await page.keyboard.press("Enter")
+                        await page.wait_for_load_state("networkidle", timeout=15000)
+                        
+                        # Wait for videos to load and click first one
+                        await page.wait_for_timeout(2000)
+                        first_video = await page.wait_for_selector("a#video-title, ytd-video-renderer a", timeout=15000)
+                        
+                        video_title = await first_video.get_attribute("title") or "Unknown video"
+                        await first_video.click()
+                        
+                        # Wait for video to start
+                        await page.wait_for_timeout(5000)
+                        
+                        result = {{
+                            "success": True,
+                            "action": "youtube_automation_completed",
+                            "search_terms": search_terms,
+                            "video_title": video_title,
+                            "video_started": True,
+                            "url": page.url,
+                            "real_browser_opened": True
+                        }}
+                    else:
+                        result = {{
+                            "success": True,
+                            "action": "youtube_opened",
+                            "url": page.url,
+                            "real_browser_opened": True
+                        }}
                 else:
+                    # Generic web automation
+                    print(f"Executing web automation: {{instruction}}")
+                    await page.goto("https://www.google.com")
                     result = {{
                         "success": True,
-                        "action": "youtube_opened",
-                        "url": page.url
+                        "action": "web_automation_completed",
+                        "url": page.url,
+                        "real_browser_opened": True
                     }}
-            else:
-                # Generic web automation
-                print(f"🌐 Executing web automation: {{instruction}}")
-                await page.goto("https://www.google.com")
-                result = {{
-                    "success": True,
-                    "action": "web_automation",
-                    "url": page.url
-                }}
-            
-            await browser.close()
-            return result
-            
-        except Exception as e:
-            await browser.close()
-            return {{"success": False, "error": str(e)}}
+                
+                # Keep browser open for a moment to show the result
+                await page.wait_for_timeout(3000)
+                await browser.close()
+                return result
+                
+            except Exception as page_error:
+                await browser.close()
+                return {{"success": False, "error": f"Page automation error: {{str(page_error)}}"}}
+                
+    except Exception as e:
+        return {{"success": False, "error": f"Playwright error: {{str(e)}}"}}
 
 if __name__ == "__main__":
-    result = asyncio.run(automate_task())
-    print("PLAYWRIGHT_RESULT:", result)
+    try:
+        result = asyncio.run(automate_task())
+        print("PLAYWRIGHT_RESULT:", result)
+    except Exception as e:
+        print("PLAYWRIGHT_RESULT:", {{"success": False, "error": str(e)}})
 '''
             
             # Execute Playwright automation
             print(f"🎭 Executing real Playwright automation: {instruction}")
             
+            # Execute with proper Windows encoding handling
+            env = os.environ.copy()
+            env['PYTHONIOENCODING'] = 'utf-8'
+            env['PYTHONUTF8'] = '1'
+            
             result = subprocess.run(
                 [sys.executable, '-c', playwright_code],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
+                encoding='utf-8',
+                errors='ignore',  # Ignore encoding errors
+                env=env
             )
             
             execution_time = time.time() - start_time
