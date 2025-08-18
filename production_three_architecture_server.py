@@ -1451,7 +1451,7 @@ if __name__ == "__main__":
             
             if not data_fabric or not automation_engine or not platform_registry:
                 print("⚠️ Some sophisticated components not available, using direct automation")
-                return await self._execute_direct_youtube_automation(instruction)
+                return self._execute_direct_automation_sync(instruction)
             
             print("✅ Sophisticated systems initialized - using real-time data")
             
@@ -1496,7 +1496,17 @@ if __name__ == "__main__":
             print(f"⚠️ Sophisticated system fallback: {str(e)}")
             print("🔄 Using direct real-time automation bypass...")
             # Use direct automation to bypass import issues
-            return await self._execute_direct_realtime_automation(instruction)
+            # Use asyncio.run for async method in sync context
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # Create a synchronous version
+                    return self._execute_direct_realtime_automation_sync(instruction)
+                else:
+                    return loop.run_until_complete(self._execute_direct_realtime_automation(instruction))
+            except:
+                return self._execute_direct_realtime_automation_sync(instruction)
     
     def _use_existing_fallback_system(self, instruction: str) -> Dict[str, Any]:
         """Use existing sophisticated fallback system"""

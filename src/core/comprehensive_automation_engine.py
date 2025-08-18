@@ -34,42 +34,63 @@ import traceback
 import signal
 import sys
 
-# Import all SUPER-OMEGA components with fallbacks
+# Import all SUPER-OMEGA components with fixed absolute imports
 try:
-    from platforms.commercial_platform_registry import CommercialPlatformRegistry
+    from ..platforms.commercial_platform_registry import CommercialPlatformRegistry
 except ImportError:
-    CommercialPlatformRegistry = None
+    try:
+        from platforms.commercial_platform_registry import CommercialPlatformRegistry
+    except ImportError:
+        CommercialPlatformRegistry = None
     
 try:
-    from security.otp_captcha_solver import OTPCAPTCHASolver
+    from ..security.otp_captcha_solver import OTPCAPTCHASolver
 except ImportError:
-    OTPCAPTCHASolver = None
+    try:
+        from security.otp_captcha_solver import OTPCAPTCHASolver
+    except ImportError:
+        OTPCAPTCHASolver = None
     
 try:
-    from booking.real_time_booking_engine import RealTimeBookingEngine
+    from ..booking.real_time_booking_engine import RealTimeBookingEngine
 except ImportError:
-    RealTimeBookingEngine = None
+    try:
+        from booking.real_time_booking_engine import RealTimeBookingEngine
+    except ImportError:
+        RealTimeBookingEngine = None
     
 try:
-    from financial.real_time_financial_engine import RealTimeFinancialEngine
+    from ..financial.real_time_financial_engine import RealTimeFinancialEngine
 except ImportError:
-    RealTimeFinancialEngine = None
+    try:
+        from financial.real_time_financial_engine import RealTimeFinancialEngine
+    except ImportError:
+        RealTimeFinancialEngine = None
     
 try:
-    from enterprise.complete_enterprise_automation import CompleteEnterpriseAutomation
+    from ..enterprise.complete_enterprise_automation import CompleteEnterpriseAutomation
 except ImportError:
-    CompleteEnterpriseAutomation = None
+    try:
+        from enterprise.complete_enterprise_automation import CompleteEnterpriseAutomation
+    except ImportError:
+        CompleteEnterpriseAutomation = None
     
 try:
-    from vision_processor import VisionProcessor, YOLODetection
+    from .vision_processor import VisionProcessor, YOLODetection
 except ImportError:
-    VisionProcessor = None
-    YOLODetection = None
+    try:
+        from vision_processor import VisionProcessor, YOLODetection
+    except ImportError:
+        VisionProcessor = None
+        YOLODetection = None
     
 try:
-    from evidence_collector import EvidenceCollector
+    from .evidence_collector import EvidenceCollector
 except ImportError:
-    EvidenceCollector = None
+    try:
+        from evidence_collector import EvidenceCollector
+    except ImportError:
+        EvidenceCollector = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
