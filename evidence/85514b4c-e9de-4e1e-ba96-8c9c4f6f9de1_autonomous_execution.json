@@ -1,0 +1,77 @@
+{
+  "id": "85514b4c-e9de-4e1e-ba96-8c9c4f6f9de1",
+  "type": "autonomous_execution",
+  "data": {
+    "workflow_id": "be4fd979-e195-4766-8b75-cd05af616441",
+    "task": "Collect evidence and run performance benchmarks",
+    "status": "completed",
+    "autonomous": true,
+    "execution_steps": [
+      "intent",
+      "plan",
+      "execute",
+      "iterate"
+    ],
+    "confidence": 0.9,
+    "execution_time": 8.821487426757812e-06,
+    "plan": {
+      "plan_id": "98ae5fc3-f3d4-497e-b5ff-78aa8a4d5744",
+      "steps": [
+        {
+          "id": "step_1",
+          "action": "prepare",
+          "dependencies": []
+        },
+        {
+          "id": "step_2",
+          "action": "execute",
+          "dependencies": [
+            "step_1"
+          ]
+        },
+        {
+          "id": "step_3",
+          "action": "validate",
+          "dependencies": [
+            "step_2"
+          ]
+        }
+      ],
+      "execution_type": "sequential",
+      "estimated_time": 3.0
+    },
+    "result": {
+      "plan_id": "98ae5fc3-f3d4-497e-b5ff-78aa8a4d5744",
+      "step_results": [
+        {
+          "step_id": "step_1",
+          "action": "prepare",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_2",
+          "action": "execute",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_3",
+          "action": "validate",
+          "status": "completed",
+          "execution_time": 0.5
+        }
+      ],
+      "overall_success": true,
+      "confidence": 0.9
+    },
+    "timestamp": "2025-08-18T12:10:50.198473"
+  },
+  "job_id": "aceb4283-eba6-4c61-9b20-dc8ff1600266",
+  "timestamp": "2025-08-18T12:10:50.198482",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 1038
+  }
+}

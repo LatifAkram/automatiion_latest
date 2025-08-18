@@ -1,0 +1,30 @@
+{
+  "id": "c63edce0-cad5-46b9-8044-a2bc5ae41282",
+  "type": "intent_analysis",
+  "data": {
+    "task_description": "Analyze intent: Test complete three architecture flow from frontend",
+    "agents_used": [
+      "data_fabric",
+      "skill_mining",
+      "decision_engine"
+    ],
+    "successful_agents": 3,
+    "total_agents": 3,
+    "confidence": 0.8333333333333334,
+    "combined_insights": [
+      "Verified data integrity for: Analyze intent: Test complete three architecture flow from frontend",
+      "Mined patterns from: Analyze intent: Test complete three architecture flow from frontend",
+      "Made intelligent decision for: Analyze intent: Test complete three architecture flow from frontend"
+    ],
+    "execution_summary": "Task processed by 3 AI agents",
+    "success": true,
+    "timestamp": "2025-08-18T12:14:30.862162"
+  },
+  "job_id": "prod_task_0000",
+  "timestamp": "2025-08-18T12:14:30.862204",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 666
+  }
+}

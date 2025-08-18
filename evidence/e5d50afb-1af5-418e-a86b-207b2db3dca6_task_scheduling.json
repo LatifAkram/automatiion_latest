@@ -1,0 +1,77 @@
+{
+  "id": "e5d50afb-1af5-418e-a86b-207b2db3dca6",
+  "type": "task_scheduling",
+  "data": {
+    "workflow_id": "56b170a3-cb07-4046-8e8b-b67d41435999",
+    "task": "Schedule: Automate complex workflow",
+    "status": "completed",
+    "autonomous": true,
+    "execution_steps": [
+      "intent",
+      "plan",
+      "execute",
+      "iterate"
+    ],
+    "confidence": 0.9,
+    "execution_time": 1.1920928955078125e-05,
+    "plan": {
+      "plan_id": "9c66cb95-5212-4443-aefe-d28d522ba76d",
+      "steps": [
+        {
+          "id": "step_1",
+          "action": "prepare",
+          "dependencies": []
+        },
+        {
+          "id": "step_2",
+          "action": "execute",
+          "dependencies": [
+            "step_1"
+          ]
+        },
+        {
+          "id": "step_3",
+          "action": "validate",
+          "dependencies": [
+            "step_2"
+          ]
+        }
+      ],
+      "execution_type": "sequential",
+      "estimated_time": 3.0
+    },
+    "result": {
+      "plan_id": "9c66cb95-5212-4443-aefe-d28d522ba76d",
+      "step_results": [
+        {
+          "step_id": "step_1",
+          "action": "prepare",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_2",
+          "action": "execute",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_3",
+          "action": "validate",
+          "status": "completed",
+          "execution_time": 0.5
+        }
+      ],
+      "overall_success": true,
+      "confidence": 0.9
+    },
+    "timestamp": "2025-08-18T12:14:50.430421"
+  },
+  "job_id": "prod_task_0003",
+  "timestamp": "2025-08-18T12:14:50.430428",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 1027
+  }
+}

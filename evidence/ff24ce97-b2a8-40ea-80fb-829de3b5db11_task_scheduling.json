@@ -1,0 +1,77 @@
+{
+  "id": "ff24ce97-b2a8-40ea-80fb-829de3b5db11",
+  "type": "task_scheduling",
+  "data": {
+    "workflow_id": "46c9c043-4eea-49bc-b3a0-7b6c37f82b49",
+    "task": "Schedule: Test complete three architecture flow from frontend",
+    "status": "completed",
+    "autonomous": true,
+    "execution_steps": [
+      "intent",
+      "plan",
+      "execute",
+      "iterate"
+    ],
+    "confidence": 0.9,
+    "execution_time": 1.4066696166992188e-05,
+    "plan": {
+      "plan_id": "becfb9ee-2935-4344-9bb7-a55032953f6c",
+      "steps": [
+        {
+          "id": "step_1",
+          "action": "prepare",
+          "dependencies": []
+        },
+        {
+          "id": "step_2",
+          "action": "execute",
+          "dependencies": [
+            "step_1"
+          ]
+        },
+        {
+          "id": "step_3",
+          "action": "validate",
+          "dependencies": [
+            "step_2"
+          ]
+        }
+      ],
+      "execution_type": "sequential",
+      "estimated_time": 3.0
+    },
+    "result": {
+      "plan_id": "becfb9ee-2935-4344-9bb7-a55032953f6c",
+      "step_results": [
+        {
+          "step_id": "step_1",
+          "action": "prepare",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_2",
+          "action": "execute",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_3",
+          "action": "validate",
+          "status": "completed",
+          "execution_time": 0.5
+        }
+      ],
+      "overall_success": true,
+      "confidence": 0.9
+    },
+    "timestamp": "2025-08-18T12:14:30.862538"
+  },
+  "job_id": "prod_task_0000",
+  "timestamp": "2025-08-18T12:14:30.862545",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 1053
+  }
+}

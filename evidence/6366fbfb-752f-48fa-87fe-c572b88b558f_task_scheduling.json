@@ -1,0 +1,77 @@
+{
+  "id": "6366fbfb-752f-48fa-87fe-c572b88b558f",
+  "type": "task_scheduling",
+  "data": {
+    "workflow_id": "5c9e4fc5-c26c-416e-a0f5-640854471af4",
+    "task": "Schedule: Check system status",
+    "status": "completed",
+    "autonomous": true,
+    "execution_steps": [
+      "intent",
+      "plan",
+      "execute",
+      "iterate"
+    ],
+    "confidence": 0.9,
+    "execution_time": 1.3113021850585938e-05,
+    "plan": {
+      "plan_id": "912a4050-3a26-4822-b58d-9b14a6e23644",
+      "steps": [
+        {
+          "id": "step_1",
+          "action": "prepare",
+          "dependencies": []
+        },
+        {
+          "id": "step_2",
+          "action": "execute",
+          "dependencies": [
+            "step_1"
+          ]
+        },
+        {
+          "id": "step_3",
+          "action": "validate",
+          "dependencies": [
+            "step_2"
+          ]
+        }
+      ],
+      "execution_type": "sequential",
+      "estimated_time": 3.0
+    },
+    "result": {
+      "plan_id": "912a4050-3a26-4822-b58d-9b14a6e23644",
+      "step_results": [
+        {
+          "step_id": "step_1",
+          "action": "prepare",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_2",
+          "action": "execute",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_3",
+          "action": "validate",
+          "status": "completed",
+          "execution_time": 0.5
+        }
+      ],
+      "overall_success": true,
+      "confidence": 0.9
+    },
+    "timestamp": "2025-08-18T12:14:38.041746"
+  },
+  "job_id": "prod_task_0001",
+  "timestamp": "2025-08-18T12:14:38.041756",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 1021
+  }
+}

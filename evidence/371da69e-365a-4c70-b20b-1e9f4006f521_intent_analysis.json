@@ -1,0 +1,30 @@
+{
+  "id": "371da69e-365a-4c70-b20b-1e9f4006f521",
+  "type": "intent_analysis",
+  "data": {
+    "task_description": "Analyze intent: Automate complex multi-step workflow orchestration",
+    "agents_used": [
+      "self_healing",
+      "skill_mining",
+      "decision_engine"
+    ],
+    "successful_agents": 3,
+    "total_agents": 3,
+    "confidence": 0.85,
+    "combined_insights": [
+      "Applied self-healing to: Analyze intent: Automate complex multi-step workflow orchestration",
+      "Mined patterns from: Analyze intent: Automate complex multi-step workflow orchestration",
+      "Made intelligent decision for: Analyze intent: Automate complex multi-step workflow orchestration"
+    ],
+    "execution_summary": "Task processed by 3 AI agents",
+    "success": true,
+    "timestamp": "2025-08-18T12:15:52.200720"
+  },
+  "job_id": "prod_task_0006",
+  "timestamp": "2025-08-18T12:15:52.200738",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 645
+  }
+}

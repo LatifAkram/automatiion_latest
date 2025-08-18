@@ -1,0 +1,50 @@
+{
+  "id": "0cff2dbc-abac-48e5-a901-ec3e9ee5f09b",
+  "type": "execution_result",
+  "data": {
+    "success": true,
+    "component": "ai_swarm",
+    "swarm_orchestration": {
+      "task_description": "Automate complex workflow",
+      "agents_used": [
+        "self_healing",
+        "skill_mining",
+        "decision_engine"
+      ],
+      "successful_agents": 3,
+      "total_agents": 3,
+      "confidence": 0.85,
+      "combined_insights": [
+        "Applied self-healing to: Automate complex workflow",
+        "Mined patterns from: Automate complex workflow",
+        "Made intelligent decision for: Automate complex workflow"
+      ],
+      "execution_summary": "Task processed by 3 AI agents",
+      "success": true,
+      "timestamp": "2025-08-18T12:14:50.430665"
+    },
+    "specialist_agents": [],
+    "confidence": 0.85,
+    "execution_method": "multi_agent_intelligence",
+    "evidence": [
+      {
+        "type": "ai_swarm_execution",
+        "agents_used": [
+          "self_healing",
+          "skill_mining",
+          "decision_engine"
+        ],
+        "task": "Automate complex workflow",
+        "timestamp": "2025-08-18T12:14:50.430669"
+      }
+    ],
+    "timestamp": "2025-08-18T12:14:50.430675"
+  },
+  "job_id": "prod_task_0003",
+  "timestamp": "2025-08-18T12:14:50.430684",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 878
+  }
+}

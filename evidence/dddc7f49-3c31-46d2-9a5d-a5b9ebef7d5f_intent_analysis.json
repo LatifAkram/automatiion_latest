@@ -1,0 +1,30 @@
+{
+  "id": "dddc7f49-3c31-46d2-9a5d-a5b9ebef7d5f",
+  "type": "intent_analysis",
+  "data": {
+    "task_description": "Analyze intent: Automate complex workflow",
+    "agents_used": [
+      "self_healing",
+      "skill_mining",
+      "decision_engine"
+    ],
+    "successful_agents": 3,
+    "total_agents": 3,
+    "confidence": 0.85,
+    "combined_insights": [
+      "Applied self-healing to: Analyze intent: Automate complex workflow",
+      "Mined patterns from: Analyze intent: Automate complex workflow",
+      "Made intelligent decision for: Analyze intent: Automate complex workflow"
+    ],
+    "execution_summary": "Task processed by 3 AI agents",
+    "success": true,
+    "timestamp": "2025-08-18T12:14:50.430016"
+  },
+  "job_id": "prod_task_0003",
+  "timestamp": "2025-08-18T12:14:50.430049",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 545
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "78bdd47e-a667-4689-a036-a07cf4309af6",
+  "type": "execution_result",
+  "data": {
+    "success": true,
+    "component": "ai_swarm",
+    "swarm_orchestration": {
+      "task_description": "Automate complex multi-step workflow orchestration",
+      "agents_used": [
+        "self_healing",
+        "skill_mining",
+        "decision_engine"
+      ],
+      "successful_agents": 3,
+      "total_agents": 3,
+      "confidence": 0.85,
+      "combined_insights": [
+        "Applied self-healing to: Automate complex multi-step workflow orchestration",
+        "Mined patterns from: Automate complex multi-step workflow orchestration",
+        "Made intelligent decision for: Automate complex multi-step workflow orchestration"
+      ],
+      "execution_summary": "Task processed by 3 AI agents",
+      "success": true,
+      "timestamp": "2025-08-18T12:15:52.201380"
+    },
+    "specialist_agents": [],
+    "confidence": 0.85,
+    "execution_method": "multi_agent_intelligence",
+    "evidence": [
+      {
+        "type": "ai_swarm_execution",
+        "agents_used": [
+          "self_healing",
+          "skill_mining",
+          "decision_engine"
+        ],
+        "task": "Automate complex multi-step workflow orchestration",
+        "timestamp": "2025-08-18T12:15:52.201383"
+      }
+    ],
+    "timestamp": "2025-08-18T12:15:52.201388"
+  },
+  "job_id": "prod_task_0006",
+  "timestamp": "2025-08-18T12:15:52.201397",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 1003
+  }
+}

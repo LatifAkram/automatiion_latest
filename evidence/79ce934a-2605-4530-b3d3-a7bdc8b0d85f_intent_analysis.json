@@ -1,0 +1,30 @@
+{
+  "id": "79ce934a-2605-4530-b3d3-a7bdc8b0d85f",
+  "type": "intent_analysis",
+  "data": {
+    "task_description": "Analyze intent: Analyze data patterns with AI intelligence",
+    "agents_used": [
+      "data_fabric",
+      "skill_mining",
+      "decision_engine"
+    ],
+    "successful_agents": 3,
+    "total_agents": 3,
+    "confidence": 0.8333333333333334,
+    "combined_insights": [
+      "Verified data integrity for: Analyze intent: Analyze data patterns with AI intelligence",
+      "Mined patterns from: Analyze intent: Analyze data patterns with AI intelligence",
+      "Made intelligent decision for: Analyze intent: Analyze data patterns with AI intelligence"
+    ],
+    "execution_summary": "Task processed by 3 AI agents",
+    "success": true,
+    "timestamp": "2025-08-18T12:15:52.198516"
+  },
+  "job_id": "prod_task_0005",
+  "timestamp": "2025-08-18T12:15:52.198534",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 630
+  }
+}

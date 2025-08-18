@@ -1,0 +1,77 @@
+{
+  "id": "86e62e8a-94fd-455c-8120-6aefa8a103c0",
+  "type": "autonomous_execution",
+  "data": {
+    "workflow_id": "608ac558-2682-445b-a30b-0754a31dc6b5",
+    "task": "Process data with secure execution environment",
+    "status": "completed",
+    "autonomous": true,
+    "execution_steps": [
+      "intent",
+      "plan",
+      "execute",
+      "iterate"
+    ],
+    "confidence": 0.9,
+    "execution_time": 1.1920928955078125e-05,
+    "plan": {
+      "plan_id": "8b1e2104-4025-454c-9543-f52389d98e33",
+      "steps": [
+        {
+          "id": "step_1",
+          "action": "prepare",
+          "dependencies": []
+        },
+        {
+          "id": "step_2",
+          "action": "execute",
+          "dependencies": [
+            "step_1"
+          ]
+        },
+        {
+          "id": "step_3",
+          "action": "validate",
+          "dependencies": [
+            "step_2"
+          ]
+        }
+      ],
+      "execution_type": "sequential",
+      "estimated_time": 3.0
+    },
+    "result": {
+      "plan_id": "8b1e2104-4025-454c-9543-f52389d98e33",
+      "step_results": [
+        {
+          "step_id": "step_1",
+          "action": "prepare",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_2",
+          "action": "execute",
+          "status": "completed",
+          "execution_time": 0.5
+        },
+        {
+          "step_id": "step_3",
+          "action": "validate",
+          "status": "completed",
+          "execution_time": 0.5
+        }
+      ],
+      "overall_success": true,
+      "confidence": 0.9
+    },
+    "timestamp": "2025-08-18T12:10:50.195707"
+  },
+  "job_id": "3ec91798-58b2-4dd1-86ae-09805f32e3cf",
+  "timestamp": "2025-08-18T12:10:50.195719",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 1038
+  }
+}

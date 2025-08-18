@@ -1,0 +1,47 @@
+{
+  "id": "c0763be6-cb91-42e8-a0eb-82b11294719f",
+  "type": "execution_result",
+  "data": {
+    "success": true,
+    "component": "ai_swarm",
+    "swarm_orchestration": {
+      "task_description": "Get system status",
+      "agents_used": [
+        "planning",
+        "decision_engine"
+      ],
+      "successful_agents": 2,
+      "total_agents": 2,
+      "confidence": 0.85,
+      "combined_insights": [
+        "Created execution plan for: Get system status",
+        "Made intelligent decision for: Get system status"
+      ],
+      "execution_summary": "Task processed by 2 AI agents",
+      "success": true,
+      "timestamp": "2025-08-18T12:15:52.197411"
+    },
+    "specialist_agents": [],
+    "confidence": 0.85,
+    "execution_method": "multi_agent_intelligence",
+    "evidence": [
+      {
+        "type": "ai_swarm_execution",
+        "agents_used": [
+          "planning",
+          "decision_engine"
+        ],
+        "task": "Get system status",
+        "timestamp": "2025-08-18T12:15:52.197414"
+      }
+    ],
+    "timestamp": "2025-08-18T12:15:52.197422"
+  },
+  "job_id": "prod_task_0004",
+  "timestamp": "2025-08-18T12:15:52.197430",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 759
+  }
+}

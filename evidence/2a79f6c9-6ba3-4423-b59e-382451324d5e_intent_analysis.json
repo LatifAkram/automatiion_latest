@@ -1,0 +1,30 @@
+{
+  "id": "2a79f6c9-6ba3-4423-b59e-382451324d5e",
+  "type": "intent_analysis",
+  "data": {
+    "task_description": "Analyze intent: Check system status",
+    "agents_used": [
+      "data_fabric",
+      "skill_mining",
+      "decision_engine"
+    ],
+    "successful_agents": 3,
+    "total_agents": 3,
+    "confidence": 0.8333333333333334,
+    "combined_insights": [
+      "Verified data integrity for: Analyze intent: Check system status",
+      "Mined patterns from: Analyze intent: Check system status",
+      "Made intelligent decision for: Analyze intent: Check system status"
+    ],
+    "execution_summary": "Task processed by 3 AI agents",
+    "success": true,
+    "timestamp": "2025-08-18T12:14:44.661102"
+  },
+  "job_id": "prod_task_0002",
+  "timestamp": "2025-08-18T12:14:44.661136",
+  "metadata": {
+    "source": "autonomous_system",
+    "reliability": "high",
+    "data_size": 538
+  }
+}
