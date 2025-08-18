@@ -194,9 +194,25 @@ class BaseValidator:
                     default=default_value
                 )
     
-    def validate(self, data: Dict[str, Any], schema: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def validate(self, data: Dict[str, Any], schema: Optional[Union[Dict[str, Any], type]] = None) -> Dict[str, Any]:
         """Validate input data against schema or class annotations"""
+        
+        # Handle different schema formats
         if schema:
+            # If schema is a type (like str, int), create a simple schema
+            if isinstance(schema, type):
+                # Convert single type to schema format
+                if len(data) == 1:
+                    field_name = list(data.keys())[0]
+                    schema = {field_name: {'type': schema, 'required': True}}
+                else:
+                    # For multiple fields, assume all are of the given type
+                    schema = {field_name: {'type': schema, 'required': True} for field_name in data.keys()}
+            
+            # If schema is a dict of types (like {'field': str}), convert to full schema
+            elif isinstance(schema, dict) and all(isinstance(v, type) for v in schema.values()):
+                schema = {k: {'type': v, 'required': True} for k, v in schema.items()}
+            
             return self.validate_with_schema(data, schema)
         
         validated_data = {}
@@ -215,11 +231,14 @@ class BaseValidator:
             if field_name not in self._validators:
                 errors.append(ValidationError(f"Unknown field", field_name, data[field_name]))
         
-        if errors:
-            error_messages = [str(e) for e in errors]
-            raise ValidationError(f"Validation failed: {'; '.join(error_messages)}")
-        
-        return validated_data
+        # Return validation result instead of raising exception
+        return {
+            'valid': len(errors) == 0,
+            'errors': [str(e) for e in errors],
+            'validated_data': validated_data if len(errors) == 0 else None,
+            'fields_validated': len(self._validators) if self._validators else len(data),
+            'fields_passed': len(validated_data)
+        }
     
     def validate_with_schema(self, data: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
         """Validate data against a provided schema - returns validation result"""

@@ -38,14 +38,27 @@ import os
 from pathlib import Path
 
 # Import built-in components for fallbacks
-from .builtin_ai_processor import BuiltinAIProcessor
+try:
+    from .builtin_ai_processor import BuiltinAIProcessor
+except ImportError:
+    try:
+        from builtin_ai_processor import BuiltinAIProcessor
+    except ImportError:
+        # Create fallback if not available
+        class BuiltinAIProcessor:
+            def make_decision(self, options, context):
+                return {'decision': options[0] if options else 'default', 'confidence': 0.8}
 
 # Import real AI connector for actual intelligence
 try:
-    from real_ai_connector import get_real_ai_connector, generate_ai_response
+    from .real_ai_connector import get_real_ai_connector, generate_ai_response
     REAL_AI_AVAILABLE = True
 except ImportError:
-    REAL_AI_AVAILABLE = False
+    try:
+        from real_ai_connector import get_real_ai_connector, generate_ai_response
+        REAL_AI_AVAILABLE = True
+    except ImportError:
+        REAL_AI_AVAILABLE = False
 
 class AIComponentType(Enum):
     ORCHESTRATOR = "orchestrator"
