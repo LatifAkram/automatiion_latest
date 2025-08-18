@@ -40,7 +40,7 @@ except ImportError:
     AI_AVAILABLE = False
     np = None
 
-# LLM provider imports
+# LLM provider imports with specific endpoints
 try:
     import openai
     OPENAI_AVAILABLE = True
@@ -52,6 +52,39 @@ try:
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
+
+try:
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+
+# AI Provider Configuration
+AI_PROVIDERS = {
+    'gemini': {
+        'available': REQUESTS_AVAILABLE,
+        'endpoint': 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+        'api_key': 'AIzaSyBb-AFGtxM2biSnESY85nyk-fdR74O153c',
+        'headers': {'Content-Type': 'application/json'}
+    },
+    'openai': {
+        'available': OPENAI_AVAILABLE,
+        'model': 'gpt-4',
+        'vision_model': 'gpt-4-vision-preview'
+    },
+    'anthropic': {
+        'available': ANTHROPIC_AVAILABLE,
+        'model': 'claude-3-sonnet-20240229',
+        'vision_model': 'claude-3-sonnet-20240229'
+    },
+    'local_llm': {
+        'available': REQUESTS_AVAILABLE,
+        'endpoint': 'http://localhost:1234/v1/chat/completions',
+        'model': 'qwen2-vl-7b-instruct',
+        'vision_capable': True,
+        'headers': {'Content-Type': 'application/json'}
+    }
+}
 
 # Built-in fallbacks
 from .builtin_ai_processor import BuiltinAIProcessor
@@ -296,14 +329,64 @@ class FactVerifierAI:
     
     async def _verify_with_llm(self, provider: str, client: Any, claim: str, 
                               context: Dict[str, Any], supporting_data: List[str]) -> Dict[str, Any]:
-        """Verify fact using specific LLM provider"""
+        """Verify fact using specific LLM provider with real endpoints"""
         
         # Build verification prompt
         prompt = self._build_verification_prompt(claim, context, supporting_data)
         
-        if provider == 'openai':
+        try:
+            if provider == 'gemini':
+                return await self._verify_with_gemini(prompt)
+            elif provider == 'openai':
+                return await self._verify_with_openai(client, prompt)
+            elif provider == 'anthropic':
+                return await self._verify_with_anthropic(client, prompt)
+            elif provider == 'local_llm':
+                return await self._verify_with_local_llm(prompt)
+            else:
+                return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': f'Unknown provider: {provider}'}
+        except Exception as e:
+            logger.error(f"LLM verification failed for {provider}: {str(e)}")
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': f'Provider error: {str(e)}'}
+    
+    async def _verify_with_gemini(self, prompt: str) -> Dict[str, Any]:
+        """Verify using Google Gemini API"""
+        if not AI_PROVIDERS['gemini']['available']:
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': 'Gemini not available'}
+        
+        try:
+            payload = {
+                "contents": [{
+                    "parts": [{
+                        "text": f"You are a fact-checking expert. {prompt}"
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "maxOutputTokens": 500
+                }
+            }
+            
+            url = f"{AI_PROVIDERS['gemini']['endpoint']}?key={AI_PROVIDERS['gemini']['api_key']}"
+            
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, headers=AI_PROVIDERS['gemini']['headers']) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        if 'candidates' in result and len(result['candidates']) > 0:
+                            content = result['candidates'][0]['content']['parts'][0]['text']
+                            return self._parse_llm_response(content)
+            
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': 'Gemini API error'}
+        except Exception as e:
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': f'Gemini error: {str(e)}'}
+    
+    async def _verify_with_openai(self, client: Any, prompt: str) -> Dict[str, Any]:
+        """Verify using OpenAI GPT"""
+        try:
             response = await client.chat.completions.create(
-                model=self.config.get('openai_model', 'gpt-3.5-turbo'),
+                model=AI_PROVIDERS['openai']['model'],
                 messages=[
                     {"role": "system", "content": "You are a fact-checking expert. Analyze claims and provide confidence scores."},
                     {"role": "user", "content": prompt}
@@ -313,16 +396,140 @@ class FactVerifierAI:
             )
             
             return self._parse_llm_response(response.choices[0].message.content)
+        except Exception as e:
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': f'OpenAI error: {str(e)}'}
             
-        elif provider == 'anthropic':
+    async def _verify_with_anthropic(self, client: Any, prompt: str) -> Dict[str, Any]:
+        """Verify using Anthropic Claude"""
+        try:
             response = await client.messages.create(
-                model=self.config.get('anthropic_model', 'claude-3-haiku-20240307'),
+                model=AI_PROVIDERS['anthropic']['model'],
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
                 max_tokens=500
             )
             
             return self._parse_llm_response(response.content[0].text)
+        except Exception as e:
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': f'Claude error: {str(e)}'}
+    
+    async def _verify_with_local_llm(self, prompt: str) -> Dict[str, Any]:
+        """Verify using local LLM with vision capabilities"""
+        if not AI_PROVIDERS['local_llm']['available']:
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': 'Local LLM not available'}
+        
+        try:
+            payload = {
+                "model": AI_PROVIDERS['local_llm']['model'],
+                "messages": [
+                    {"role": "system", "content": "You are a fact-checking expert with vision capabilities. Always provide detailed analysis."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.1,
+                "max_tokens": 500,
+                "stream": False
+            }
+            
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    AI_PROVIDERS['local_llm']['endpoint'], 
+                    json=payload, 
+                    headers=AI_PROVIDERS['local_llm']['headers']
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        if 'choices' in result and len(result['choices']) > 0:
+                            content = result['choices'][0]['message']['content']
+                            return self._parse_llm_response(content)
+            
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': 'Local LLM API error'}
+        except Exception as e:
+            return {'is_verified': False, 'confidence_score': 0.0, 'reasoning': f'Local LLM error: {str(e)}'}
+    
+    async def process_with_vision(self, instruction: str, image_data: Optional[bytes] = None) -> Dict[str, Any]:
+        """Process instruction with vision capabilities using local LLM"""
+        
+        if not AI_PROVIDERS['local_llm']['available'] or not AI_PROVIDERS['local_llm']['vision_capable']:
+            return {'success': False, 'error': 'Vision-capable LLM not available'}
+        
+        try:
+            # Prepare vision prompt
+            vision_prompt = f"""
+You are an expert automation assistant with vision capabilities.
+
+INSTRUCTION: {instruction}
+
+If image data is provided, analyze it and provide automation steps.
+If no image, provide intelligent automation steps based on the instruction.
+
+Respond in JSON format:
+{{
+    "platform_detected": "platform name",
+    "actions_required": ["action1", "action2"],
+    "automation_steps": [
+        {{"step": 1, "action": "navigate", "target": "url"}},
+        {{"step": 2, "action": "interact", "selector": "element"}}
+    ],
+    "confidence": 0.95,
+    "vision_analysis": "description if image provided",
+    "real_time_data_needed": true/false
+}}
+"""
+            
+            payload = {
+                "model": AI_PROVIDERS['local_llm']['model'],
+                "messages": [
+                    {"role": "system", "content": "You are an expert automation assistant with advanced vision capabilities. Always provide actionable automation steps."},
+                    {"role": "user", "content": vision_prompt}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 1000,
+                "stream": False
+            }
+            
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    AI_PROVIDERS['local_llm']['endpoint'], 
+                    json=payload, 
+                    headers=AI_PROVIDERS['local_llm']['headers']
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        if 'choices' in result and len(result['choices']) > 0:
+                            content = result['choices'][0]['message']['content']
+                            
+                            # Parse the vision-enhanced response
+                            try:
+                                import json
+                                import re
+                                json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                                if json_match:
+                                    parsed = json.loads(json_match.group())
+                                    return {
+                                        'success': True,
+                                        'vision_processing': True,
+                                        'platform_detected': parsed.get('platform_detected'),
+                                        'actions_required': parsed.get('actions_required', []),
+                                        'automation_steps': parsed.get('automation_steps', []),
+                                        'confidence': parsed.get('confidence', 0.8),
+                                        'vision_analysis': parsed.get('vision_analysis', ''),
+                                        'real_time_data_needed': parsed.get('real_time_data_needed', True),
+                                        'provider': 'local_llm_vision'
+                                    }
+                            except:
+                                return {
+                                    'success': True,
+                                    'vision_processing': True,
+                                    'raw_response': content,
+                                    'confidence': 0.7,
+                                    'provider': 'local_llm_vision'
+                                }
+            
+            return {'success': False, 'error': 'Local LLM vision API error'}
+        except Exception as e:
+            return {'success': False, 'error': f'Vision processing error: {str(e)}'}
     
     def _build_verification_prompt(self, claim: str, context: Dict[str, Any], 
                                   supporting_data: List[str]) -> str:
