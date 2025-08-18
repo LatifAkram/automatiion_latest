@@ -9,7 +9,7 @@ import { RealTimeBrowser } from '../src/components/real-time-browser';
 import SophisticatedAutomationDisplay from '../src/components/sophisticated-automation-display';
 
 // Backend configuration
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8888';
 
 // Theme configuration
 type Theme = 'light' | 'dark' | 'auto';
@@ -415,7 +415,7 @@ export default function Home() {
                              message.toLowerCase().includes('look up');
 
       // Send message to backend - use intelligent automation for automation requests
-      const endpoint = isAutomationRequest ? '/api/fixed-super-omega-execute' : '/api/chat';
+      const endpoint = isAutomationRequest ? '/api/execute' : '/api/chat';
       const requestBody = isAutomationRequest 
         ? {
             instruction: message
@@ -775,7 +775,7 @@ export default function Home() {
       }
 
       // Execute intelligent automation
-      const automationResponse = await fetch(`${BACKEND_URL}/api/fixed-super-omega-execute`, {
+      const automationResponse = await fetch(`${BACKEND_URL}/api/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
