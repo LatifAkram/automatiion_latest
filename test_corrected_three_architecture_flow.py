@@ -75,6 +75,9 @@ def test_three_architecture_flow():
                         print(f"   ✅ PROPER THREE ARCHITECTURE FLOW CONFIRMED")
                     else:
                         print(f"   ❌ STILL USING SINGLE ARCHITECTURE: {result.get('architecture_used')}")
+                elif result.get('architecture_used') == 'three_architecture_orchestrated':
+                    print(f"   ✅ THREE ARCHITECTURE ORCHESTRATED FLOW CONFIRMED")
+                    print(f"   📊 Quality Score: {result.get('result', {}).get('quality_score', 'N/A')}")
                 else:
                     print(f"   ❌ NO FLOW TRACE - NOT USING THREE ARCHITECTURE FLOW")
                 
