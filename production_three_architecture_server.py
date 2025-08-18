@@ -1089,7 +1089,7 @@ class ProductionThreeArchitectureServer:
             print("🚀 Using existing sophisticated live automation...")
             
             # Import existing live automation system
-            from super_omega_live_automation_fixed import SuperOmegaLiveAutomation
+            from src.testing.super_omega_live_automation_fixed import SuperOmegaLiveAutomation
             
             # Initialize with real-time capabilities
             live_automation = SuperOmegaLiveAutomation()
