@@ -584,7 +584,7 @@ class ReportGenerator:
             self.logger.error(f"Failed to generate Excel report: {e}", exc_info=True)
             raise
     
-    def _add_excel_summary_sheet(self, wb: openpyxl.Workbook, report_data: Dict[str, Any]):
+    def _add_excel_summary_sheet(self, wb, report_data: Dict[str, Any]):
         """Add summary sheet to Excel workbook."""
         ws = wb.create_sheet("Summary")
         
@@ -608,7 +608,7 @@ class ReportGenerator:
             ws[f'B{i}'] = value
             ws[f'A{i}'].font = Font(bold=True)
     
-    def _add_excel_execution_sheet(self, wb: openpyxl.Workbook, report_data: Dict[str, Any]):
+    def _add_excel_execution_sheet(self, wb, report_data: Dict[str, Any]):
         """Add execution details sheet to Excel workbook."""
         ws = wb.create_sheet("Execution Details")
         
@@ -628,7 +628,7 @@ class ReportGenerator:
             ws.cell(row=i, column=5, value=step.get("duration", 0))
             ws.cell(row=i, column=6, value=step.get("selector", ""))
     
-    def _add_excel_ai_sheet(self, wb: openpyxl.Workbook, report_data: Dict[str, Any]):
+    def _add_excel_ai_sheet(self, wb, report_data: Dict[str, Any]):
         """Add AI analysis sheet to Excel workbook."""
         ws = wb.create_sheet("AI Analysis")
         
@@ -652,7 +652,7 @@ class ReportGenerator:
             ws[f'B{i}'] = count
             ws[f'A{i}'].font = Font(bold=True)
     
-    def _add_excel_performance_sheet(self, wb: openpyxl.Workbook, report_data: Dict[str, Any]):
+    def _add_excel_performance_sheet(self, wb, report_data: Dict[str, Any]):
         """Add performance metrics sheet to Excel workbook."""
         ws = wb.create_sheet("Performance Metrics")
         
@@ -674,7 +674,7 @@ class ReportGenerator:
             ws[f'B{i}'] = value
             ws[f'A{i}'].font = Font(bold=True)
     
-    def _add_excel_code_sheet(self, wb: openpyxl.Workbook, report_data: Dict[str, Any]):
+    def _add_excel_code_sheet(self, wb, report_data: Dict[str, Any]):
         """Add Playwright code sheet to Excel workbook."""
         ws = wb.create_sheet("Playwright Code")
         
