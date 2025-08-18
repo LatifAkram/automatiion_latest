@@ -39,32 +39,36 @@ class AIProvider:
         self.config = config
         self.logger = logging.getLogger(__name__)
         
-        # Provider configurations
+        # Provider configurations with specific endpoints
         self.providers = {
             "openai": {
-                "available": openai is not None and config.openai_api_key,
+                "available": openai is not None,
                 "config": config,
-                "client": None
+                "client": None,
+                "model": "gpt-4"
             },
             "anthropic": {
-                "available": anthropic is not None and config.anthropic_api_key,
+                "available": anthropic is not None,
                 "config": config,
-                "client": None
+                "client": None,
+                "model": "claude-3-sonnet-20240229"
             },
-            "google": {
-                "available": genai is not None and config.google_api_key,
-                "config": config,
-                "client": None
+            "gemini": {
+                "available": True,  # Use direct API calls
+                "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+                "api_key": "AIzaSyBb-AFGtxM2biSnESY85nyk-fdR74O153c",
+                "model": "gemini-1.5-flash"
             },
-            "local": {
-                "available": True,  # Always available as fallback
-                "config": config,
-                "client": None
+            "local_llm": {
+                "available": True,  # Always try local LLM
+                "endpoint": "http://localhost:1234/v1/chat/completions",
+                "model": "qwen2-vl-7b-instruct",
+                "vision_capable": True
             }
         }
         
-        # Provider priority order
-        self.provider_priority = ["openai", "anthropic", "google", "local"]
+        # Provider priority order - prioritize your specific endpoints
+        self.provider_priority = ["gemini", "local_llm", "openai", "anthropic"]
         
         # Performance tracking
         self.provider_performance = {}
@@ -239,17 +243,22 @@ class AIProvider:
     async def generate_response(self, prompt: str, max_tokens: int = 1000, temperature: float = 0.7, timeout: int = 30) -> str:
         """Generate a response using available AI providers with intelligent fallback and timeout."""
         try:
-            # Try available providers in order with fallback
+            # Try available providers in order with fallback - prioritize your specific endpoints
             providers_to_try = []
             
+            # Always try Gemini first (your specific API key)
+            if self.providers["gemini"]["available"]:
+                providers_to_try.append(("Google Gemini", self._call_google))
+            
+            # Always try Local LLM second (your specific endpoint)
+            if self.providers["local_llm"]["available"]:
+                providers_to_try.append(("Local LLM Vision", self._call_local_llm))
+            
+            # Then try other providers if available
             if self.openai_client:
                 providers_to_try.append(("OpenAI", self._call_openai))
             if self.anthropic_client:
                 providers_to_try.append(("Anthropic", self._call_anthropic))
-            if self.google_client:
-                providers_to_try.append(("Google Gemini", self._call_google))
-            if self.local_llm_client:
-                providers_to_try.append(("Local LLM", self._call_local_llm))
             
             # If no providers available, use fallback
             if not providers_to_try:
@@ -356,37 +365,61 @@ class AIProvider:
             raise Exception(f"Anthropic API error: {e}")
             
     async def _call_google(self, prompt: str, max_tokens: int, temperature: float) -> str:
-        """Call Google Gemini API."""
+        """Call Google Gemini API using your specific endpoint."""
         try:
-            # Use the already initialized client
-            response = await asyncio.to_thread(
-                self.google_client.generate_content,
-                prompt,
-                generation_config=genai.types.GenerationConfig(
-                    max_output_tokens=max_tokens,
-                    temperature=temperature
-                )
-            )
-            return response.text
+            # Use your specific Gemini endpoint
+            gemini_config = self.providers["gemini"]
+            url = f"{gemini_config['endpoint']}?key={gemini_config['api_key']}"
+            
+            payload = {
+                "contents": [{
+                    "parts": [{
+                        "text": prompt
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": temperature,
+                    "maxOutputTokens": max_tokens
+                }
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        if 'candidates' in result and len(result['candidates']) > 0:
+                            content = result['candidates'][0]['content']['parts'][0]['text']
+                            return content
+                    else:
+                        error_text = await response.text()
+                        raise Exception(f"Gemini API error {response.status}: {error_text}")
+            
+            raise Exception("Gemini API returned no content")
         except Exception as e:
             raise Exception(f"Google Gemini API error: {e}")
             
     async def _call_local_llm(self, prompt: str, max_tokens: int, temperature: float) -> str:
-        """Call local LLM API."""
+        """Call local LLM API using your specific endpoint."""
         try:
+            # Use your specific local LLM endpoint
+            local_config = self.providers["local_llm"]
+            
+            payload = {
+                "model": local_config["model"],  # qwen2-vl-7b-instruct
+                "messages": [
+                    {"role": "system", "content": "You are an expert automation assistant with vision capabilities. Provide clear, helpful responses for automation tasks."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": temperature,
+                "max_tokens": max_tokens if max_tokens > 0 else -1,
+                "stream": False
+            }
+            
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    f"{self.config.local_llm_url}/v1/chat/completions",
-                    json={
-                        "model": self.config.local_llm_model,
-                        "messages": [
-                            {"role": "system", "content": "You are an expert automation assistant. Provide clear, helpful responses for automation tasks. Always respond with valid JSON when requested."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "temperature": temperature,
-                        "max_tokens": max_tokens,
-                        "stream": False
-                    },
+                    local_config["endpoint"],  # http://localhost:1234/v1/chat/completions
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
                     timeout=aiohttp.ClientTimeout(total=30)
                 ) as response:
                     if response.status != 200:
