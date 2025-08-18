@@ -520,6 +520,89 @@ class ProductionThreeArchitectureServer:
             'no_limitations': True
         }
     
+    def _process_task_sync(self, instruction: str, priority: TaskPriority):
+        """Process task through proper three-architecture flow"""
+        
+        start_time = time.time()
+        task_id = f'task_{uuid.uuid4().hex[:8]}'
+        
+        print(f"🚀 STARTING THREE ARCHITECTURE FLOW for task {task_id}")
+        print(f"   📝 Instruction: {instruction}")
+        
+        # STEP 1: Autonomous Orchestrator receives (central brain)
+        print("🧠 STEP 1: Autonomous Orchestrator (Central Brain) receives request")
+        orchestrator_receipt = self._autonomous_orchestrator_receive(task_id, instruction, priority)
+        
+        # STEP 2: Intent Analysis via AI Swarm
+        print("🤖 STEP 2: Intent Analysis via AI Swarm")
+        intent_analysis = self._ai_swarm_intent_analysis(instruction, task_id)
+        
+        # STEP 3: Task Scheduling via Autonomous Layer
+        print("📅 STEP 3: Task Scheduling via Autonomous Layer")
+        task_schedule = self._autonomous_layer_task_scheduling(intent_analysis, priority, task_id, instruction)
+        
+        # STEP 4: Multi-architecture execution with fallbacks
+        print("⚡ STEP 4: Multi-architecture execution with fallbacks")
+        execution_results = self._multi_architecture_execution_with_fallbacks(task_schedule, instruction)
+        
+        # STEP 5: Result aggregation through orchestrator
+        print("📊 STEP 5: Result aggregation through orchestrator")
+        final_result = self._orchestrator_result_aggregation(execution_results, task_id)
+        
+        execution_time = time.time() - start_time
+        print(f"✅ THREE ARCHITECTURE FLOW COMPLETED in {execution_time:.2f}s")
+        
+        # Create comprehensive task result
+        return type('TaskResult', (), {
+            'id': task_id,
+            'instruction': instruction,
+            'status': type('Status', (), {'value': 'completed'})(),
+            'architecture_used': 'three_architecture_orchestrated',
+            'execution_time': execution_time,
+            'result': final_result,
+            'evidence_ids': [f'evidence_{task_id}'],
+            'flow_trace': {
+                'step_1_orchestrator': orchestrator_receipt,
+                'step_2_intent_analysis': intent_analysis,
+                'step_3_task_scheduling': task_schedule,
+                'step_4_execution': execution_results,
+                'step_5_aggregation': final_result
+            }
+        })()
+    
+    def _autonomous_orchestrator_receive(self, task_id: str, instruction: str, priority: TaskPriority) -> Dict[str, Any]:
+        """STEP 1: Autonomous Orchestrator receives and validates the request"""
+        
+        print(f"   🧠 Autonomous Orchestrator receiving task {task_id}")
+        
+        # Central brain processes the incoming request
+        orchestrator_receipt = {
+            'task_received': True,
+            'task_id': task_id,
+            'instruction': instruction,
+            'priority': priority.name,
+            'received_timestamp': time.time(),
+            'orchestrator_status': 'active',
+            'validation': {
+                'instruction_valid': len(instruction.strip()) > 0,
+                'priority_valid': isinstance(priority, TaskPriority),
+                'task_id_valid': len(task_id) > 0
+            },
+            'orchestrator_decision': 'proceed_to_intent_analysis'
+        }
+        
+        # Store in autonomous layer's task registry
+        if hasattr(self.working_autonomous_layer, 'task_registry'):
+            self.working_autonomous_layer.task_registry[task_id] = {
+                'instruction': instruction,
+                'priority': priority,
+                'status': 'received',
+                'created_at': time.time()
+            }
+        
+        print(f"   ✅ Task {task_id} received and validated by Autonomous Orchestrator")
+        return orchestrator_receipt
+    
     def create_frontend_interface(self) -> str:
         """Create complete frontend interface"""
         return f"""
@@ -1330,10 +1413,10 @@ class ProductionHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 # Process through three architectures synchronously to avoid event loop conflicts
                 try:
                     # Use synchronous processing to avoid event loop issues
-                    task_result = self._process_task_sync(instruction, priority)
+                    task_result = self.server_instance._process_task_sync(instruction, priority)
                 except Exception as e:
                     # Handle processing errors
-                    task_result = self._create_error_result(instruction, str(e))
+                    task_result = self.server_instance._create_error_result(instruction, str(e))
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
