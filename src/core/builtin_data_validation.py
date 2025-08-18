@@ -222,7 +222,7 @@ class BaseValidator:
         return validated_data
     
     def validate_with_schema(self, data: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate data against a provided schema"""
+        """Validate data against a provided schema - returns validation result"""
         validated_data = {}
         errors = []
         
@@ -249,13 +249,16 @@ class BaseValidator:
                 validated_data[field_name] = validator.validate(value, field_name)
                 
             except ValidationError as e:
-                errors.append(e)
+                errors.append(str(e))
         
-        if errors:
-            error_messages = [str(e) for e in errors]
-            raise ValidationError(f"Schema validation failed: {'; '.join(error_messages)}")
-        
-        return validated_data
+        # Return validation result instead of raising exception
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors,
+            'validated_data': validated_data if len(errors) == 0 else None,
+            'fields_validated': len(schema),
+            'fields_passed': len(validated_data)
+        }
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
