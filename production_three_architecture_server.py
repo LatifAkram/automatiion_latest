@@ -1414,19 +1414,44 @@ if __name__ == "__main__":
             
             print("🚀 Using existing sophisticated automation engine...")
             
-            # Import existing real-time data fabric
-            from realtime_data_fabric_ai import RealTimeDataFabricAI
+            # Import existing real-time data fabric with absolute imports
+            try:
+                from src.core.realtime_data_fabric_ai import RealTimeDataFabricAI
+            except ImportError:
+                try:
+                    import realtime_data_fabric_ai
+                    RealTimeDataFabricAI = realtime_data_fabric_ai.RealTimeDataFabricAI
+                except ImportError:
+                    RealTimeDataFabricAI = None
             
             # Import comprehensive automation engine
-            from comprehensive_automation_engine import ComprehensiveAutomationEngine
+            try:
+                from src.core.comprehensive_automation_engine import ComprehensiveAutomationEngine
+            except ImportError:
+                try:
+                    import comprehensive_automation_engine
+                    ComprehensiveAutomationEngine = comprehensive_automation_engine.ComprehensiveAutomationEngine
+                except ImportError:
+                    ComprehensiveAutomationEngine = None
             
             # Import commercial platform registry with 100k+ selectors
-            from commercial_platform_registry import CommercialPlatformRegistry
+            try:
+                from src.platforms.commercial_platform_registry import CommercialPlatformRegistry
+            except ImportError:
+                try:
+                    import commercial_platform_registry
+                    CommercialPlatformRegistry = commercial_platform_registry.CommercialPlatformRegistry
+                except ImportError:
+                    CommercialPlatformRegistry = None
             
-            # Initialize with real-time data
-            data_fabric = RealTimeDataFabricAI()
-            automation_engine = ComprehensiveAutomationEngine()
-            platform_registry = CommercialPlatformRegistry()
+            # Initialize with real-time data (with None checks)
+            data_fabric = RealTimeDataFabricAI() if RealTimeDataFabricAI else None
+            automation_engine = ComprehensiveAutomationEngine() if ComprehensiveAutomationEngine else None
+            platform_registry = CommercialPlatformRegistry() if CommercialPlatformRegistry else None
+            
+            if not data_fabric or not automation_engine or not platform_registry:
+                print("⚠️ Some sophisticated components not available, using direct automation")
+                return await self._execute_direct_youtube_automation(instruction)
             
             print("✅ Sophisticated systems initialized - using real-time data")
             
