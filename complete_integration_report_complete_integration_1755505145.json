@@ -1,0 +1,82 @@
+{
+  "test_id": "complete_integration_1755505145",
+  "overall_score": 77.6,
+  "integration_status": "\u26a0\ufe0f  GOOD INTEGRATION",
+  "test_results": {
+    "backend_architectures": {
+      "architecture_results": {
+        "builtin_foundation": {
+          "status": "functional",
+          "cpu_percent": 0.0,
+          "memory_percent": 8.497233157819137,
+          "ai_decision": "integrate",
+          "zero_dependencies": true
+        },
+        "ai_swarm": {
+          "status": "functional",
+          "components": 7,
+          "test_result": "completed",
+          "execution_time": 0.04920482635498047,
+          "ai_intelligence": true
+        },
+        "autonomous_layer": {
+          "status": "functional",
+          "job_id": "62d879cb",
+          "job_status": "completed",
+          "jobs_processed": 1,
+          "success_rate": 100.0,
+          "production_ready": true
+        }
+      },
+      "functional_architectures": 3,
+      "score": 100.0
+    },
+    "frontend_interface": {
+      "frontend_checks": {
+        "features": {
+          "websocket_support": true,
+          "backend_integration": true,
+          "architecture_display": true,
+          "realtime_updates": true,
+          "sophisticated_ui": true
+        }
+      },
+      "feature_score": 100.0,
+      "server_score": 100,
+      "score": 100.0
+    },
+    "integration_communication": {
+      "communication_results": {
+        "health_endpoint": {
+          "status": "failed",
+          "error": "name 'BuiltinPerformanceMonitor' is not defined"
+        },
+        "execution_endpoint": {
+          "status": "functional",
+          "test_result": "completed"
+        }
+      },
+      "backend_communication_score": 90,
+      "websocket_score": 100,
+      "score": 93.0
+    },
+    "realtime_updates": {
+      "realtime_system_functional": true,
+      "score": 95
+    },
+    "sophisticated_coordination": {
+      "coordination_results": {},
+      "score": 0
+    }
+  },
+  "component_scores": {
+    "Backend Architecture Verification": 100.0,
+    "Frontend Interface Verification": 100.0,
+    "Integration Communication Test": 93.0,
+    "Real-time Updates Test": 95,
+    "Sophisticated Coordination Test": 0
+  },
+  "system_ready": true,
+  "production_ready": false,
+  "timestamp": "2025-08-18T08:19:08.089950"
+}

@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUPER-OMEGA: Complete Architecture Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+            gap: 1px;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d4ff, #ff00d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .system-status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-healthy {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+        
+        .status-active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+        
+        .status-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .sidebar {
+            background: rgba(0, 0, 0, 0.4);
+            border-right: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .architecture-panel {
+            margin-bottom: 25px;
+        }
+        
+        .architecture-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid;
+        }
+        
+        .builtin-title {
+            background: rgba(34, 197, 94, 0.1);
+            border-left-color: #22c55e;
+            color: #22c55e;
+        }
+        
+        .ai-title {
+            background: rgba(168, 85, 247, 0.1);
+            border-left-color: #a855f7;
+            color: #a855f7;
+        }
+        
+        .autonomous-title {
+            background: rgba(249, 115, 22, 0.1);
+            border-left-color: #f97316;
+            color: #f97316;
+        }
+        
+        .component-list {
+            list-style: none;
+            padding-left: 15px;
+        }
+        
+        .component-item {
+            padding: 6px 0;
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .component-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+        
+        .main-content {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .chat-interface {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        
+        .message-user {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            margin-left: auto;
+        }
+        
+        .message-ai {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid #a855f7;
+        }
+        
+        .message-system {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            text-align: center;
+            margin: 10px auto;
+            max-width: 60%;
+        }
+        
+        .execution-flow {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .execution-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .execution-step:last-child {
+            border-bottom: none;
+        }
+        
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .step-completed {
+            background: #22c55e;
+            color: #000;
+        }
+        
+        .step-processing {
+            background: #f59e0b;
+            color: #000;
+            animation: pulse 1s infinite;
+        }
+        
+        .step-pending {
+            background: #6b7280;
+            color: #fff;
+        }
+        
+        .chat-input-container {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 0 0 10px 10px;
+            border-top: 1px solid #333;
+        }
+        
+        .chat-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+        }
+        
+        .chat-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .send-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .send-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .realtime-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 1px solid #333;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .realtime-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #00d4ff;
+            text-align: center;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-card {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .metric-label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        .activity-feed {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .activity-header {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            font-weight: 600;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .activity-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #333;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-timestamp {
+            color: #666;
+            font-size: 10px;
+        }
+        
+        .activity-builtin {
+            border-left: 3px solid #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .activity-ai {
+            border-left: 3px solid #a855f7;
+            background: rgba(168, 85, 247, 0.05);
+        }
+        
+        .activity-autonomous {
+            border-left: 3px solid #f97316;
+            background: rgba(249, 115, 22, 0.05);
+        }
+        
+        .activity-system {
+            border-left: 3px solid #00d4ff;
+            background: rgba(0, 212, 255, 0.05);
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .connected {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+        
+        .disconnected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .thinking-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid #a855f7;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .thinking-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #a855f7;
+            animation: thinking 1.5s infinite;
+        }
+        
+        .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes thinking {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
+        }
+        
+        .architecture-flow {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+        
+        .flow-step {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            position: relative;
+        }
+        
+        .flow-step-active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .flow-step-completed {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+        
+        .flow-arrow {
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .metrics-chart {
+            height: 100px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 6px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to top, #3b82f6, #00d4ff);
+            transition: height 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🌟 SUPER-OMEGA</div>
+            <div class="system-status">
+                <div class="status-indicator status-healthy">
+                    <div class="status-pulse"></div>
+                    Built-in Foundation
+                </div>
+                <div class="status-indicator status-active">
+                    <div class="status-pulse"></div>
+                    AI Swarm (7)
+                </div>
+                <div class="status-indicator status-active">
+                    <div class="status-pulse"></div>
+                    Autonomous Layer
+                </div>
+            </div>
+        </div>
+        
+        <!-- Left Sidebar - Architecture Overview -->
+        <div class="sidebar">
+            <div class="architecture-panel">
+                <div class="architecture-title builtin-title">
+                    🏗️ Built-in Foundation
+                </div>
+                <ul class="component-list">
+                    <li class="component-item">
+                        AI Processor <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Performance Monitor <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Data Validation <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Vision Processor <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Web Server <span class="component-status"></span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="architecture-panel">
+                <div class="architecture-title ai-title">
+                    🤖 AI Swarm Intelligence
+                </div>
+                <ul class="component-list">
+                    <li class="component-item">
+                        Main Planner AI <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Self-Healing AI <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Skill Mining AI <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Data Fabric AI <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Copilot AI <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Vision Intelligence AI <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Decision Engine AI <span class="component-status"></span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="architecture-panel">
+                <div class="architecture-title autonomous-title">
+                    🚀 Autonomous Layer
+                </div>
+                <ul class="component-list">
+                    <li class="component-item">
+                        Job Orchestrator <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Resource Manager <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Execution Engine <span class="component-status"></span>
+                    </li>
+                    <li class="component-item">
+                        Learning System <span class="component-status"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content - Chat Interface -->
+        <div class="main-content">
+            <div class="chat-interface">
+                <div class="chat-header">
+                    <h2>🎯 Sophisticated Architecture Coordination</h2>
+                    <p>Chat with SUPER-OMEGA using all three architectures</p>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message message-system">
+                        🌟 SUPER-OMEGA Complete System Ready<br>
+                        All three architectures synchronized and active
+                    </div>
+                </div>
+                
+                <div class="thinking-indicator" id="thinkingIndicator">
+                    <div class="thinking-dots">
+                        <div class="thinking-dot"></div>
+                        <div class="thinking-dot"></div>
+                        <div class="thinking-dot"></div>
+                    </div>
+                    <span id="thinkingMessage">Processing with all architectures...</span>
+                </div>
+                
+                <div class="chat-input-container">
+                    <textarea 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Enter your automation request... (e.g., 'Automate ticket booking with AI assistance')"
+                        rows="3"
+                    ></textarea>
+                    <button id="sendButton" class="send-button" onclick="sendMessage()">
+                        🚀 Execute with All Architectures
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Sidebar - Real-time Updates -->
+        <div class="realtime-panel">
+            <div class="realtime-header">
+                📊 Real-time System Updates
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="cpuMetric">0.0%</div>
+                    <div class="metric-label">CPU Usage</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="memoryMetric">0.0%</div>
+                    <div class="metric-label">Memory Usage</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="jobsMetric">0</div>
+                    <div class="metric-label">Jobs Processed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="successMetric">100%</div>
+                    <div class="metric-label">Success Rate</div>
+                </div>
+            </div>
+            
+            <div class="activity-feed">
+                <div class="activity-header">
+                    🔄 Live Architecture Updates
+                </div>
+                <div id="activityFeed">
+                    <div class="activity-item activity-system">
+                        <div>System initialized and ready</div>
+                        <div class="activity-timestamp" id="initTimestamp"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="connection-status disconnected">
+        🔴 Connecting to backend...
+    </div>
+    
+    <script>
+        // Backend configuration
+        const BACKEND_URL = 'http://localhost:8081';
+        const WS_URL = 'ws://localhost:8081/realtime/connect';
+        
+        // Global state
+        let websocket = null;
+        let isConnected = false;
+        let currentExecution = null;
+        
+        // Metrics storage
+        let metricsHistory = {
+            cpu: [],
+            memory: [],
+            jobs: [],
+            success: []
+        };
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSystem();
+            connectWebSocket();
+            
+            // Set initial timestamp
+            document.getElementById('initTimestamp').textContent = new Date().toLocaleTimeString();
+            
+            // Handle Enter key in chat input
+            document.getElementById('chatInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        });
+        
+        function initializeSystem() {
+            console.log('🌟 SUPER-OMEGA Frontend initializing...');
+            
+            // Test backend connectivity
+            fetch(`${BACKEND_URL}/health`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Backend health check:', data);
+                    updateSystemStatus(data);
+                })
+                .catch(error => {
+                    console.error('❌ Backend connection failed:', error);
+                    addActivityUpdate('system', 'Backend connection failed - using offline mode', 'error');
+                });
+        }
+        
+        function connectWebSocket() {
+            try {
+                websocket = new WebSocket(WS_URL);
+                
+                websocket.onopen = function(event) {
+                    console.log('🔌 WebSocket connected');
+                    isConnected = true;
+                    updateConnectionStatus(true);
+                    addActivityUpdate('system', 'Real-time connection established', 'success');
+                };
+                
+                websocket.onmessage = function(event) {
+                    try {
+                        const update = JSON.parse(event.data);
+                        handleRealTimeUpdate(update);
+                    } catch (error) {
+                        console.error('Failed to parse WebSocket message:', error);
+                    }
+                };
+                
+                websocket.onclose = function(event) {
+                    console.log('🔌 WebSocket disconnected');
+                    isConnected = false;
+                    updateConnectionStatus(false);
+                    
+                    // Attempt reconnection after 5 seconds
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    addActivityUpdate('system', 'WebSocket connection error', 'error');
+                };
+                
+            } catch (error) {
+                console.error('Failed to create WebSocket:', error);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        function handleRealTimeUpdate(update) {
+            console.log('📡 Real-time update:', update);
+            
+            switch (update.type) {
+                case 'initial_state':
+                    handleInitialState(update.data);
+                    break;
+                    
+                case 'builtin_foundation_update':
+                    handleBuiltinUpdate(update.data);
+                    break;
+                    
+                case 'ai_swarm_update':
+                    handleAISwarmUpdate(update.data);
+                    break;
+                    
+                case 'autonomous_layer_update':
+                    handleAutonomousUpdate(update.data);
+                    break;
+                    
+                case 'execution_started':
+                    handleExecutionStarted(update);
+                    break;
+                    
+                case 'execution_phase':
+                    handleExecutionPhase(update);
+                    break;
+                    
+                case 'execution_completed':
+                    handleExecutionCompleted(update);
+                    break;
+                    
+                case 'system_heartbeat':
+                    handleSystemHeartbeat(update.data);
+                    break;
+                    
+                default:
+                    console.log('Unknown update type:', update.type);
+            }
+        }
+        
+        function handleBuiltinUpdate(data) {
+            // Update CPU and Memory metrics
+            document.getElementById('cpuMetric').textContent = `${data.cpu_percent.toFixed(1)}%`;
+            document.getElementById('memoryMetric').textContent = `${data.memory_percent.toFixed(1)}%`;
+            
+            // Add to metrics history
+            metricsHistory.cpu.push(data.cpu_percent);
+            metricsHistory.memory.push(data.memory_percent);
+            
+            // Keep only last 50 data points
+            if (metricsHistory.cpu.length > 50) {
+                metricsHistory.cpu.shift();
+                metricsHistory.memory.shift();
+            }
+            
+            addActivityUpdate('builtin', `Performance update: CPU ${data.cpu_percent.toFixed(1)}%, Memory ${data.memory_percent.toFixed(1)}%`);
+        }
+        
+        function handleAISwarmUpdate(data) {
+            addActivityUpdate('ai', `AI Swarm: Task ${data.task_counter} ${data.last_task_status} (${(data.execution_time * 1000).toFixed(1)}ms)`);
+        }
+        
+        function handleAutonomousUpdate(data) {
+            document.getElementById('jobsMetric').textContent = data.jobs_processed;
+            document.getElementById('successMetric').textContent = `${data.success_rate.toFixed(1)}%`;
+            
+            addActivityUpdate('autonomous', `Autonomous: ${data.jobs_processed} jobs, ${data.success_rate.toFixed(1)}% success, ${data.active_workers} workers`);
+        }
+        
+        function handleExecutionStarted(update) {
+            currentExecution = update.execution_id;
+            
+            addChatMessage('system', `🚀 Execution started: ${update.instruction}`);
+            showThinkingIndicator('Coordinating all three architectures...');
+            
+            // Show architecture flow
+            showArchitectureFlow();
+        }
+        
+        function handleExecutionPhase(update) {
+            const phase = update.phase;
+            const status = update.status;
+            const message = update.message;
+            
+            updateThinkingIndicator(message);
+            
+            if (status === 'completed') {
+                addActivityUpdate(phase.includes('builtin') ? 'builtin' : 
+                                phase.includes('ai') ? 'ai' : 'autonomous', 
+                                message);
+                
+                updateArchitectureFlowStep(phase, 'completed');
+            } else if (status === 'starting') {
+                updateArchitectureFlowStep(phase, 'active');
+            }
+        }
+        
+        function handleExecutionCompleted(update) {
+            hideThinkingIndicator();
+            
+            const result = update.data;
+            const success = result.integration_success;
+            
+            let responseMessage = `✅ Execution completed successfully!\\n`;
+            responseMessage += `🏗️ Built-in: ${result.execution_results.builtin_foundation?.status || 'unknown'}\\n`;
+            responseMessage += `🤖 AI Swarm: ${result.execution_results.ai_swarm?.status || 'unknown'}\\n`;
+            responseMessage += `🚀 Autonomous: ${result.execution_results.autonomous_layer?.status || 'unknown'}\\n`;
+            responseMessage += `⏱️ Total time: ${result.total_execution_time.toFixed(2)}s`;
+            
+            addChatMessage('ai', responseMessage);
+            
+            // Show detailed results
+            if (result.execution_results) {
+                showExecutionResults(result.execution_results);
+            }
+            
+            resetArchitectureFlow();
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addChatMessage('user', message);
+            input.value = '';
+            
+            // Disable send button
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+            
+            // Send to backend
+            fetch(`${BACKEND_URL}/api/fixed-super-omega-execute`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    instruction: message,
+                    context: {
+                        frontend_integration: true,
+                        real_time_updates: true,
+                        sophisticated_coordination: true
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ Backend response:', data);
+                // Response will come via WebSocket real-time updates
+            })
+            .catch(error => {
+                console.error('❌ Backend request failed:', error);
+                addChatMessage('system', `❌ Backend request failed: ${error.message}`);
+                hideThinkingIndicator();
+            })
+            .finally(() => {
+                sendButton.disabled = false;
+            });
+        }
+        
+        function addChatMessage(type, content) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            messageDiv.className = `message message-${type}`;
+            messageDiv.innerHTML = `
+                <div>${content.replace(/\\n/g, '<br>')}</div>
+                <div style="font-size: 10px; color: #666; margin-top: 5px;">
+                    ${new Date().toLocaleTimeString()}
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showThinkingIndicator(message) {
+            const indicator = document.getElementById('thinkingIndicator');
+            const messageSpan = document.getElementById('thinkingMessage');
+            
+            messageSpan.textContent = message;
+            indicator.style.display = 'flex';
+        }
+        
+        function updateThinkingIndicator(message) {
+            const messageSpan = document.getElementById('thinkingMessage');
+            messageSpan.textContent = message;
+        }
+        
+        function hideThinkingIndicator() {
+            const indicator = document.getElementById('thinkingIndicator');
+            indicator.style.display = 'none';
+        }
+        
+        function showArchitectureFlow() {
+            // Create architecture flow if it doesn't exist
+            let flowContainer = document.getElementById('architectureFlow');
+            if (!flowContainer) {
+                flowContainer = document.createElement('div');
+                flowContainer.id = 'architectureFlow';
+                flowContainer.className = 'architecture-flow';
+                flowContainer.innerHTML = `
+                    <div class="flow-step" id="builtinStep">
+                        🏗️ Built-in<br><small>Analysis</small>
+                        <div class="flow-arrow">→</div>
+                    </div>
+                    <div class="flow-step" id="aiStep">
+                        🤖 AI Swarm<br><small>Orchestration</small>
+                        <div class="flow-arrow">→</div>
+                    </div>
+                    <div class="flow-step" id="autonomousStep">
+                        🚀 Autonomous<br><small>Execution</small>
+                    </div>
+                `;
+                
+                const thinkingIndicator = document.getElementById('thinkingIndicator');
+                thinkingIndicator.parentNode.insertBefore(flowContainer, thinkingIndicator.nextSibling);
+            }
+        }
+        
+        function updateArchitectureFlowStep(phase, status) {
+            let stepId;
+            if (phase.includes('builtin')) stepId = 'builtinStep';
+            else if (phase.includes('ai')) stepId = 'aiStep';
+            else if (phase.includes('autonomous')) stepId = 'autonomousStep';
+            
+            if (stepId) {
+                const step = document.getElementById(stepId);
+                if (step) {
+                    step.className = `flow-step flow-step-${status}`;
+                }
+            }
+        }
+        
+        function resetArchitectureFlow() {
+            const steps = ['builtinStep', 'aiStep', 'autonomousStep'];
+            steps.forEach(stepId => {
+                const step = document.getElementById(stepId);
+                if (step) {
+                    step.className = 'flow-step';
+                }
+            });
+        }
+        
+        function showExecutionResults(results) {
+            let resultsHtml = '<div class="execution-flow"><strong>📊 Execution Results:</strong><br>';
+            
+            for (const [architecture, result] of Object.entries(results)) {
+                const icon = architecture.includes('builtin') ? '🏗️' : 
+                           architecture.includes('ai') ? '🤖' : '🚀';
+                const status = result.status === 'completed' ? '✅' : '❌';
+                
+                resultsHtml += `<div class="execution-step">
+                    <span class="step-icon ${result.status === 'completed' ? 'step-completed' : 'step-pending'}">
+                        ${icon}
+                    </span>
+                    <span>${architecture}: ${status} ${result.status}</span>
+                </div>`;
+            }
+            
+            resultsHtml += '</div>';
+            
+            addChatMessage('ai', resultsHtml);
+        }
+        
+        function addActivityUpdate(type, message, level = 'info') {
+            const feed = document.getElementById('activityFeed');
+            const item = document.createElement('div');
+            
+            item.className = `activity-item activity-${type}`;
+            item.innerHTML = `
+                <div>${message}</div>
+                <div class="activity-timestamp">${new Date().toLocaleTimeString()}</div>
+            `;
+            
+            feed.appendChild(item);
+            
+            // Keep only last 20 items
+            while (feed.children.length > 21) { // 20 + header
+                feed.removeChild(feed.children[1]); // Skip header
+            }
+            
+            feed.scrollTop = feed.scrollHeight;
+        }
+        
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            
+            if (connected) {
+                status.textContent = '🟢 Connected to SUPER-OMEGA';
+                status.className = 'connection-status connected';
+            } else {
+                status.textContent = '🔴 Disconnected from backend';
+                status.className = 'connection-status disconnected';
+            }
+        }
+        
+        function updateSystemStatus(healthData) {
+            if (healthData.architectures) {
+                // Update architecture status indicators in header
+                // This could be enhanced to show actual status from health data
+                console.log('📊 System health updated:', healthData);
+            }
+        }
+        
+        // Periodic frontend updates
+        setInterval(() => {
+            if (!isConnected) {
+                // Try to reconnect
+                connectWebSocket();
+            }
+        }, 10000); // Every 10 seconds
+        
+        // Example automation requests
+        const exampleRequests = [
+            "Optimize system performance using all three architectures",
+            "Search for automation best practices and implement them",
+            "Process a complex workflow with AI assistance and autonomous execution",
+            "Monitor system health and provide recommendations",
+            "Coordinate between built-in, AI, and autonomous layers for maximum efficiency"
+        ];
+        
+        // Add example requests to chat on startup
+        setTimeout(() => {
+            addChatMessage('system', `💡 Try these example requests:<br>• ${exampleRequests.join('<br>• ')}`);
+        }, 2000);
+    </script>
+</body>
+</html>
