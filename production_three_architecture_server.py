@@ -1329,13 +1329,38 @@ class ProductionHTTPHandler(http.server.SimpleHTTPRequestHandler):
                 
                 # Process through three architectures
                 async def process_task():
-                    return await self.server_instance.process_user_instruction(instruction, priority)
+                    try:
+                        return await self.server_instance.process_user_instruction(instruction, priority)
+                    except Exception as e:
+                        # Return error result instead of raising
+                        from datetime import datetime
+                        return type('TaskResult', (), {
+                            'id': f'error_{int(time.time())}',
+                            'instruction': instruction,
+                            'status': type('Status', (), {'value': 'failed'})(),
+                            'architecture_used': 'error_fallback',
+                            'execution_time': 0.0,
+                            'result': {'error': str(e)},
+                            'evidence_ids': []
+                        })()
                 
-                # Run async task
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                task_result = loop.run_until_complete(process_task())
-                loop.close()
+                # Run async task with proper error handling
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    task_result = loop.run_until_complete(process_task())
+                    loop.close()
+                except Exception as async_error:
+                    # Handle async execution errors
+                    task_result = type('TaskResult', (), {
+                        'id': f'async_error_{int(time.time())}',
+                        'instruction': instruction,
+                        'status': type('Status', (), {'value': 'failed'})(),
+                        'architecture_used': 'async_error_fallback',
+                        'execution_time': 0.0,
+                        'result': {'async_error': str(async_error)},
+                        'evidence_ids': []
+                    })()
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
