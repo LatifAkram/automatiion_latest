@@ -130,20 +130,56 @@ async def start_three_architecture_system():
         print("🔄 Press Ctrl+C to stop the server")
         print("=" * 60)
         
-        # Keep THREE ARCHITECTURE server running continuously
+        # Keep THREE ARCHITECTURE server running continuously with proper shutdown
         try:
             print("🔄 Complete Three Architecture server running... waiting for requests")
             print("📱 Processing: Frontend → Backend → Intent → Scheduling → Execution → Aggregation")
             print("🏗️ Built-in Foundation handling simple tasks")
             print("🤖 AI Swarm handling intelligent tasks") 
             print("🚀 Autonomous Layer handling complex workflows")
+            print("")
+            print("💡 TO STOP THE SERVER:")
+            print("   Windows: Press Ctrl+C (may need to press multiple times)")
+            print("   Alternative: Close the terminal window")
+            print("   Alternative: Press Ctrl+Break")
+            print("")
+            
+            # Set up proper signal handling for Windows
+            import signal
+            
+            def signal_handler(sig, frame):
+                print("\n⏹️ Shutdown signal received...")
+                three_arch_server.running = False
+                httpd.shutdown()
+                httpd.server_close()
+                print("✅ Three Architecture system stopped")
+                sys.exit(0)
+            
+            # Register signal handlers
+            signal.signal(signal.SIGINT, signal_handler)
+            if hasattr(signal, 'SIGBREAK'):  # Windows specific
+                signal.signal(signal.SIGBREAK, signal_handler)
+            
             httpd.serve_forever()
+            
         except KeyboardInterrupt:
-            print("\n⏹️ Shutting down complete three architecture system...")
+            print("\n⏹️ KeyboardInterrupt received - shutting down...")
             three_arch_server.running = False
-            httpd.shutdown()
-            httpd.server_close()
-            print("✅ Complete Three Architecture system stopped")
+            try:
+                httpd.shutdown()
+                httpd.server_close()
+            except:
+                pass
+            print("✅ Three Architecture system stopped")
+        except Exception as e:
+            print(f"\n❌ Server error: {e}")
+            three_arch_server.running = False
+            try:
+                httpd.shutdown()
+                httpd.server_close()
+            except:
+                pass
+            print("✅ Server stopped due to error")
         
     except ImportError as e:
         print(f"❌ Three architecture import error: {e}")
