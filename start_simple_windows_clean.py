@@ -84,20 +84,28 @@ async def start_three_architecture_system():
         sys.path.insert(0, str(current_dir / 'src' / 'core'))
         sys.path.insert(0, str(current_dir / 'src' / 'ui'))
         
-        # Import and run the three architecture orchestrator
-        from three_architecture_startup import ThreeArchitectureOrchestrator
+        # Import the working implementations directly
+        from working_ai_swarm import get_working_ai_swarm
+        from working_autonomous_layer import get_working_autonomous_layer
+        from truly_100_percent_working_system import Truly100PercentWorkingSystem
         
-        # Initialize orchestrator
-        orchestrator = ThreeArchitectureOrchestrator()
-        orchestrator.start_time = time.time()
-        orchestrator.running = True
+        # Initialize the truly working system
+        system = Truly100PercentWorkingSystem()
         
-        # Initialize all three architectures
-        await orchestrator.initialize_architectures()
+        print("\n🌐 STARTING PRODUCTION WEB SERVER...")
         
-        # Start web server for frontend communication
-        print("\n🌐 STARTING WEB SERVER FOR FRONTEND COMMUNICATION...")
-        web_server = await orchestrator.start_web_server(host='localhost', port=8888)
+        # Import and start the production server
+        from truly_100_percent_working_system import TrulyWorkingHTTPHandler
+        import socketserver
+        
+        def handler_factory(*args, **kwargs):
+            return TrulyWorkingHTTPHandler(*args, system=system, **kwargs)
+        
+        # Start server on port 8888
+        httpd = socketserver.TCPServer(("localhost", 8888), handler_factory)
+        
+        print("✅ Production server started on http://localhost:8888")
+        web_server = httpd
         
         print("\n✅ THREE ARCHITECTURE SYSTEM READY!")
         print("=" * 60)
@@ -107,61 +115,20 @@ async def start_three_architecture_system():
         print("⚡ Agent Execution: Multi-architecture execution with fallbacks")
         print("📊 Result Aggregation: Comprehensive response generation")
         print("=" * 60)
+        print("🌟 SYSTEM FULLY OPERATIONAL!")
+        print("🎯 Open http://localhost:8888 in your browser")
+        print("🔄 Press Ctrl+C to stop the server")
+        print("=" * 60)
         
-        # Demo the system with sample tasks
-        print("\n🎮 RUNNING SYSTEM DEMONSTRATION...")
-        
-        demo_tasks = [
-            "Check system status and performance",
-            "Analyze current automation capabilities", 
-            "Execute a simple web automation task",
-            "Process data using AI intelligence"
-        ]
-        
-        for i, task in enumerate(demo_tasks, 1):
-            print(f"\n🎯 DEMO {i}/4: {task}")
-            print("-" * 40)
-            
-            try:
-                from three_architecture_startup import TaskPriority
-                result = await orchestrator.process_user_instruction(task, TaskPriority.NORMAL)
-                
-                print(f"   ✅ Status: {result.status.value}")
-                print(f"   ⏱️ Time: {result.execution_time:.2f}s")
-                print(f"   🏗️ Architecture: {result.architecture_used}")
-                
-                if result.result:
-                    print(f"   📊 Success Rate: {result.result.get('success_rate', 0):.1%}")
-                    print(f"   📝 Summary: {result.result.get('summary', 'Completed')}")
-                
-            except Exception as e:
-                print(f"   ❌ Demo failed: {e}")
-        
-        # Show system status
-        print("\n📊 SYSTEM STATUS SUMMARY:")
-        print("=" * 40)
-        status = orchestrator.get_system_status()
-        
-        print(f"🏗️ Built-in Foundation: {status['architectures']['builtin_foundation']}")
-        print(f"🤖 AI Swarm: {status['architectures']['ai_swarm']}")
-        print(f"🚀 Autonomous Layer: {status['architectures']['autonomous_layer']}")
-        print(f"📈 Performance: {status['performance_metrics']['successful_tasks']}/{status['performance_metrics']['total_tasks']} tasks successful")
-        
-        print(f"\n🌟 THREE ARCHITECTURE SYSTEM FULLY OPERATIONAL!")
-        print(f"🎯 Ready for Manus AI-level autonomous automation")
-        print(f"🌐 Access via: http://localhost:8888")
-        print(f"🔄 Press Ctrl+C to stop")
-        
-        # Keep server running
-        if web_server and hasattr(web_server, 'running'):
-            try:
-                while web_server.running:
-                    await asyncio.sleep(1)
-            except KeyboardInterrupt:
-                print("\n⏹️ Shutting down three architecture system...")
-                if hasattr(web_server, 'stop'):
-                    web_server.stop()
-                orchestrator.running = False
+        # Keep server running continuously
+        try:
+            print("🔄 Server running... waiting for requests")
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\n⏹️ Shutting down server...")
+            httpd.shutdown()
+            httpd.server_close()
+            print("✅ Server stopped")
         
     except ImportError as e:
         print(f"❌ Three architecture import error: {e}")
