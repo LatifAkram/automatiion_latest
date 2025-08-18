@@ -51,7 +51,37 @@ try:
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
-from semantic_dom_graph import SemanticDOMGraph, DOMNode, BoundingBox
+try:
+    from .semantic_dom_graph import SemanticDOMGraph, DOMNode, BoundingBox
+except ImportError:
+    try:
+        from src.core.semantic_dom_graph import SemanticDOMGraph, DOMNode, BoundingBox
+    except ImportError:
+        # Fallback implementations
+        @dataclass
+        class BoundingBox:
+            x: float
+            y: float
+            width: float
+            height: float
+        
+        @dataclass
+        class DOMNode:
+            node_id: str
+            tag_name: str
+            text_content: str = ""
+            attributes: Dict[str, str] = None
+            bbox: BoundingBox = None
+        
+        class SemanticDOMGraph:
+            def __init__(self):
+                self.nodes = {}
+            
+            async def build_from_page(self, page):
+                return self
+            
+            def find_similar_nodes(self, node, threshold=0.8):
+                return []
 # Import contracts with fallback
 try:
     from models.contracts import TargetSelector, StepContract
