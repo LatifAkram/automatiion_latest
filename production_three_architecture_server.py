@@ -603,6 +603,18 @@ class ProductionThreeArchitectureServer:
         print(f"   ✅ Task {task_id} received and validated by Autonomous Orchestrator")
         return orchestrator_receipt
     
+    def _create_error_result(self, instruction: str, error: str):
+        """Create error result for failed tasks"""
+        return type('TaskResult', (), {
+            'id': f'error_{int(time.time())}',
+            'instruction': instruction,
+            'status': type('Status', (), {'value': 'failed'})(),
+            'architecture_used': 'error_fallback',
+            'execution_time': 0.0,
+            'result': {'error': error},
+            'evidence_ids': []
+        })()
+    
     def create_frontend_interface(self) -> str:
         """Create complete frontend interface"""
         return f"""
