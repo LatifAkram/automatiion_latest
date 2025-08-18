@@ -1494,8 +1494,9 @@ if __name__ == "__main__":
                 
         except Exception as e:
             print(f"⚠️ Sophisticated system fallback: {str(e)}")
-            # Use existing fallback chain
-            return self._use_existing_fallback_system(instruction)
+            print("🔄 Using direct real-time automation bypass...")
+            # Use direct automation to bypass import issues
+            return await self._execute_direct_realtime_automation(instruction)
     
     def _use_existing_fallback_system(self, instruction: str) -> Dict[str, Any]:
         """Use existing sophisticated fallback system"""
